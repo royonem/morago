@@ -1,14 +1,21 @@
- server:
-  port: 8080
-
- spring:
-
+spring:
   application:
-   name: morago
+    name: morago
 
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
- logging:
-   pattern:
-     console: "%d{yyyy-MM-dd HH:mm:ss} [traceId=%X{traceId}] [eventId=%X{eventId}] [userId=%X{userId}] [ip=%X{clientIp}] %-5level %logger{36} - %msg%n"
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
