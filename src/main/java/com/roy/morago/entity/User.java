@@ -5,8 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -35,7 +36,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private int topikLevel;
     @Column(nullable = false)
-    private LocalDateTime birthdate;
+    private LocalDate birthdate;
 
     @ManyToMany
     @JoinTable(
@@ -43,7 +44,23 @@ public class User extends BaseEntity {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "topic_id")
     )
-    private List<Topic> topics;
+    private Set<Topic> topics;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_languages",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "language_id")
+    )
+    private Set<Language> languages;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;

@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -22,7 +21,7 @@ public class Topic extends BaseEntity {
     @JoinColumn(name = "topic_icon_id")
     private File icon;
     @ManyToMany(mappedBy = "topics")
-    private List<User> users;
+    private Set<User> users;
 
     @Column(nullable = false, unique = true)
     private String name;
