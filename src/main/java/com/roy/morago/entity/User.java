@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -28,14 +28,14 @@ public class User extends BaseEntity {
     private String passwordHash;
     @Column(nullable = false, unique = true)
     private String phone;
-    @Column(nullable = false)
+    @Column(nullable = false) // eventually turn into enum
     private String availability;
-    @Column(nullable = false)
+    @Column(nullable = false) // eventually turn into enum
     private String status;
     @Column(nullable = false)
     private int topikLevel;
     @Column(nullable = false)
-    private Date birthdate;
+    private LocalDateTime birthdate;
 
     @ManyToMany
     @JoinTable(
@@ -44,4 +44,7 @@ public class User extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "topic_id")
     )
     private List<Topic> topics;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications;
 }
