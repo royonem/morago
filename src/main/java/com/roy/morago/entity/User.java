@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -37,4 +37,11 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private Date birthdate;
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_topics",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "topic_id")
+    )
+    private List<Topic> topics;
 }
