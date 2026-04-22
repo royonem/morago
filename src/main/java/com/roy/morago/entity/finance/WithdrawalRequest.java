@@ -1,5 +1,7 @@
-package com.roy.morago.entity;
+package com.roy.morago.entity.finance;
 
+import com.roy.morago.entity.BaseEntity;
+import com.roy.morago.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

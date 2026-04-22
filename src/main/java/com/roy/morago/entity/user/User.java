@@ -1,5 +1,9 @@
-package com.roy.morago.entity;
+package com.roy.morago.entity.user;
 
+import com.roy.morago.entity.BaseEntity;
+import com.roy.morago.entity.file.File;
+import com.roy.morago.entity.topic.Topic;
+import com.roy.morago.entity.notification.Notification;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

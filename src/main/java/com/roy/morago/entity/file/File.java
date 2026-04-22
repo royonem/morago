@@ -1,5 +1,6 @@
-package com.roy.morago.entity;
+package com.roy.morago.entity.file;
 
+import com.roy.morago.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -14,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "files")
-public class File extends BaseEntity{
+public class File extends BaseEntity {
     @Column(nullable = false)
     private String fileName;
     @Column(nullable = false)

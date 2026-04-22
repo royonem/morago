@@ -1,5 +1,6 @@
-package com.roy.morago.entity;
+package com.roy.morago.entity.user;
 
+import com.roy.morago.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
