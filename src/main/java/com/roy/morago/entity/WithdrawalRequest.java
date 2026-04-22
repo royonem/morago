@@ -18,19 +18,25 @@ public class WithdrawalRequest extends BaseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "requester_id", nullable = false)
     private User requester;
+
     @ManyToOne
     @JoinColumn(name = "reviewer_id")
     private User reviewer;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "bank_account_id", nullable = false)
     private BankAccount bankAccount;
+
     @Column(nullable = false)
     private Integer coinAmount;
     @Column(nullable = false)
     private BigDecimal cashAmount;
+    @Column(nullable = false)
+    private String currencyCode;
     @Column(nullable = false)
     private String status;
     @Column
