@@ -19,24 +19,9 @@ public class User extends BaseEntity {
     @OneToOne(optional = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "profile_picture_id")
     private File profilePicture;
-    @Column(nullable = false)
-    private String firstName;
-    @Column(nullable = false)
-    private String lastName;
-    @Column(nullable = false, unique = true)
-    private String email;
-    @Column(nullable = false)
-    private String passwordHash;
-    @Column(nullable = false, unique = true)
-    private String phone;
-    @Column(nullable = false) // eventually turn into enum
-    private String availability;
-    @Column(nullable = false) // eventually turn into enum
-    private String status;
-    @Column(nullable = false)
-    private int topikLevel;
-    @Column(nullable = false)
-    private LocalDate birthdate;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications;
 
     @ManyToMany
     @JoinTable(
@@ -62,6 +47,22 @@ public class User extends BaseEntity {
     )
     private Set<Role> roles;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Notification> notifications;
+    @Column(nullable = false)
+    private String firstName;
+    @Column(nullable = false)
+    private String lastName;
+    @Column(nullable = false, unique = true)
+    private String email;
+    @Column(nullable = false)
+    private String passwordHash;
+    @Column(nullable = false, unique = true)
+    private String phone;
+    @Column(nullable = false) // eventually turn into enum
+    private String availability;
+    @Column(nullable = false) // eventually turn into enum
+    private String status;
+    @Column(nullable = false)
+    private int topikLevel;
+    @Column(nullable = false)
+    private LocalDate birthdate;
 }

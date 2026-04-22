@@ -17,9 +17,11 @@ public class Topic extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+
     @OneToOne(optional = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "topic_icon_id")
     private File icon;
+
     @ManyToMany(mappedBy = "topics")
     private Set<User> users;
 

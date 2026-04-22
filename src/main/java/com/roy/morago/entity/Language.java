@@ -17,9 +17,9 @@ import java.util.Set;
 @Entity
 @Table(name = "languages")
 public class Language extends BaseEntity {
-    @Column(nullable = false, unique = true)
-    private String name;
-
     @ManyToMany(mappedBy = "languages")
     private Set<User> users;
+
+    @Column(nullable = false, unique = true)
+    private String name;
 }

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
 
 @Getter
@@ -18,9 +17,11 @@ public class Call extends BaseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "client_id", nullable = false)
     private User client;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "translator_id", nullable = false)
     private User translator;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "topic_id", nullable = false)
     private Topic topic;
