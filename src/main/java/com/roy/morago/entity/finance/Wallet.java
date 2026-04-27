@@ -2,6 +2,7 @@ package com.roy.morago.entity.finance;
 
 import com.roy.morago.entity.BaseEntity;
 import com.roy.morago.entity.user.User;
+import com.roy.morago.enums.CurrencyCode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +23,7 @@ public class Wallet extends BaseEntity {
     @Column(nullable = false)
     private Integer balance;
     @Column(nullable = false)
-    private String currencyCode;
+    private CurrencyCode currencyCode;
     @Column(nullable = false)
     private String status;
 }
