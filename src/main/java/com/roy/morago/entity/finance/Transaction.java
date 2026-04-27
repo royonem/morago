@@ -2,6 +2,7 @@ package com.roy.morago.entity.finance;
 
 import com.roy.morago.entity.BaseEntity;
 import com.roy.morago.entity.call.Call;
+import com.roy.morago.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,8 +30,8 @@ public class Transaction extends BaseEntity {
     @JoinColumn(name = "withdrawal_request_id", unique = true)
     private WithdrawalRequest withdrawalRequest;
 
-    @Column(nullable = false) // eventually use enum not string
-    private String type;
+    @Column(nullable = false)
+    private TransactionType type;
     @Column(nullable = false)
     private Integer coinAmount;
     @Column(nullable = false)
