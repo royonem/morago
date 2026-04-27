@@ -39,8 +39,8 @@ public class Transaction extends BaseEntity {
     private BigDecimal cashAmount;
     @Column(nullable = false)
     private CurrencyCode currencyCode;
-    @Column(nullable = false) // eventually use enum not string
-    private String status;
+    @Column(nullable = false)
+    private TransactionType status;
     @Column(nullable = false)
     private Integer balanceBefore;
     @Column(nullable = false)
