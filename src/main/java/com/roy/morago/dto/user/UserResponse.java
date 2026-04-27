@@ -1,5 +1,6 @@
 package com.roy.morago.dto.user;
 
+import com.roy.morago.enums.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,6 @@ public class UserResponse {
     private Set<String> roles;
     private Set<String> languages;
     private String availability;
-    private String status;
+    private UserStatus status;
     private Integer topikLevel;
 }

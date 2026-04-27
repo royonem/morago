@@ -4,6 +4,7 @@ import com.roy.morago.entity.BaseEntity;
 import com.roy.morago.entity.file.File;
 import com.roy.morago.entity.topic.Topic;
 import com.roy.morago.entity.notification.Notification;
+import com.roy.morago.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -63,8 +64,8 @@ public class User extends BaseEntity {
     private String phone;
     @Column(nullable = false) // eventually turn into enum
     private String availability;
-    @Column(nullable = false) // eventually turn into enum
-    private String status;
+    @Column(nullable = false) // only for translators. eventually turn into enum
+    private UserStatus status;
     @Column(nullable = false)
     private int topikLevel;
     @Column(nullable = false)
