@@ -1,5 +1,6 @@
 package com.roy.morago.dto.user;
 
+import com.roy.morago.enums.Availability;
 import com.roy.morago.enums.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +19,7 @@ public class UpdateUserRequest {
     private String firstName;
     private String lastName;
     private String phone;
-    private String availability;
+    private Availability availability;
     private UserStatus status; // translators only (verified or non verified)
     private Integer topikLevel;
 }
