@@ -3,6 +3,7 @@ package com.roy.morago.entity.call;
 import com.roy.morago.entity.BaseEntity;
 import com.roy.morago.entity.topic.Topic;
 import com.roy.morago.entity.user.User;
+import com.roy.morago.enums.CallStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,7 +33,7 @@ public class Call extends BaseEntity {
     @Column(nullable = false)
     private Integer cost;
     @Column(nullable = false)
-    private String status;
+    private CallStatus status;
     @Column
     private Integer rating;
     @Column
