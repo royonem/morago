@@ -1,4 +1,8 @@
 package com.roy.morago.security;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +34,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 String username = claims.getSubject();
                 java.util.List<?> rawRoles = claims.get("roleNames", java.util.List.class);
-                var roles = rawRoles.stream()
+                java.util.List<String> roles = (rawRoles == null ? java.util.Collections.emptyList() : rawRoles)
+                        .stream()
                         .map(Object::toString)
                         .toList();
                 var authorities = roles.stream()
@@ -43,8 +48,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         authorities
                 );
                 SecurityContextHolder.getContext().setAuthentication(auth);
+            } catch (ExpiredJwtException e) {
+                logger.debug("JWT expired: {}", request.getRequestURI());
+            } catch (SignatureException e) {
+                logger.debug("Invalid JWT signature: {}", request.getRequestURI());
+            } catch (MalformedJwtException e) {
+                logger.debug("Malformed JWT: {}", request.getRequestURI());
             } catch (Exception e) {
-                logger.debug("Invalid JWT");
+                logger.error("Unexpected JWT error: {}", request.getRequestURI(), e);
             }
         }
         filterChain.doFilter(request, response);
