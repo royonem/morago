@@ -4,6 +4,7 @@ import com.roy.morago.dto.user.UpdateUserRequest;
 import com.roy.morago.dto.user.UserResponse;
 import com.roy.morago.entity.user.Language;
 import com.roy.morago.entity.user.User;
+import com.roy.morago.exception.UserNotFoundException;
 import com.roy.morago.mapper.UserMapper;
 import com.roy.morago.repository.user.LanguageRepository;
 import com.roy.morago.repository.user.UserRepository;
@@ -22,7 +23,7 @@ public class UserService {
 
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         return userMapper.toUserResponse(user);
     }
 
@@ -33,7 +34,7 @@ public class UserService {
     @Transactional
     public void updateUser(Long id, UpdateUserRequest userDto) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         userMapper.updateUserFromDto(userDto, user);
 
         if (userDto.getLanguages() != null) {
@@ -48,7 +49,7 @@ public class UserService {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
         } else {
-            throw new RuntimeException("User not found: " + id); // update to use custom exception
+            throw new UserNotFoundException("User not found: " + id);
         }
     }
 }
