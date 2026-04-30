@@ -15,7 +15,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class UpdateUserRequest {
     private Set<String> languages;
-    private Set<String> topics;
     private String profilePictureUrl;
     private String firstName;
     private String lastName;
