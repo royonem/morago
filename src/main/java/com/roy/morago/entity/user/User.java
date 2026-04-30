@@ -5,6 +5,7 @@ import com.roy.morago.entity.file.File;
 import com.roy.morago.entity.topic.Topic;
 import com.roy.morago.entity.notification.Notification;
 import com.roy.morago.enums.Availability;
+import com.roy.morago.enums.TopikLevel;
 import com.roy.morago.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -68,7 +69,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private UserStatus status;
     @Column(nullable = false)
-    private int topikLevel;
+    private TopikLevel topikLevel;
     @Column(nullable = false)
     private LocalDate birthdate;
 }

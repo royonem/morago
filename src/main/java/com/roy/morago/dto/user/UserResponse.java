@@ -1,6 +1,7 @@
 package com.roy.morago.dto.user;
 
 import com.roy.morago.enums.Availability;
+import com.roy.morago.enums.TopikLevel;
 import com.roy.morago.enums.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,5 +24,5 @@ public class UserResponse {
     private Set<String> languages;
     private Availability availability;
     private UserStatus status;
-    private Integer topikLevel;
+    private TopikLevel topikLevel;
 }
