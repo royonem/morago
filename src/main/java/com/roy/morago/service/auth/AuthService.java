@@ -3,6 +3,7 @@ package com.roy.morago.service.auth;
 import com.roy.morago.dto.auth.ClientRegisterRequest;
 import com.roy.morago.dto.auth.LoginRequest;
 import com.roy.morago.dto.auth.LoginResponse;
+import com.roy.morago.dto.auth.TranslatorRegisterRequest;
 import com.roy.morago.entity.user.Role;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.exception.DuplicateEmailException;
@@ -57,18 +58,24 @@ public class AuthService {
         return new LoginResponse(token);
     }
 
-    public void register(ClientRegisterRequest dto) {
-        if (userRepository.existsByEmail(dto.getEmail())) {
+    public void registerClient(ClientRegisterRequest dto) {
+        User client = userMapper.createUserFromDto(dto);
+        register(client, dto.getPassword(), "ROLE_CLIENT");
+    }
+
+    public void registerTranslator(TranslatorRegisterRequest dto) {
+        User translator = userMapper.createUserFromDto(dto);
+        register(translator, dto.getPassword(), "ROLE_TRANSLATOR");
+    }
+
+    public void register(User user, String password, String role) {
+        if (userRepository.existsByEmail(user.getEmail())) {
             throw new DuplicateEmailException("Email already in use.");
         }
-        User user = userMapper.createUserFromDto(dto);
-
-        Role defaultRole = roleRepository.findByName("ROLE_CLIENT")
-                .orElseThrow(() -> new RoleNotFoundException("Client role not found"));
-        if (user.getRoles().isEmpty()) {
-            user.getRoles().add(defaultRole);
-        }
-        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        Role defaultRole = roleRepository.findByName(role)
+                .orElseThrow(() -> new RoleNotFoundException("Role not found"));
+        user.getRoles().add(defaultRole);
+        user.setPasswordHash(passwordEncoder.encode(password));
         userRepository.save(user);
     }
 }
