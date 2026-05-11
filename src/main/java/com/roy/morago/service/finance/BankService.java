@@ -7,7 +7,6 @@ import com.roy.morago.exception.BankNotFoundException;
 import com.roy.morago.repository.finance.BankRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
