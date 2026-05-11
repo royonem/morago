@@ -3,12 +3,10 @@ package com.roy.morago.entity.finance;
 import com.roy.morago.entity.BaseEntity;
 import com.roy.morago.entity.call.Call;
 import com.roy.morago.enums.CurrencyCode;
+import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.TransactionType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -40,7 +38,7 @@ public class Transaction extends BaseEntity {
     @Column(nullable = false)
     private CurrencyCode currencyCode;
     @Column(nullable = false)
-    private TransactionType status;
+    private TransactionStatus status;
     @Column(nullable = false)
     private Integer balanceBefore;
     @Column(nullable = false)
