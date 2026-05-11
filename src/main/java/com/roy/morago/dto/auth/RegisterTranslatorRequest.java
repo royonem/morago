@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TranslatorRegisterRequest {
+public class RegisterTranslatorRequest {
     @NotBlank(message = "First name is required")
     private String firstName;
     @NotBlank(message = "Last name is required")

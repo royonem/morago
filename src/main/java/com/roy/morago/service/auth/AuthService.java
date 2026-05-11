@@ -1,9 +1,9 @@
 package com.roy.morago.service.auth;
 
-import com.roy.morago.dto.auth.ClientRegisterRequest;
+import com.roy.morago.dto.auth.RegisterClientRequest;
 import com.roy.morago.dto.auth.LoginRequest;
 import com.roy.morago.dto.auth.LoginResponse;
-import com.roy.morago.dto.auth.TranslatorRegisterRequest;
+import com.roy.morago.dto.auth.RegisterTranslatorRequest;
 import com.roy.morago.entity.user.Role;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.exception.DuplicateEmailException;
@@ -58,12 +58,12 @@ public class AuthService {
         return new LoginResponse(token);
     }
 
-    public void registerClient(ClientRegisterRequest dto) {
+    public void registerClient(RegisterClientRequest dto) {
         User client = userMapper.createUserFromDto(dto);
         register(client, dto.getPassword(), "ROLE_CLIENT");
     }
 
-    public void registerTranslator(TranslatorRegisterRequest dto) {
+    public void registerTranslator(RegisterTranslatorRequest dto) {
         User translator = userMapper.createUserFromDto(dto);
         register(translator, dto.getPassword(), "ROLE_TRANSLATOR");
     }

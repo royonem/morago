@@ -1,13 +1,12 @@
 package com.roy.morago.mapper;
 
-import com.roy.morago.dto.auth.ClientRegisterRequest;
-import com.roy.morago.dto.auth.TranslatorRegisterRequest;
+import com.roy.morago.dto.auth.RegisterClientRequest;
+import com.roy.morago.dto.auth.RegisterTranslatorRequest;
 import com.roy.morago.dto.user.UpdateUserRequest;
 import com.roy.morago.dto.user.UserResponse;
 import com.roy.morago.entity.user.Language;
 import com.roy.morago.entity.user.Role;
 import com.roy.morago.entity.user.User;
-import com.roy.morago.repository.user.LanguageRepository;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -18,8 +17,8 @@ import java.util.stream.Collectors;
 public interface UserMapper {
 
     // CREATE
-    User createUserFromDto(ClientRegisterRequest dto);
-    User createUserFromDto(TranslatorRegisterRequest dto);
+    User createUserFromDto(RegisterClientRequest dto);
+    User createUserFromDto(RegisterTranslatorRequest dto);
     // READ
     List<UserResponse> toUserResponse(List<User> users);
 

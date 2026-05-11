@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClientRegisterRequest {
+public class RegisterClientRequest {
     @NotBlank(message = "First name is required")
     private String firstName;
     @NotBlank(message = "Last name is required")
