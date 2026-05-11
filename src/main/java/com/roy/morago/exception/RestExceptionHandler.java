@@ -31,11 +31,11 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    @ExceptionHandler(BankNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleBankNotFound(BankNotFoundException ex) {
+    @ExceptionHandler(DeficientFundsException.class)
+    public ResponseEntity<Map<String, String>> handleDeficientFunds(DeficientFundsException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
@@ -57,13 +57,6 @@ public class RestExceptionHandler {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-    }
-
-    @ExceptionHandler(DeficientFundsException.class)
-    public ResponseEntity<Map<String, String>> handleDeficientFunds(DeficientFundsException ex) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler(PasswordMismatchException.class)
