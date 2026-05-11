@@ -18,9 +18,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(DuplicateEmailException.class)
-    public ResponseEntity<Map<String, String>> handleAll(DuplicateEmailException ex) {
-    @ExceptionHandler(DuplicateUsernameException.class)
-    public ResponseEntity<Map<String, String>> handleDuplicateUsername(DuplicateUsernameException ex) {
+    public ResponseEntity<Map<String, String>> handleDuplicateEmail(DuplicateEmailException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
@@ -45,6 +43,13 @@ public class RestExceptionHandler {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<Map<String, String>> handleAll(InvalidRefreshTokenException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
     @ExceptionHandler(DeficientFundsException.class)
