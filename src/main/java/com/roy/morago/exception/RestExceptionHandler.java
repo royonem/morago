@@ -23,4 +23,11 @@ public class RestExceptionHandler {
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
+
+    @ExceptionHandler(BankNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleBankNotFound(BankNotFoundException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
 }
