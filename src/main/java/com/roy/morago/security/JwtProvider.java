@@ -12,7 +12,7 @@ import java.util.Set;
 public class JwtProvider {
     private final SecretKey jwtSigningKey;
 
-    @Value("${app.jwt.expiration-ms}")
+    @Value("${app.jwt.access-expiration-ms}")
     private long jwtExpiration;
 
     public JwtProvider(SecretKey jwtSigningKey) {

@@ -38,7 +38,7 @@ public class WebSecurityConfig {
         return http.build();
     }
 
-    @Value("${jwt.secret}")
+    @Value("${app.jwt.secret}")
     private String jwtSecret;
 
     @Bean
