@@ -2,6 +2,7 @@ package com.roy.morago.entity.user;
 
 import com.roy.morago.entity.BaseEntity;
 import com.roy.morago.entity.file.File;
+import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.topic.Topic;
 import com.roy.morago.entity.notification.Notification;
 import com.roy.morago.enums.Availability;
@@ -26,6 +27,9 @@ public class User extends BaseEntity {
     @OneToOne(optional = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "profile_picture_id")
     private File profilePicture;
+
+    @OneToOne(mappedBy = "user")
+    private Wallet wallet;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;
