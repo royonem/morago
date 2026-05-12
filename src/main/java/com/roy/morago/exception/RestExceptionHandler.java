@@ -17,8 +17,8 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    @ExceptionHandler(InvalidEmailException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidEmail(InvalidEmailException ex) {
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicateEmail(DuplicateEmailException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);

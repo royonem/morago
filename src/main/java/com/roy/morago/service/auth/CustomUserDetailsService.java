@@ -1,7 +1,7 @@
 package com.roy.morago.service.auth;
 
 import com.roy.morago.entity.user.User;
-import com.roy.morago.exception.InvalidEmailException;
+import com.roy.morago.exception.UserNotFoundException;
 import com.roy.morago.repository.user.UserRepository;
 import com.roy.morago.security.UserPrincipal;
 import lombok.AllArgsConstructor;
@@ -18,7 +18,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new InvalidEmailException("User or email not found."));
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
         return new UserPrincipal(user);
     }
 }

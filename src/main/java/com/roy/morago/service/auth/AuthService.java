@@ -7,7 +7,7 @@ import com.roy.morago.dto.auth.RegisterTranslatorRequest;
 import com.roy.morago.entity.user.Role;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.exception.InvalidCredentialsException;
-import com.roy.morago.exception.InvalidEmailException;
+import com.roy.morago.exception.DuplicateEmailException;
 import com.roy.morago.exception.PasswordMismatchException;
 import com.roy.morago.exception.RoleNotFoundException;
 import com.roy.morago.mapper.UserMapper;
@@ -71,7 +71,7 @@ public class AuthService {
 
     public void register(User user, String password, String confirmPassword, String role) {
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new InvalidEmailException("Email already in use.");
+            throw new DuplicateEmailException("Email already in use.");
         }
         if (!password.equals(confirmPassword)) {
             throw new PasswordMismatchException("Passwords do not match.");
