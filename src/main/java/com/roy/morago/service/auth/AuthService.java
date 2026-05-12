@@ -8,6 +8,7 @@ import com.roy.morago.entity.user.Role;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.exception.InvalidCredentialsException;
 import com.roy.morago.exception.InvalidEmailException;
+import com.roy.morago.exception.PasswordMismatchException;
 import com.roy.morago.exception.RoleNotFoundException;
 import com.roy.morago.mapper.UserMapper;
 import com.roy.morago.repository.user.RoleRepository;
@@ -60,17 +61,20 @@ public class AuthService {
 
     public void registerClient(RegisterClientRequest dto) {
         User client = userMapper.createUserFromDto(dto);
-        register(client, dto.getPassword(), "ROLE_CLIENT");
+        register(client, dto.getPassword(), dto.getConfirmPassword(), "ROLE_CLIENT");
     }
 
     public void registerTranslator(RegisterTranslatorRequest dto) {
         User translator = userMapper.createUserFromDto(dto);
-        register(translator, dto.getPassword(), "ROLE_TRANSLATOR");
+        register(translator, dto.getPassword(), dto.getConfirmPassword(), "ROLE_TRANSLATOR");
     }
 
-    public void register(User user, String password, String role) {
+    public void register(User user, String password, String confirmPassword, String role) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new InvalidEmailException("Email already in use.");
+        }
+        if (!password.equals(confirmPassword)) {
+            throw new PasswordMismatchException("Passwords do not match.");
         }
         Role defaultRole = roleRepository.findByName(role)
                 .orElseThrow(() -> new RoleNotFoundException("Role not found"));
