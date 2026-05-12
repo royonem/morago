@@ -6,8 +6,8 @@ import com.roy.morago.dto.auth.LoginResponse;
 import com.roy.morago.dto.auth.RegisterTranslatorRequest;
 import com.roy.morago.entity.user.Role;
 import com.roy.morago.entity.user.User;
-import com.roy.morago.exception.DuplicateEmailException;
 import com.roy.morago.exception.InvalidCredentialsException;
+import com.roy.morago.exception.InvalidEmailException;
 import com.roy.morago.exception.RoleNotFoundException;
 import com.roy.morago.mapper.UserMapper;
 import com.roy.morago.repository.user.RoleRepository;
@@ -70,7 +70,7 @@ public class AuthService {
 
     public void register(User user, String password, String role) {
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new DuplicateEmailException("Email already in use.");
+            throw new InvalidEmailException("Email already in use.");
         }
         Role defaultRole = roleRepository.findByName(role)
                 .orElseThrow(() -> new RoleNotFoundException("Role not found"));
