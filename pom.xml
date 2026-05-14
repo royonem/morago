@@ -101,6 +101,11 @@
 			<version>1.5.5.Final</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-mysql</artifactId>
+			<version>11.15.0</version>
+		</dependency>
     </dependencies>
 	<build>
 		<plugins>
