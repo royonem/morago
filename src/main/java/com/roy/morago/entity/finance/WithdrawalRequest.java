@@ -3,7 +3,7 @@ package com.roy.morago.entity.finance;
 import com.roy.morago.entity.BaseEntity;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CurrencyCode;
-import com.roy.morago.enums.TransactionStatus;
+import com.roy.morago.enums.WithdrawalStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,7 +42,7 @@ public class WithdrawalRequest extends BaseEntity {
     @Column(nullable = false)
     private CurrencyCode currencyCode;
     @Column(nullable = false)
-    private TransactionStatus status;
+    private WithdrawalStatus status;
     @Column
     private String rejectionReason;
     @Column
