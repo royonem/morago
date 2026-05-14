@@ -23,7 +23,7 @@ public class Notification extends BaseEntity {
     @Column(nullable = false)
     private String content;
     @Column(nullable = false)
-    private Boolean read;
+    private Boolean wasRead;
     @Column
     private LocalDateTime readAt;
 }
