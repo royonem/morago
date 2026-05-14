@@ -7,7 +7,6 @@ import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -32,17 +31,15 @@ public class Transaction extends BaseEntity {
     @Column(nullable = false)
     private TransactionType type;
     @Column(nullable = false)
-    private Integer coinAmount;
-    @Column(nullable = false)
-    private BigDecimal cashAmount;
+    private Long amount;
     @Column(nullable = false)
     private CurrencyCode currencyCode;
     @Column(nullable = false)
     private TransactionStatus status;
     @Column(nullable = false)
-    private Integer balanceBefore;
+    private Long balanceBefore;
     @Column(nullable = false)
-    private Integer balanceAfter;
+    private Long balanceAfter;
     @Column(nullable = false,  unique = true)
     private String reference;
     @Column(nullable = false)

@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -36,9 +35,7 @@ public class WithdrawalRequest extends BaseEntity {
     private BankAccount bankAccount;
 
     @Column(nullable = false)
-    private Integer coinAmount;
-    @Column(nullable = false)
-    private BigDecimal cashAmount;
+    private Long amount;
     @Column(nullable = false)
     private CurrencyCode currencyCode;
     @Column(nullable = false)

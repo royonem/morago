@@ -22,7 +22,7 @@ public class Wallet extends BaseEntity {
     private User user;
 
     @Column(nullable = false)
-    private Integer balance;
+    private Long balance;
     @Column(nullable = false)
     private CurrencyCode currencyCode;
     @Column(nullable = false)
