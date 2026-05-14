@@ -1,6 +1,8 @@
 package com.roy.morago.entity.file;
 
 import com.roy.morago.entity.BaseEntity;
+import com.roy.morago.enums.FilePurpose;
+import com.roy.morago.enums.FileStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -23,5 +25,13 @@ public class File extends BaseEntity {
     @Column(nullable = false)
     private String fileType;
     @Column(nullable = false)
-    private Integer fileSize;
+    private Long fileSize;
+    @Column(nullable = false)
+    private FilePurpose filePurpose;
+    @Column
+    private FileStatus fileStatus;
+
+    public void activate() {
+        this.fileStatus = FileStatus.ACTIVE;
+    }
 }
