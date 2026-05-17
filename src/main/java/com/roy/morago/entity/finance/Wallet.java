@@ -21,7 +21,9 @@ public class Wallet extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(nullable = false)
+    @Version
+    private Long version;
+    @Column(nullable = false, columnDefinition = "BIGINT CHECK (balance >= 0)")
     private Long balance;
     @Column(nullable = false)
     private CurrencyCode currencyCode;
