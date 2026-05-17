@@ -37,7 +37,7 @@ public class TransactionService {
         User user = userService.findUserWithAuthentication(authentication);
         Wallet wallet = user.getWallet();
         Long currentBalance = wallet.getBalance();
-        walletService.ensureNonNegativeBalance(currentBalance);
+        walletService.validateNonNegativeBalance(currentBalance);
 
         Long transactionAmount = dto.getAmount();
 
