@@ -7,6 +7,7 @@ import com.roy.morago.service.finance.WithdrawalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,11 +34,13 @@ public class WithdrawalController {
         withdrawalService.cancelWithdrawalRequest(id);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/reject")
     public void rejectWithdrawalRequest(@PathVariable Long id, Authentication authentication, @RequestBody RejectWithdrawalDTO rejectionDTO) {
         withdrawalService.rejectWithdrawalRequest(id, authentication, rejectionDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/approve")
     public void approveWithdrawalRequest(@PathVariable Long id, Authentication authentication) {
         withdrawalService.approveWithdrawalRequest(id, authentication);
