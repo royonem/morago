@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     boolean existsByWalletUserIdAndStatus(Long userId, TransactionStatus status);
+
+    boolean existsByIdAndWalletUserId(Long transactionId, Long userId);
 }

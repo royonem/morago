@@ -24,11 +24,13 @@ public class WithdrawalController {
         return withdrawalService.createWithdrawalRequest(dto, authentication);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isWithdrawalOwner(#id, authentication)")
     @GetMapping("/{id}")
     public WithdrawalRequestResponse getWithdrawalRequest(@PathVariable Long id) {
         return withdrawalService.getWithdrawalRequestByTransactionId(id);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isWithdrawalOwner(#id, authentication)")
     @PatchMapping("/{id}/cancel")
     public void cancelWithdrawalRequest(@PathVariable Long id) {
         withdrawalService.cancelWithdrawalRequest(id);

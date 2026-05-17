@@ -31,13 +31,13 @@ public class WalletController {
         walletService.activateWallet(id);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT', 'TRANSLATOR')")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isWalletOwner(#id, authentication)")
     @GetMapping("/{id}")
     public WalletDTO getWallet(@PathVariable Long id) {
         return walletService.getWalletById(id);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT', 'TRANSLATOR')")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isWalletOwner(#id, authentication)")
     @PatchMapping("/{id}/updateCurrency")
     public void updateCurrency(@PathVariable Long id, CurrencyCode newCode) {
         walletService.updateCurrency(id, newCode);

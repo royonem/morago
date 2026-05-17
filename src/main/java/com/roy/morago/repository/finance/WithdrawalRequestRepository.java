@@ -4,4 +4,5 @@ import com.roy.morago.entity.finance.WithdrawalRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface WithdrawalRequestRepository extends JpaRepository<WithdrawalRequest, Long> {
+    boolean existsByIdAndRequesterId(Long withdrawalId, Long userId);
 }
