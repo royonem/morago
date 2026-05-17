@@ -39,7 +39,7 @@ public class WalletController {
 
     @PreAuthorize("hasRole('ADMIN') or @securityService.isWalletOwner(#id, authentication)")
     @PatchMapping("/{id}/updateCurrency")
-    public void updateCurrency(@PathVariable Long id, CurrencyCode newCode) {
+    public void updateCurrency(@PathVariable Long id, @RequestParam CurrencyCode newCode) {
         walletService.updateCurrency(id, newCode);
     }
 }
