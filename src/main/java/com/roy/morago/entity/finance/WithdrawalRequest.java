@@ -1,5 +1,6 @@
 package com.roy.morago.entity.finance;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.roy.morago.entity.BaseEntity;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CurrencyCode;
@@ -33,6 +34,10 @@ public class WithdrawalRequest extends BaseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "bank_account_id", nullable = false)
     private BankAccount bankAccount;
+
+    @OneToOne(mappedBy = "withdrawalRequest")
+    @JsonIgnore
+    private Transaction transaction;
 
     @Column(nullable = false)
     private Long amount;
