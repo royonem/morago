@@ -24,7 +24,7 @@ public class Transaction extends BaseEntity {
     @JoinColumn(name = "call_id")
     private Call call;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "withdrawal_request_id", unique = true)
     private WithdrawalRequest withdrawalRequest;
 
