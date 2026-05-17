@@ -39,21 +39,21 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, String>> handleAll(InvalidCredentialsException ex) {
+    public ResponseEntity<Map<String, String>> handleInvalidCredentials(InvalidCredentialsException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
     @ExceptionHandler(RoleNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleAll(RoleNotFoundException ex) {
+    public ResponseEntity<Map<String, String>> handleRoleNotFound(RoleNotFoundException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)
-    public ResponseEntity<Map<String, String>> handleAll(InvalidRefreshTokenException ex) {
+    public ResponseEntity<Map<String, String>> handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
