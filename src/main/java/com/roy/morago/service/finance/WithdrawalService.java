@@ -6,10 +6,9 @@ import com.roy.morago.dto.finance.WithdrawalRequestResponse;
 import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.finance.WithdrawalRequest;
 import com.roy.morago.entity.user.User;
+import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.WithdrawalStatus;
-import com.roy.morago.exception.DeficientFundsException;
-import com.roy.morago.exception.InvalidWithdrawalException;
-import com.roy.morago.exception.WithdrawalNotFoundException;
+import com.roy.morago.exception.*;
 import com.roy.morago.mapper.WithdrawalRequestMapper;
 import com.roy.morago.repository.finance.WithdrawalRequestRepository;
 import com.roy.morago.service.user.UserService;
@@ -31,6 +30,7 @@ public class WithdrawalService {
     public WithdrawalRequestResponse createWithdrawalRequest(WithdrawalRequestDTO dto, Authentication authentication) {
         User user = userService.findUserWithAuthentication(authentication);
         Wallet wallet = user.getWallet();
+        checkExistingPendingWithdrawal(user);
 
         validateSufficientFunds(dto.getAmount(), wallet);
 
@@ -65,6 +65,7 @@ public class WithdrawalService {
         logReview(request, adminAuth);
         request.setRejectionReason(rejectionDTO.rejectionReason());
         request.setStatus(WithdrawalStatus.REJECTED);
+        transactionService.failTransaction(request.getTransaction().getId());
     }
 
     @Transactional
@@ -79,12 +80,6 @@ public class WithdrawalService {
         request.setStatus(WithdrawalStatus.APPROVED);
 
         transactionService.processTransaction(request.getTransaction().getId());
-        confirmWithdrawalSuccess(request.getTransaction().getId());
-    }
-
-    @Transactional
-    public void confirmWithdrawalSuccess(Long requestId) {
-        WithdrawalRequest request = findWithdrawalRequest(requestId);
         transactionService.validateTransactionIsPaid(request.getTransaction().getId());
         request.setPaidAt(LocalDateTime.now());
     }
@@ -92,6 +87,12 @@ public class WithdrawalService {
     private void logReview(WithdrawalRequest request, Authentication adminAuth) {
         request.setReviewer(userService.findUserWithAuthentication(adminAuth));
         request.setReviewedAt(LocalDateTime.now());
+    }
+
+    private void checkExistingPendingWithdrawal(User user) {
+        if (withdrawalRequestRepository.existsByRequesterAndStatus(user, WithdrawalStatus.PENDING)) {
+            throw new ExistingWithdrawalRequestException("Pending withdrawal request already exists.");
+        }
     }
 
     private void validateSufficientFunds(Long requestAmount, Wallet wallet) {
@@ -102,12 +103,14 @@ public class WithdrawalService {
 
     private void validatePendingWithdrawal(WithdrawalRequest request) {
         if (request.getStatus() != WithdrawalStatus.PENDING) {
-            throw new InvalidWithdrawalException("Withdrawal Request is invalid.");
+            throw new InvalidWithdrawalStateException("Withdrawal state is invalid.");
+        } else if (request.getTransaction().getStatus() != TransactionStatus.PENDING) {
+            throw new InvalidTransactionStateException("Transaction is not pending.");
         }
     }
 
     private WithdrawalRequest findWithdrawalRequest(Long id) {
         return withdrawalRequestRepository.findById(id)
-                .orElseThrow(() -> new WithdrawalNotFoundException("Transaction not found"));
+                .orElseThrow(() -> new WithdrawalNotFoundException("Withdrawal request not found"));
     }
 }
