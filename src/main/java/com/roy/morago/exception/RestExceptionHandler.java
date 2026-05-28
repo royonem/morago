@@ -107,4 +107,11 @@ public class RestExceptionHandler {
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
+
+    @ExceptionHandler(ExistingTransactionException.class)
+    public ResponseEntity<Map<String, String>> handleExistingTransaction(ExistingTransactionException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
 }
