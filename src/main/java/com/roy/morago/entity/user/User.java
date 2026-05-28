@@ -73,8 +73,8 @@ public class User extends BaseEntity {
     private Availability availability;
     @Column(nullable = false)
     private UserStatus status;
-    @Column(nullable = false)
+    @Column
     private TopikLevel topikLevel;
-    @Column(nullable = false)
+    @Column
     private LocalDate birthdate;
 }
