@@ -1,4 +1,4 @@
-package com.roy.morago.exception;
+package com.roy.morago.exception.finance;
 
 public class ExistingTransactionException extends RuntimeException {
     public ExistingTransactionException(String message) {

@@ -2,7 +2,7 @@ package com.roy.morago.service.finance;
 
 import com.roy.morago.dto.finance.BankAccountDTO;
 import com.roy.morago.entity.finance.BankAccount;
-import com.roy.morago.exception.BankNotFoundException;
+import com.roy.morago.exception.finance.BankNotFoundException;
 import com.roy.morago.mapper.BankAccountMapper;
 import com.roy.morago.repository.finance.BankRepository;
 import com.roy.morago.service.user.UserService;
