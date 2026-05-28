@@ -13,8 +13,10 @@ import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class WalletService {
@@ -53,11 +55,30 @@ public class WalletService {
     public void updateCurrency(Long id, CurrencyCode newCode) {
         Wallet wallet = findWalletById(id);
         User user = wallet.getUser();
-
-        if (transactionRepository.existsByWalletUserIdAndStatus(user.getId(), TransactionStatus.PENDING)) {
-            throw new InvalidTransactionStateException("Cannot update wallet while there is a pending transaction.");
-        }
+        checkPending(user);
         wallet.setCurrencyCode(newCode);
+    }
+
+    @Transactional
+    public void addFunds(Long id, Long funds) {
+        Wallet wallet = findWalletById(id);
+        User user = wallet.getUser();
+        checkPending(user);
+        wallet.setBalance(wallet.getBalance() + funds);
+    }
+
+    @Transactional
+    public void subtractFunds(Long id, Long funds) {
+        Wallet wallet = findWalletById(id);
+        User user = wallet.getUser();
+        checkPending(user);
+        long newBalance = wallet.getBalance() - funds;
+        if (newBalance < 0) {
+            log.warn("Balance would go negative for wallet {}. Clamping to 0. Requested subtract: {}, Former balance: {}",
+                    id, funds, wallet.getBalance());
+            newBalance = 0L;
+        }
+        wallet.setBalance(newBalance);
     }
 
     public WalletDTO getWalletById(Long id) {
@@ -72,6 +93,12 @@ public class WalletService {
     private Wallet findWalletById(Long id) {
         return walletRepository.findById(id)
                 .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
+    }
+
+    private void checkPending(User user) {
+        if (transactionRepository.existsByWalletUserIdAndStatus(user.getId(), TransactionStatus.PENDING)) {
+            throw new InvalidTransactionStateException("Cannot update wallet while there is a pending transaction.");
+        }
     }
 
     protected void validateNonNegativeBalance(Long balance) {
