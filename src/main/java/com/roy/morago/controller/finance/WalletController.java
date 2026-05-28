@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/wallet")
@@ -41,5 +43,17 @@ public class WalletController {
     @PatchMapping("/{id}/updateCurrency")
     public void updateCurrency(@PathVariable Long id, @RequestParam CurrencyCode newCode) {
         walletService.updateCurrency(id, newCode);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/addFunds")
+    public void addFunds(@PathVariable Long id, @RequestParam Long funds) {
+        walletService.addFunds(id, funds);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/subtractFunds")
+    public void subtractFunds(@PathVariable Long id, @RequestParam Long funds) {
+        walletService.subtractFunds(id, funds);
     }
 }
