@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "transactions")
 public class Transaction extends BaseEntity {
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "wallet_id")
     private Wallet wallet;
 
