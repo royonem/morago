@@ -97,6 +97,11 @@ public class TransactionService {
         transaction.setStatus(TransactionStatus.PAID);
     }
 
+    protected void failTransaction(Long id) {
+        Transaction transaction = findTransaction(id);
+        transaction.setStatus(TransactionStatus.FAILED);
+    }
+
     protected void validateTransactionIsPaid(Long transactionId) {
         Transaction transaction = findTransaction(transactionId);
         if (transaction.getStatus() != TransactionStatus.PAID) {
