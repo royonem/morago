@@ -1,5 +1,6 @@
 package com.roy.morago.service.finance;
 
+import com.roy.morago.dto.finance.WalletDTO;
 import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.Availability;
@@ -171,5 +172,20 @@ public class WalletServiceIT {
         assertThatThrownBy(() -> walletService.subtractFunds(testWallet.getId(), 100L))
                 .isInstanceOf(InvalidTransactionStateException.class);
         verifyBalance(testWallet.getId(), 0L);
+    }
+
+    @Test
+    void testGetWalletById_success() {
+        WalletDTO result = walletService.getWalletById(testWallet.getId());
+
+        assertThat(result.getBalance()).isEqualTo(0L);
+        assertThat(result.getCurrencyCode()).isEqualTo(CurrencyCode.KRW);
+        assertThat(result.getStatus()).isEqualTo(WalletStatus.ACTIVE);
+    }
+
+    @Test
+    void testGetWalletById_notFound_throwsException() {
+        assertThatThrownBy(() -> walletService.getWalletById(-1L))
+                .isInstanceOf(WalletNotFoundException.class);
     }
 }
