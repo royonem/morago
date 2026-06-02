@@ -9,10 +9,10 @@ import com.roy.morago.entity.finance.WithdrawalRequest;
 import com.roy.morago.entity.user.Role;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.*;
-import com.roy.morago.exception.DeficientFundsException;
-import com.roy.morago.exception.ExistingWithdrawalRequestException;
-import com.roy.morago.exception.InvalidWithdrawalStateException;
-import com.roy.morago.exception.WithdrawalNotFoundException;
+import com.roy.morago.exception.finance.DeficientFundsException;
+import com.roy.morago.exception.finance.ExistingWithdrawalRequestException;
+import com.roy.morago.exception.finance.InvalidWithdrawalStateException;
+import com.roy.morago.exception.finance.WithdrawalNotFoundException;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
 import com.roy.morago.repository.finance.WithdrawalRequestRepository;
@@ -220,16 +220,18 @@ public class WithdrawalServiceTest {
         verifyBalance(900L);
         verifyReview(testRequest.getId());
         verifyRequester(testRequest.getId());
-        verifyRejection(testRequest.getId());
     }
 
+    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testGetWithdrawalRequestByTransactionId() {
         WithdrawalRequestResponse response = withdrawalService
-                .getWithdrawalRequestByTransactionId(testRequest.getId());
+                .getWithdrawalRequestByTransactionId(testTransaction.getId());
 
         assertThat(response.getTransactionId()).isEqualTo(testTransaction.getId());
         assertThat(response.getAmount()).isEqualTo(100L);
+        assertThat(response.getCurrencyCode()).isEqualTo(CurrencyCode.KRW);
+        assertThat(response.getStatus()).isEqualTo(TransactionStatus.PENDING);
     }
 
     // Test Already Approved
@@ -379,9 +381,10 @@ public class WithdrawalServiceTest {
     }
 
     // Test Get Failed Case
+    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testGetWithdrawalRequestByTransactionId_notFound_throwsException() {
-        assertThatThrownBy(() -> withdrawalService.getWithdrawalRequestByTransactionId(999L))
+        assertThatThrownBy(() -> withdrawalService.getWithdrawalRequestByTransactionId(-1L))
                 .isInstanceOf(WithdrawalNotFoundException.class);
     }
 }
