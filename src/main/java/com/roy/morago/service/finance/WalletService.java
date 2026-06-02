@@ -8,6 +8,7 @@ import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.WalletStatus;
 import com.roy.morago.exception.finance.DeficientFundsException;
 import com.roy.morago.exception.finance.ExistingTransactionException;
+import com.roy.morago.exception.finance.NonActiveWalletException;
 import com.roy.morago.exception.finance.WalletNotFoundException;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
@@ -56,6 +57,7 @@ public class WalletService {
         Wallet wallet = findWalletById(id);
         User user = wallet.getUser();
         checkPending(user);
+        checkActive(wallet);
         wallet.setCurrencyCode(newCode);
     }
 
@@ -64,6 +66,7 @@ public class WalletService {
         Wallet wallet = findWalletById(id);
         User user = wallet.getUser();
         checkPending(user);
+        checkActive(wallet);
         wallet.setBalance(wallet.getBalance() + funds);
     }
 
@@ -72,12 +75,9 @@ public class WalletService {
         Wallet wallet = findWalletById(id);
         User user = wallet.getUser();
         checkPending(user);
+        checkActive(wallet);
         long newBalance = wallet.getBalance() - funds;
-        if (newBalance < 0) {
-            log.warn("Balance would go negative for wallet {}. Clamping to 0. Requested subtract: {}, Former balance: {}",
-                    id, funds, wallet.getBalance());
-            newBalance = 0L;
-        }
+        validateNonNegativeBalance(newBalance);
         wallet.setBalance(newBalance);
     }
 
@@ -98,6 +98,12 @@ public class WalletService {
     private void checkPending(User user) {
         if (transactionRepository.existsByWalletUserIdAndStatus(user.getId(), TransactionStatus.PENDING)) {
             throw new ExistingTransactionException("Cannot update wallet while there is a pending transaction.");
+        }
+    }
+
+    private void checkActive(Wallet wallet) {
+        if (wallet.getStatus() != WalletStatus.ACTIVE) {
+            throw new NonActiveWalletException("Cannot access wallet.");
         }
     }
 
