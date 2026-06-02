@@ -8,9 +8,7 @@ import com.roy.morago.entity.finance.WithdrawalRequest;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.TransactionType;
-import com.roy.morago.exception.finance.DeficientFundsException;
-import com.roy.morago.exception.finance.InvalidTransactionStateException;
-import com.roy.morago.exception.finance.TransactionNotFoundException;
+import com.roy.morago.exception.finance.*;
 import com.roy.morago.mapper.TransactionMapper;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
@@ -21,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -37,11 +36,11 @@ public class TransactionService {
         User user = userService.findUserWithAuthentication(authentication);
         Wallet wallet = user.getWallet();
         Long currentBalance = wallet.getBalance();
-        walletService.validateNonNegativeBalance(currentBalance);
-
         Long transactionAmount = dto.getAmount();
-
         Long balanceAfter = calculateBalanceAfter(dto.getType(), currentBalance, transactionAmount);
+
+        checkExistingPendingTransaction(user);
+        walletService.validateNonNegativeBalance(currentBalance);
         validateBalanceAfter(balanceAfter);
 
         Transaction transaction = transactionMapper.createTransactionFromDto(dto);
@@ -49,6 +48,8 @@ public class TransactionService {
         transaction.setWallet(wallet);
         transaction.setBalanceBefore(currentBalance);
         transaction.setBalanceAfter(balanceAfter);
+        transaction.setReference(generateTransactionReference(dto.getType()));
+        transaction.setDescription(generateTransactionDescription(dto.getType(), dto.getAmount()));
 
         transactionRepository.save(transaction);
         if (!dto.getType().equals(TransactionType.WITHDRAWAL)) {
@@ -79,8 +80,8 @@ public class TransactionService {
         transaction.setBalanceBefore(wallet.getBalance());
         transaction.setBalanceAfter
                 (calculateBalanceAfter(TransactionType.WITHDRAWAL, wallet.getBalance(), request.getAmount()));
-        transaction.setReference("test");
-        transaction.setDescription("test");
+        transaction.setReference(generateTransactionReference(TransactionType.WITHDRAWAL));
+        transaction.setDescription(generateTransactionDescription(TransactionType.WITHDRAWAL, request.getAmount()));
         transaction.setWithdrawalRequest(request);
         transactionRepository.save(transaction);
     }
@@ -121,6 +122,12 @@ public class TransactionService {
         };
     }
 
+    private void checkExistingPendingTransaction(User user) {
+        if (transactionRepository.existsByWalletUserIdAndStatus(user.getId(), TransactionStatus.PENDING)) {
+            throw new ExistingTransactionException("Pending transaction already exists.");
+        }
+    }
+
     private void validatePendingTransaction(Transaction transaction, String message) {
         if (transaction.getStatus() != TransactionStatus.PENDING) {
             throw new InvalidTransactionStateException(message);
@@ -133,4 +140,12 @@ public class TransactionService {
         }
     }
 
+    private String generateTransactionReference(TransactionType type) {
+        String random = UUID.randomUUID().toString();
+        return type + "-" + random;
+    }
+
+    private String generateTransactionDescription(TransactionType type, Long amount) {
+        return type + " transaction of " + amount;
+    }
 }
