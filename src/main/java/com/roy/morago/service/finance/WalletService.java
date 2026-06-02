@@ -7,7 +7,7 @@ import com.roy.morago.enums.CurrencyCode;
 import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.WalletStatus;
 import com.roy.morago.exception.finance.DeficientFundsException;
-import com.roy.morago.exception.finance.InvalidTransactionStateException;
+import com.roy.morago.exception.finance.ExistingTransactionException;
 import com.roy.morago.exception.finance.WalletNotFoundException;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
@@ -97,7 +97,7 @@ public class WalletService {
 
     private void checkPending(User user) {
         if (transactionRepository.existsByWalletUserIdAndStatus(user.getId(), TransactionStatus.PENDING)) {
-            throw new InvalidTransactionStateException("Cannot update wallet while there is a pending transaction.");
+            throw new ExistingTransactionException("Cannot update wallet while there is a pending transaction.");
         }
     }
 
