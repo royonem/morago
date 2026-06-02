@@ -21,7 +21,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @Transactional
 @SpringBootTest
-public class WalletServiceTest {
+public class WalletServiceIT {
     @Autowired
     private WalletService walletService;
     @Autowired

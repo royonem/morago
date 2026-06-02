@@ -31,7 +31,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @Transactional
 @SpringBootTest
-public class WithdrawalServiceTest {
+public class WithdrawalServiceIT {
     @Autowired
     private WithdrawalService withdrawalService;
     @Autowired

@@ -29,7 +29,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @Transactional
 @SpringBootTest
-public class TransactionServiceTest {
+public class TransactionServiceIT {
     @Autowired
     private TransactionService transactionService;
     @Autowired
