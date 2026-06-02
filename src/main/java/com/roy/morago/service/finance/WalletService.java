@@ -6,10 +6,7 @@ import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CurrencyCode;
 import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.WalletStatus;
-import com.roy.morago.exception.finance.DeficientFundsException;
-import com.roy.morago.exception.finance.ExistingTransactionException;
-import com.roy.morago.exception.finance.NonActiveWalletException;
-import com.roy.morago.exception.finance.WalletNotFoundException;
+import com.roy.morago.exception.finance.*;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
 import jakarta.transaction.Transactional;
@@ -67,6 +64,7 @@ public class WalletService {
         User user = wallet.getUser();
         checkPending(user);
         checkActive(wallet);
+        checkPositiveMovingFunds(funds);
         wallet.setBalance(wallet.getBalance() + funds);
     }
 
@@ -76,6 +74,7 @@ public class WalletService {
         User user = wallet.getUser();
         checkPending(user);
         checkActive(wallet);
+        checkPositiveMovingFunds(funds);
         long newBalance = wallet.getBalance() - funds;
         validateNonNegativeBalance(newBalance);
         wallet.setBalance(newBalance);
@@ -104,6 +103,12 @@ public class WalletService {
     private void checkActive(Wallet wallet) {
         if (wallet.getStatus() != WalletStatus.ACTIVE) {
             throw new NonActiveWalletException("Cannot access wallet.");
+        }
+    }
+
+    private void checkPositiveMovingFunds(Long funds) {
+        if (funds <= 0) {
+            throw new NonPositiveTransactionException("Transactions must include a positive amount.");
         }
     }
 
