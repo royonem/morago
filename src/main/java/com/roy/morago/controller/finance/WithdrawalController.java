@@ -27,7 +27,7 @@ public class WithdrawalController {
     @PreAuthorize("hasRole('ADMIN') or @securityService.isWithdrawalOwner(#id, authentication)")
     @GetMapping("/{id}")
     public WithdrawalRequestResponse getWithdrawalRequest(@PathVariable Long id) {
-        return withdrawalService.getWithdrawalRequestByTransactionId(id);
+        return withdrawalService.getWithdrawalRequest(id);
     }
 
     @PreAuthorize("hasRole('ADMIN') or @securityService.isWithdrawalOwner(#id, authentication)")

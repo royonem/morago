@@ -45,7 +45,7 @@ public class WithdrawalService {
         return mapper.createWithdrawalRequestResponse(request);
     }
 
-    public WithdrawalRequestResponse getWithdrawalRequestByTransactionId(Long requestId) {
+    public WithdrawalRequestResponse getWithdrawalRequest(Long requestId) {
         WithdrawalRequest request = findWithdrawalRequest(requestId);
         return mapper.createWithdrawalRequestResponse(request);
     }

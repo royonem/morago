@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WithdrawalRequestResponse {
-    private Long transactionId;
+    private Long id;
     private Long amount;
     private CurrencyCode currencyCode;
     private WithdrawalStatus status;
