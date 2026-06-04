@@ -1,10 +1,8 @@
 package com.roy.morago.exception;
 
 import com.roy.morago.exception.finance.*;
-import com.roy.morago.exception.topic.CategoryNotFoundException;
-import com.roy.morago.exception.topic.DuplicateCategoryNameException;
-import com.roy.morago.exception.topic.DuplicateTopicNameException;
-import com.roy.morago.exception.topic.TopicNotFoundException;
+import com.roy.morago.exception.notification.NotificationNotFoundException;
+import com.roy.morago.exception.topic.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -181,5 +179,12 @@ public class RestExceptionHandler {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(NotificationNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNotificationNotFound(NotificationNotFoundException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 }
