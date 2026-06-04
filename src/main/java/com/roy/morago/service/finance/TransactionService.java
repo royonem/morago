@@ -14,11 +14,9 @@ import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
 import com.roy.morago.service.user.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -31,7 +29,6 @@ public class TransactionService {
     private final WalletService walletService;
 
     @Transactional
-    @ResponseStatus(HttpStatus.CREATED)
     public TransactionResponse createTransaction(TransactionDTO dto, Authentication authentication) {
         User user = userService.findUserWithAuthentication(authentication);
         Wallet wallet = user.getWallet();
