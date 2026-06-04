@@ -3,10 +3,7 @@ package com.roy.morago.entity.notification;
 import com.roy.morago.entity.BaseEntity;
 import com.roy.morago.entity.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Getter
@@ -21,9 +18,17 @@ public class Notification extends BaseEntity {
     private User user;
 
     @Column(nullable = false)
-    private String content;
+    private String title;
     @Column(nullable = false)
-    private Boolean wasRead;
+    private String content;
+    @Column
+    private String actionUrl;
+    @Column(nullable = false)
+    private Boolean isRead = false;
+    @Column
+    private LocalDateTime scheduledFor;
+    @Column
+    private LocalDateTime sentAt;
     @Column
     private LocalDateTime readAt;
 }
