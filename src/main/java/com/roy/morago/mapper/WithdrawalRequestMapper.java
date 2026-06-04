@@ -9,5 +9,5 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface WithdrawalRequestMapper {
     WithdrawalRequest createWithdrawalRequestFromDto(WithdrawalRequestDTO dto);
-    WithdrawalRequestResponse createWithdrawalRequestResponse(WithdrawalRequest dto);
+    WithdrawalRequestResponse createWithdrawalRequestResponse(WithdrawalRequest request);
 }
