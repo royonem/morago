@@ -17,6 +17,4 @@ public class TransactionDTO {
     private Long amount;
     @NotNull(message = "Currency type must be specified")
     private CurrencyCode currencyCode;
-    private String reference;
-    private String description;
 }
