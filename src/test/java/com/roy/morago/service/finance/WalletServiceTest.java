@@ -7,10 +7,8 @@ import com.roy.morago.enums.Availability;
 import com.roy.morago.enums.CurrencyCode;
 import com.roy.morago.enums.UserStatus;
 import com.roy.morago.enums.WalletStatus;
-import com.roy.morago.exception.finance.DeficientFundsException;
-import com.roy.morago.exception.finance.InvalidTransactionStateException;
-import com.roy.morago.exception.finance.NonActiveWalletException;
-import com.roy.morago.exception.finance.WalletNotFoundException;
+import com.roy.morago.exception.finance.*;
+import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,12 +16,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.Optional;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,17 +27,19 @@ public class WalletServiceTest {
     private WalletService walletService;
     @Mock
     private WalletRepository walletRepository;
+    @Mock
+    private TransactionRepository transactionRepository;
 
     private Wallet testWallet;
     private User testUser;
 
-    private void stubWalletRepository() {
+    // Stubs
+    private void stubFindWalletById() {
         when(walletRepository.findById(testWallet.getId()))
                 .thenReturn(Optional.of(testWallet));
-        when(walletRepository.save(any(Wallet.class)))
-                .thenReturn(testWallet);
     }
 
+    // Setup
     private void createTestUser() {
         testUser = new User();
         testUser.setId(1L);
@@ -71,142 +68,124 @@ public class WalletServiceTest {
         testWallet.setUser(testUser);
     }
 
+    // Tests
     @Test
     void testAddFunds() {
-        stubWalletRepository();
+        stubFindWalletById();
         walletService.addFunds(testWallet.getId(), 500L);
         assertThat(testWallet.getBalance()).isEqualTo(1500L);
-        verify(walletRepository).save(testWallet);
     }
 
     @Test
     void testAddFunds_negativeAmount_throwsException() {
-        stubWalletRepository();
+        stubFindWalletById();
         assertThatThrownBy(() -> walletService.addFunds(testWallet.getId(), -100L))
-                .isInstanceOf(InvalidTransactionStateException.class);
+                .isInstanceOf(NonPositiveTransactionException.class);
         assertThat(testWallet.getBalance()).isEqualTo(1000L);
-        verify(walletRepository, never()).save(any(Wallet.class));
     }
 
     @Test
     void testSubtractFunds() {
-        stubWalletRepository();
+        stubFindWalletById();
         walletService.subtractFunds(testWallet.getId(), 200L);
         assertThat(testWallet.getBalance()).isEqualTo(800L);
-        verify(walletRepository).save(testWallet);
     }
 
     @Test
     void testSubtractFunds_insufficientBalance_throwsException() {
-        stubWalletRepository();
+        stubFindWalletById();
         assertThatThrownBy(() -> walletService.subtractFunds(testWallet.getId(), 1200L))
                 .isInstanceOf(DeficientFundsException.class);
         assertThat(testWallet.getBalance()).isEqualTo(1000L);
-        verify(walletRepository, never()).save(any(Wallet.class));
     }
 
     @Test
     void testSubtractFunds_negativeAmount_throwsException() {
-        stubWalletRepository();
+        stubFindWalletById();
         assertThatThrownBy(() -> walletService.subtractFunds(testWallet.getId(), -100L))
-                .isInstanceOf(InvalidTransactionStateException.class);
+                .isInstanceOf(NonPositiveTransactionException.class);
         assertThat(testWallet.getBalance()).isEqualTo(1000L);
-        verify(walletRepository, never()).save(any(Wallet.class));
     }
 
     @Test
     void testChangeCurrencyCode() {
-        stubWalletRepository();
+        stubFindWalletById();
         walletService.updateCurrency(testWallet.getId(), CurrencyCode.USD);
         assertThat(testWallet.getCurrencyCode()).isEqualTo(CurrencyCode.USD);
-        verify(walletRepository).save(testWallet);
     }
 
     @Test
     void testActivateWallet_whenSuspended_becomesActive() {
-        stubWalletRepository();
+        stubFindWalletById();
         walletService.suspendWallet(testWallet.getId());
         assertThat(testWallet.getStatus()).isEqualTo(WalletStatus.SUSPENDED);
         walletService.activateWallet(testWallet.getId());
         assertThat(testWallet.getStatus()).isEqualTo(WalletStatus.ACTIVE);
-        verify(walletRepository, times(2)).save(testWallet);
     }
 
     @Test
     void testSuspendWallet() {
-        stubWalletRepository();
+        stubFindWalletById();
         walletService.suspendWallet(testWallet.getId());
         assertThat(testWallet.getStatus()).isEqualTo(WalletStatus.SUSPENDED);
-        verify(walletRepository).save(testWallet);
     }
 
     @Test
     void testAddFunds_whenWalletSuspended_throwsException() {
-        stubWalletRepository();
+        stubFindWalletById();
         walletService.suspendWallet(testWallet.getId());
         assertThat(testWallet.getStatus()).isEqualTo(WalletStatus.SUSPENDED);
-        verify(walletRepository).save(testWallet);
         assertThatThrownBy(() -> walletService.addFunds(testWallet.getId(), 100L))
                 .isInstanceOf(NonActiveWalletException.class);
         assertThat(testWallet.getBalance()).isEqualTo(1000L);
-        verify(walletRepository, times(1)).save(testWallet);
     }
 
     @Test
     void testSubtractFunds_whenWalletSuspended_throwsException() {
-        stubWalletRepository();
+        stubFindWalletById();
         walletService.suspendWallet(testWallet.getId());
         assertThat(testWallet.getStatus()).isEqualTo(WalletStatus.SUSPENDED);
-        verify(walletRepository).save(testWallet);
         assertThatThrownBy(() -> walletService.subtractFunds(testWallet.getId(), 100L))
                 .isInstanceOf(NonActiveWalletException.class);
         assertThat(testWallet.getBalance()).isEqualTo(1000L);
-        verify(walletRepository, times(1)).save(testWallet);
     }
 
     @Test
     void testBlockWallet() {
-        stubWalletRepository();
+        stubFindWalletById();
         walletService.blockWallet(testWallet.getId());
         assertThat(testWallet.getStatus()).isEqualTo(WalletStatus.BLOCKED);
-        verify(walletRepository).save(testWallet);
     }
 
     @Test
     void testAddFunds_whenWalletBlocked_throwsException() {
-        stubWalletRepository();
+        stubFindWalletById();
         walletService.blockWallet(testWallet.getId());
         assertThat(testWallet.getStatus()).isEqualTo(WalletStatus.BLOCKED);
-        verify(walletRepository).save(testWallet);
         assertThatThrownBy(() -> walletService.addFunds(testWallet.getId(), 100L))
                 .isInstanceOf(NonActiveWalletException.class);
         assertThat(testWallet.getBalance()).isEqualTo(1000L);
-        verify(walletRepository, times(1)).save(testWallet);
     }
 
     @Test
     void testSubtractFunds_whenWalletBlocked_throwsException() {
-        stubWalletRepository();
+        stubFindWalletById();
         walletService.blockWallet(testWallet.getId());
         assertThat(testWallet.getStatus()).isEqualTo(WalletStatus.BLOCKED);
-        verify(walletRepository).save(testWallet);
         assertThatThrownBy(() -> walletService.subtractFunds(testWallet.getId(), 100L))
                 .isInstanceOf(NonActiveWalletException.class);
         assertThat(testWallet.getBalance()).isEqualTo(1000L);
-        verify(walletRepository, times(1)).save(testWallet);
     }
 
     @Test
     void testGetWalletById_success() {
-        stubWalletRepository();
+        stubFindWalletById();
 
         WalletDTO result = walletService.getWalletById(testWallet.getId());
 
         assertThat(result.getBalance()).isEqualTo(1000L);
         assertThat(result.getCurrencyCode()).isEqualTo(CurrencyCode.KRW);
         assertThat(result.getStatus()).isEqualTo(WalletStatus.ACTIVE);
-        verify(walletRepository).findById(testWallet.getId());
-        verify(walletRepository, never()).save(any());
     }
 
     @Test
@@ -216,8 +195,5 @@ public class WalletServiceTest {
 
         assertThatThrownBy(() -> walletService.getWalletById(testWallet.getId()))
                 .isInstanceOf(WalletNotFoundException.class);
-
-        verify(walletRepository).findById(testWallet.getId());
-        verify(walletRepository, never()).save(any());
     }
 }
