@@ -83,6 +83,7 @@ public class TransactionService {
         transaction.setReference(generateTransactionReference(TransactionType.WITHDRAWAL));
         transaction.setDescription(generateTransactionDescription(TransactionType.WITHDRAWAL, request.getAmount()));
         transaction.setWithdrawalRequest(request);
+        request.setTransaction(transaction);
         transactionRepository.save(transaction);
     }
 
@@ -98,6 +99,7 @@ public class TransactionService {
         transaction.setStatus(TransactionStatus.PAID);
     }
 
+    @Transactional
     protected void failTransaction(Long id) {
         Transaction transaction = findTransaction(id);
         transaction.setStatus(TransactionStatus.FAILED);
