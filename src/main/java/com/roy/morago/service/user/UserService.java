@@ -10,6 +10,7 @@ import com.roy.morago.repository.user.LanguageRepository;
 import com.roy.morago.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +21,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final LanguageRepository languageRepository;
     private final UserMapper userMapper;
+
+    public User findUserWithAuthentication(Authentication authentication) {
+        return userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+    }
 
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)

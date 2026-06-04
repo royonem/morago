@@ -1,5 +1,5 @@
 package com.roy.morago.enums;
 
 public enum TransactionStatus {
-    PENDING, APPROVED, REJECTED, PAID, CANCELLED;
+    PENDING, PAID, CANCELED, FAILED;
 }

@@ -65,7 +65,7 @@ CREATE TABLE notifications
     updated_at datetime              NULL,
     user_id    BIGINT                NOT NULL,
     content    VARCHAR(255)          NOT NULL,
-    `read`     BIT(1)                NOT NULL,
+    was_read   BIT(1)                NOT NULL,
     read_at    datetime              NULL,
     CONSTRAINT pk_notifications PRIMARY KEY (id)
 );
@@ -112,12 +112,11 @@ CREATE TABLE transactions
     call_id               BIGINT                NULL,
     withdrawal_request_id BIGINT                NULL,
     type                  SMALLINT              NOT NULL,
-    coin_amount           INT                   NOT NULL,
-    cash_amount           DECIMAL               NOT NULL,
+    amount                BIGINT                NOT NULL,
     currency_code         SMALLINT              NOT NULL,
     status                SMALLINT              NOT NULL,
-    balance_before        INT                   NOT NULL,
-    balance_after         INT                   NOT NULL,
+    balance_before        BIGINT                NOT NULL,
+    balance_after         BIGINT                NOT NULL,
     `reference`           VARCHAR(255)          NOT NULL,
     `description`         VARCHAR(255)          NOT NULL,
     processed_at          datetime              NULL,
@@ -169,9 +168,10 @@ CREATE TABLE wallets
     created_at    datetime              NULL,
     updated_at    datetime              NULL,
     user_id       BIGINT                NOT NULL,
-    balance       INT                   NOT NULL,
+    version       BIGINT                NULL,
+    balance       BIGINT                NOT NULL CHECK (balance >= 0),
     currency_code SMALLINT              NOT NULL,
-    status        VARCHAR(255)          NOT NULL,
+    status        SMALLINT              NOT NULL,
     CONSTRAINT pk_wallets PRIMARY KEY (id)
 );
 
@@ -184,8 +184,7 @@ CREATE TABLE withdrawal_requests
     reviewer_id      BIGINT                NULL,
     wallet_id        BIGINT                NOT NULL,
     bank_account_id  BIGINT                NOT NULL,
-    coin_amount      INT                   NOT NULL,
-    cash_amount      DECIMAL               NOT NULL,
+    amount           BIGINT                NOT NULL,
     currency_code    SMALLINT              NOT NULL,
     status           SMALLINT              NOT NULL,
     rejection_reason VARCHAR(255)          NULL,
@@ -193,21 +192,6 @@ CREATE TABLE withdrawal_requests
     paid_at          datetime              NULL,
     CONSTRAINT pk_withdrawal_requests PRIMARY KEY (id)
 );
-
-CREATE TABLE notifications
-(
-    id         BIGINT AUTO_INCREMENT NOT NULL,
-    created_at datetime              NULL,
-    updated_at datetime              NULL,
-    user_id    BIGINT                NOT NULL,
-    content    VARCHAR(255)          NOT NULL,
-    was_read   BIT(1)                NOT NULL,
-    read_at    datetime              NULL,
-    CONSTRAINT pk_notifications PRIMARY KEY (id)
-);
-
-ALTER TABLE notifications
-    ADD CONSTRAINT FK_NOTIFICATIONS_ON_USER FOREIGN KEY (user_id) REFERENCES users (id);
 
 ALTER TABLE bank_accounts
     ADD CONSTRAINT uc_bank_accounts_accountnumber UNIQUE (account_number);
@@ -238,9 +222,6 @@ ALTER TABLE transactions
 
 ALTER TABLE transactions
     ADD CONSTRAINT uc_transactions_reference UNIQUE (`reference`);
-
-ALTER TABLE transactions
-    ADD CONSTRAINT uc_transactions_wallet UNIQUE (wallet_id);
 
 ALTER TABLE transactions
     ADD CONSTRAINT uc_transactions_withdrawal_request UNIQUE (withdrawal_request_id);
