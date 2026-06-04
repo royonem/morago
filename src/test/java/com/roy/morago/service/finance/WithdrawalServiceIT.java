@@ -164,7 +164,7 @@ public class WithdrawalServiceIT {
         WithdrawalRequestResponse responseDto = withdrawalService.createWithdrawalRequest(testRequestDto, userAuth);
 
         // find and save transaction + withdrawalRequest
-        Long transactionId = responseDto.getTransactionId();
+        Long transactionId = responseDto.getId();
         testTransaction= transactionRepository.findById(transactionId).orElseThrow();
         testRequest = withdrawalRequestRepository.findByTransaction(testTransaction);
 
@@ -224,11 +224,11 @@ public class WithdrawalServiceIT {
 
     @WithMockUser(username = "johndoe@test.com")
     @Test
-    void testGetWithdrawalRequestByTransactionId() {
+    void testGetWithdrawalRequest() {
         WithdrawalRequestResponse response = withdrawalService
-                .getWithdrawalRequestByTransactionId(testTransaction.getId());
+                .getWithdrawalRequest(testRequest.getId());
 
-        assertThat(response.getTransactionId()).isEqualTo(testTransaction.getId());
+        assertThat(response.getId()).isEqualTo(testTransaction.getId());
         assertThat(response.getAmount()).isEqualTo(100L);
         assertThat(response.getCurrencyCode()).isEqualTo(CurrencyCode.KRW);
         assertThat(response.getStatus()).isEqualTo(TransactionStatus.PENDING);
@@ -384,7 +384,7 @@ public class WithdrawalServiceIT {
     @WithMockUser(username = "johndoe@test.com")
     @Test
     void testGetWithdrawalRequestByTransactionId_notFound_throwsException() {
-        assertThatThrownBy(() -> withdrawalService.getWithdrawalRequestByTransactionId(-1L))
+        assertThatThrownBy(() -> withdrawalService.getWithdrawalRequest(-1L))
                 .isInstanceOf(WithdrawalNotFoundException.class);
     }
 }

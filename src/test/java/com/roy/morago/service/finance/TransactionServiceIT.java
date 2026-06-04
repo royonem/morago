@@ -123,8 +123,6 @@ public class TransactionServiceIT {
         testTransactionDto.setType(type);
         testTransactionDto.setAmount(amount);
         testTransactionDto.setCurrencyCode(CurrencyCode.KRW);
-        testTransactionDto.setDescription("test transaction");
-        testTransactionDto.setReference("test reference");
     }
 
     private void testCreateTransaction(TransactionType type, Long amount) {
@@ -150,6 +148,7 @@ public class TransactionServiceIT {
 
     private void testCreatePendingTransaction(TransactionType type, Long amount) {
         Transaction pendingTransaction = new Transaction();
+        pendingTransaction.setId(1L);
         pendingTransaction.setType(type);
         pendingTransaction.setAmount(amount);
         pendingTransaction.setCurrencyCode(CurrencyCode.KRW);
@@ -158,7 +157,11 @@ public class TransactionServiceIT {
         pendingTransaction.setStatus(TransactionStatus.PENDING);
         pendingTransaction.setWallet(testWallet);
         pendingTransaction.setBalanceBefore(testWallet.getBalance());
-        pendingTransaction.setBalanceAfter(testWallet.getBalance() + amount);
+        if (type == TransactionType.WITHDRAWAL || type == TransactionType.CALL_CHARGE) {
+            testTransaction.setBalanceAfter(testWallet.getBalance() - amount);
+        } else {
+            testTransaction.setBalanceAfter(testWallet.getBalance() + amount);
+        }
         testTransaction = transactionRepository.save(pendingTransaction);
     }
 
