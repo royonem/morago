@@ -4,7 +4,6 @@ import com.roy.morago.dto.auth.RegisterClientRequest;
 import com.roy.morago.dto.auth.LoginRequest;
 import com.roy.morago.dto.auth.LoginResponse;
 import com.roy.morago.dto.auth.RegisterTranslatorRequest;
-import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.user.Role;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CurrencyCode;
