@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FileDTO {
-    private Long fileId;
+    private Long id;
     private String fileName;
     private String filePath;
     private String fileType;
