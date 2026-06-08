@@ -169,7 +169,7 @@ CREATE TABLE wallets
     updated_at    datetime              NULL,
     user_id       BIGINT                NOT NULL,
     version       BIGINT                NULL,
-    balance       BIGINT                NOT NULL CHECK (balance >= 0),
+    balance       BIGINT                NOT NULL,
     currency_code SMALLINT              NOT NULL,
     status        SMALLINT              NOT NULL,
     CONSTRAINT pk_wallets PRIMARY KEY (id)
