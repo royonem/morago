@@ -7,7 +7,9 @@ import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.FilePurpose;
 import com.roy.morago.mapper.FileMapper;
 import com.roy.morago.repository.file.FileRepository;
+import com.roy.morago.repository.topic.TopicRepository;
 import com.roy.morago.repository.user.UserRepository;
+import com.roy.morago.service.topic.TopicHelper;
 import com.roy.morago.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ public class FileService {
     private final UserService userService;
     private final UserRepository userRepository;
     private final FileHelper fileHelper;
+    private final TopicHelper topicHelper;
+    private final TopicRepository topicRepository;
 
     @Transactional
     public FileDTO uploadProfilePicture(MultipartFile file) {
@@ -54,14 +58,12 @@ public class FileService {
     @Transactional
     public void saveTopicIcon(Long topicId, Long iconId) {
         File icon = fileHelper.findFileById(iconId);
-
-        // Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new TopicNotFoundException("Topic not found"));
-        Topic topic = new Topic(); // temporary code. delete later
+        Topic topic = topicHelper.findTopicById(topicId);
 
         String finalPath = fileStorageService.moveToFinalStorage(icon, FilePurpose.ICON);
         fileHelper.finalizeFile(icon, finalPath);
         topic.setIcon(icon);
-        // topicRepository.save(topic); add topic repository save later
+        topicRepository.save(topic);
     }
 
     @Transactional
@@ -75,8 +77,7 @@ public class FileService {
 
     @Transactional
     public void deleteTopicIcon(Long topicId) {
-        // Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new TopicNotFoundException("Topic not found"));
-        Topic topic = new Topic(); // filler code until Topic Crud is finished
+        Topic topic = topicHelper.findTopicById(topicId);
         File icon = fileHelper.findIconByTopic(topic);
         topic.setIcon(null);
         fileRepository.deleteById(icon.getId());
