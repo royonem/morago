@@ -5,20 +5,14 @@ import com.roy.morago.entity.file.File;
 import com.roy.morago.entity.topic.Topic;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.FilePurpose;
-import com.roy.morago.enums.FileStatus;
-import com.roy.morago.exception.FileNotFoundException;
-import com.roy.morago.exception.FileValidationException;
-import com.roy.morago.exception.UserNotFoundException;
 import com.roy.morago.mapper.FileMapper;
 import com.roy.morago.repository.file.FileRepository;
 import com.roy.morago.repository.user.UserRepository;
-import lombok.NonNull;
+import com.roy.morago.service.user.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -26,92 +20,66 @@ public class FileService {
     private final FileRepository fileRepository;
     private final FileMapper fileMapper;
     private final FileStorageService fileStorageService;
+    private final UserService userService;
     private final UserRepository userRepository;
-    private static final List<String> ALLOWED_TYPES =
-            List.of("image/png", "image/jpeg");
+    private final FileHelper fileHelper;
 
     @Transactional
-    public FileDTO uploadFile(MultipartFile file, FilePurpose filePurpose) {
-        validateFile(file, filePurpose);
-        String tempPath = fileStorageService.storeTempFile(file);
-        File fileEntity = buildFileEntity(file, tempPath, filePurpose);
-        fileRepository.save(fileEntity);
-        return fileMapper.createFileDTOFromEntity(fileEntity);
+    public FileDTO uploadProfilePicture(MultipartFile file) {
+        return fileHelper.uploadFile(file, FilePurpose.PICTURE);
     }
 
-    public File buildFileEntity(MultipartFile file, String tempPath, FilePurpose filePurpose) {
-        File fileEntity = new File();
-        fileEntity.setFileName(file.getOriginalFilename());
-        fileEntity.setFilePurpose(filePurpose);
-        fileEntity.setFileType(file.getContentType());
-        fileEntity.setFileSize(file.getSize());
-        fileEntity.setFileStatus(FileStatus.PENDING);
-        fileEntity.setFilePath(tempPath);
-        return fileEntity;
-    }
-
-    public void validateFile(@NonNull MultipartFile file, FilePurpose filePurpose) {
-        int profilePicSizeLimit = 5 * 1024 * 1024;
-        int iconSizeLimit = 500 * 1024;
-
-        if (file.isEmpty()) {
-            throw new FileValidationException("File is empty");
-        }
-        if ((FilePurpose.ICON.equals(filePurpose) && file.getSize() > iconSizeLimit)
-                || (FilePurpose.PICTURE.equals(filePurpose) && file.getSize() > profilePicSizeLimit)) {
-            throw new FileValidationException("File size is too large");
-        }
-        String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
-            throw new FileValidationException("Unsupported file type");
-        }
+    @Transactional
+    public FileDTO uploadTopicIcon(MultipartFile file) {
+        return fileHelper.uploadFile(file, FilePurpose.ICON);
     }
 
     @Transactional(readOnly = true)
-    public FileDTO viewFile(Long id) {
-        return fileMapper.createFileDTOFromEntity(findFileById(id));
+    public FileDTO viewFile(Long fileId) {
+        return fileMapper.createFileDTOFromEntity(fileHelper.findFileById(fileId));
     }
 
     @Transactional
-    public void deleteFile(Long id) {
-        File file = findFileById(id);
-        fileRepository.deleteById(id);
-        fileStorageService.deleteFromStorage(file.getFilePath());
-    }
-
-    @Transactional  // possibly move this to UserController later
-    public void saveProfilePicture(Long pictureId, Authentication authentication) {
-        File file = findFileById(pictureId);
-
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new UserNotFoundException("User not found"));
+    public void saveProfilePicture(Long userId, Long pictureId) {
+        User user = userService.findUserById(userId);
+        File file = fileHelper.findFileById(pictureId);
 
         String finalPath = fileStorageService.moveToFinalStorage(file, FilePurpose.PICTURE);
-        finalizeFile(file, finalPath);
+        fileHelper.finalizeFile(file, finalPath);
 
         user.setProfilePicture(file);
         userRepository.save(user);
     }
 
-    @Transactional // possibly move this to TopicController later
-    public void saveTopicIcon(Long iconId, Long topicId) {
-        File file = findFileById(iconId);
-        // Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new RuntimeException("Topic not found"));
+    @Transactional
+    public void saveTopicIcon(Long topicId, Long iconId) {
+        File icon = fileHelper.findFileById(iconId);
+
+        // Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new TopicNotFoundException("Topic not found"));
         Topic topic = new Topic(); // temporary code. delete later
 
-        String finalPath = fileStorageService.moveToFinalStorage(file, FilePurpose.ICON);
-        finalizeFile(file, finalPath);
-        topic.setIcon(file);
-        // topicRepository.save(topic);
-        // add topic repository save later
+        String finalPath = fileStorageService.moveToFinalStorage(icon, FilePurpose.ICON);
+        fileHelper.finalizeFile(icon, finalPath);
+        topic.setIcon(icon);
+        // topicRepository.save(topic); add topic repository save later
     }
 
-    private void finalizeFile(File file, String finalPath) {
-        file.setFilePath(finalPath);
-        file.activate();
-        fileRepository.save(file);
+    @Transactional
+    public void deleteProfilePicture(Long userId) {
+        User user = userService.findUserById(userId);
+        File picture = fileHelper.findPictureByUser(user);
+        user.setProfilePicture(null);
+        fileRepository.deleteById(picture.getId());
+        fileStorageService.deleteFromStorage(picture.getFilePath());
     }
 
-    private File findFileById(Long id) {
-        return fileRepository.findById(id).orElseThrow(() -> new FileNotFoundException("File not found."));
+    @Transactional
+    public void deleteTopicIcon(Long topicId) {
+        // Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new TopicNotFoundException("Topic not found"));
+        Topic topic = new Topic(); // filler code until Topic Crud is finished
+        File icon = fileHelper.findIconByTopic(topic);
+        topic.setIcon(null);
+        fileRepository.deleteById(icon.getId());
+        fileStorageService.deleteFromStorage(icon.getFilePath());
     }
 }
