@@ -27,10 +27,8 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 
-    public UserResponse getUserById(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-        return userMapper.toUserResponse(user);
+    public UserResponse getUserById(Long userId) {
+        return userMapper.toUserResponse(findUserById(userId));
     }
 
     public List<UserResponse> getAllUsers() {
@@ -57,5 +55,10 @@ public class UserService {
         } else {
             throw new UserNotFoundException("User not found: " + id);
         }
+    }
+
+    public User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 }

@@ -23,7 +23,7 @@ public class Wallet extends BaseEntity {
 
     @Version
     private Long version;
-    @Column(nullable = false, columnDefinition = "BIGINT CHECK (balance >= 0)")
+    @Column(nullable = false)
     private Long balance;
     @Column(nullable = false)
     private CurrencyCode currencyCode;

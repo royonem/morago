@@ -24,3 +24,9 @@ app:
     secret: ${JWT_SECRET}
     access-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}
     refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+
+file:
+  upload:
+    temp-dir: uploads/temp
+    picture-dir: uploads/pictures
+    icon-dir: uploads/icons

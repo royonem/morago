@@ -1,0 +1,85 @@
+package com.roy.morago.service.file;
+
+import com.roy.morago.dto.file.FileDTO;
+import com.roy.morago.entity.file.File;
+import com.roy.morago.entity.topic.Topic;
+import com.roy.morago.entity.user.User;
+import com.roy.morago.enums.FilePurpose;
+import com.roy.morago.mapper.FileMapper;
+import com.roy.morago.repository.file.FileRepository;
+import com.roy.morago.repository.user.UserRepository;
+import com.roy.morago.service.user.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+@RequiredArgsConstructor
+@Service
+public class FileService {
+    private final FileRepository fileRepository;
+    private final FileMapper fileMapper;
+    private final FileStorageService fileStorageService;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final FileHelper fileHelper;
+
+    @Transactional
+    public FileDTO uploadProfilePicture(MultipartFile file) {
+        return fileHelper.uploadFile(file, FilePurpose.PICTURE);
+    }
+
+    @Transactional
+    public FileDTO uploadTopicIcon(MultipartFile file) {
+        return fileHelper.uploadFile(file, FilePurpose.ICON);
+    }
+
+    @Transactional(readOnly = true)
+    public FileDTO viewFile(Long fileId) {
+        return fileMapper.createFileDTOFromEntity(fileHelper.findFileById(fileId));
+    }
+
+    @Transactional
+    public void saveProfilePicture(Long userId, Long pictureId) {
+        User user = userService.findUserById(userId);
+        File file = fileHelper.findFileById(pictureId);
+
+        String finalPath = fileStorageService.moveToFinalStorage(file, FilePurpose.PICTURE);
+        fileHelper.finalizeFile(file, finalPath);
+
+        user.setProfilePicture(file);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void saveTopicIcon(Long topicId, Long iconId) {
+        File icon = fileHelper.findFileById(iconId);
+
+        // Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new TopicNotFoundException("Topic not found"));
+        Topic topic = new Topic(); // temporary code. delete later
+
+        String finalPath = fileStorageService.moveToFinalStorage(icon, FilePurpose.ICON);
+        fileHelper.finalizeFile(icon, finalPath);
+        topic.setIcon(icon);
+        // topicRepository.save(topic); add topic repository save later
+    }
+
+    @Transactional
+    public void deleteProfilePicture(Long userId) {
+        User user = userService.findUserById(userId);
+        File picture = fileHelper.findPictureByUser(user);
+        user.setProfilePicture(null);
+        fileRepository.deleteById(picture.getId());
+        fileStorageService.deleteFromStorage(picture.getFilePath());
+    }
+
+    @Transactional
+    public void deleteTopicIcon(Long topicId) {
+        // Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new TopicNotFoundException("Topic not found"));
+        Topic topic = new Topic(); // filler code until Topic Crud is finished
+        File icon = fileHelper.findIconByTopic(topic);
+        topic.setIcon(null);
+        fileRepository.deleteById(icon.getId());
+        fileStorageService.deleteFromStorage(icon.getFilePath());
+    }
+}
