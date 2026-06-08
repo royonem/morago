@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/categories")
@@ -15,10 +17,15 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/create")
+    @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryDTO createCategory(@Valid @RequestBody CategoryDTO dto) {
         return categoryService.createCategory(dto);
+    }
+
+    @GetMapping("/")
+    public List<CategoryDTO> categoryList() {
+        return categoryService.getAllCategories();
     }
 
     @GetMapping("/{id}")
@@ -27,25 +34,13 @@ public class CategoryController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{id}/deactivate")
-    public void deactivateCategory(@PathVariable Long id) {
-        categoryService.deactivateCategory(id);
+    @PutMapping("/{id}")
+    public CategoryDTO updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDTO dto) {
+        return categoryService.updateCategory(id, dto);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{id}/activate")
-    public void activateCategory(@PathVariable Long id) {
-        categoryService.activateCategory(id);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{id}/rename")
-    public void renameCategory(@PathVariable Long id, @RequestParam String newName) {
-        categoryService.renameCategory(id, newName);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}/delete")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
