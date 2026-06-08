@@ -2,73 +2,56 @@ package com.roy.morago.service.topic;
 
 import com.roy.morago.dto.topic.CategoryDTO;
 import com.roy.morago.entity.topic.Category;
-import com.roy.morago.exception.CategoryNotFoundException;
-import com.roy.morago.exception.DuplicateCategoryNameException;
 import com.roy.morago.repository.topic.CategoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 public class CategoryService {
     private final CategoryRepository categoryRepository;
+    private final TopicHelper topicHelper;
 
     @Transactional
     public CategoryDTO createCategory(CategoryDTO dto) {
-        checkDuplicateCategories(dto.getName());
+        topicHelper.checkDuplicateCategories(dto.getName());
         Category category = new Category();
         category.setName(dto.getName());
         category.setActive(true);
         categoryRepository.save(category);
-        return createCategoryDTO(category);
+        return topicHelper.createCategoryDTO(category);
+    }
+
+    public List<CategoryDTO> getAllCategories() {
+        List<Category> categories = categoryRepository.findAll();
+        List<CategoryDTO> categoriesList = new ArrayList<>();
+        for (Category category : categories) {
+            categoriesList.add(topicHelper.createCategoryDTO(category));
+        }
+        return categoriesList;
     }
 
     public CategoryDTO getCategory(Long id) {
-        Category category = findCategoryById(id);
-        return createCategoryDTO(category);
+        Category category = topicHelper.findCategoryById(id);
+        return topicHelper.createCategoryDTO(category);
     }
 
     @Transactional
-    public void deactivateCategory(Long id) {
-        Category category = findCategoryById(id);
-        category.setActive(false);
-    }
-
-    @Transactional
-    public void activateCategory(Long id) {
-        Category category = findCategoryById(id);
-        category.setActive(true);
-    }
-
-    @Transactional
-    public void renameCategory(Long id, String newName) {
-        checkDuplicateCategories(newName);
-        Category category = findCategoryById(id);
-        category.setName(newName);
+    public CategoryDTO updateCategory(Long id, CategoryDTO dto) {
+        topicHelper.checkDuplicateCategories(dto.getName());
+        Category category = topicHelper.findCategoryById(id);
+        category.setName(dto.getName());
+        category.setActive(dto.getActive());
+        return topicHelper.createCategoryDTO(category);
     }
 
     @Transactional
     public void deleteCategory(Long id) {
-        Category category = findCategoryById(id);
+        Category category = topicHelper.findCategoryById(id);
         categoryRepository.delete(category);
-    }
-
-    private void checkDuplicateCategories(String name) {
-        if (categoryRepository.existByName(name)) {
-            throw new DuplicateCategoryNameException("Category with name " + name + " already exists");
-        }
-    }
-
-    private CategoryDTO createCategoryDTO(Category category) {
-        CategoryDTO dto = new CategoryDTO();
-        dto.setId(category.getId());
-        dto.setName(category.getName());
-        return dto;
-    }
-
-    private Category findCategoryById(Long id) {
-        return categoryRepository.findById(id).orElseThrow(()
-                -> new CategoryNotFoundException("Category not found."));
     }
 }
