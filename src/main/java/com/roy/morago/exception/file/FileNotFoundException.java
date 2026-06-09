@@ -1,4 +1,4 @@
-package com.roy.morago.exception;
+package com.roy.morago.exception.file;
 
 public class FileNotFoundException extends RuntimeException {
     public FileNotFoundException(String message) {
