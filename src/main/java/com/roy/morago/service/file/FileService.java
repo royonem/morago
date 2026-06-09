@@ -10,7 +10,7 @@ import com.roy.morago.repository.file.FileRepository;
 import com.roy.morago.repository.topic.TopicRepository;
 import com.roy.morago.repository.user.UserRepository;
 import com.roy.morago.service.topic.TopicHelper;
-import com.roy.morago.service.user.UserService;
+import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +22,7 @@ public class FileService {
     private final FileRepository fileRepository;
     private final FileMapper fileMapper;
     private final FileStorageService fileStorageService;
-    private final UserService userService;
+    private final UserHelper userHelper;
     private final UserRepository userRepository;
     private final FileHelper fileHelper;
     private final TopicHelper topicHelper;
@@ -45,7 +45,7 @@ public class FileService {
 
     @Transactional
     public void saveProfilePicture(Long userId, Long pictureId) {
-        User user = userService.findUserById(userId);
+        User user = userHelper.findUserById(userId);
         File file = fileHelper.findFileById(pictureId);
 
         String finalPath = fileStorageService.moveToFinalStorage(file, FilePurpose.PICTURE);
@@ -68,7 +68,7 @@ public class FileService {
 
     @Transactional
     public void deleteProfilePicture(Long userId) {
-        User user = userService.findUserById(userId);
+        User user = userHelper.findUserById(userId);
         File picture = fileHelper.findPictureByUser(user);
         user.setProfilePicture(null);
         fileRepository.deleteById(picture.getId());

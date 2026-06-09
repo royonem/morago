@@ -5,7 +5,7 @@ import com.roy.morago.entity.finance.BankAccount;
 import com.roy.morago.exception.finance.BankNotFoundException;
 import com.roy.morago.mapper.BankAccountMapper;
 import com.roy.morago.repository.finance.BankRepository;
-import com.roy.morago.service.user.UserService;
+import com.roy.morago.service.user.UserHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -15,13 +15,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class BankService {
     private final BankRepository bankRepository;
-    private final UserService userService;
+    private final UserHelper userHelper;
     private final BankAccountMapper bankAccountMapper;
 
     @Transactional
     public BankAccountDTO linkBankAccount(BankAccountDTO dto, Authentication authentication) {
         BankAccount bankAccount = bankAccountMapper.createBankAccountFromDTO(dto);
-        bankAccount.setUser(userService.findUserWithAuthentication(authentication));
+        bankAccount.setUser(userHelper.findUserWithAuthentication(authentication));
         bankRepository.save(bankAccount);
         return bankAccountMapper.createBankAccountDTO(bankAccount);
     }

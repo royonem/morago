@@ -10,7 +10,6 @@ import com.roy.morago.repository.user.LanguageRepository;
 import com.roy.morago.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Set;
@@ -21,14 +20,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final LanguageRepository languageRepository;
     private final UserMapper userMapper;
+    private final UserHelper helper;
 
-    public User findUserWithAuthentication(Authentication authentication) {
-        return userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-    }
-
-    public UserResponse getUserById(Long userId) {
-        return userMapper.toUserResponse(findUserById(userId));
+    public UserResponse getUser(Long userId) {
+        return userMapper.toUserResponse(helper.findUserById(userId));
     }
 
     public List<UserResponse> getAllUsers() {
@@ -37,8 +32,7 @@ public class UserService {
 
     @Transactional
     public void updateUser(Long id, UpdateUserRequest userDto) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        User user = helper.findUserById(id);
         userMapper.updateUserFromDto(userDto, user);
 
         if (userDto.getLanguages() != null) {
@@ -50,15 +44,8 @@ public class UserService {
 
     @Transactional
     public void deleteUser(Long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-        } else {
-            throw new UserNotFoundException("User not found: " + id);
-        }
+        User user = helper.findUserById(id);
+        userRepository.delete(user);
     }
 
-    public User findUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-    }
 }

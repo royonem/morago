@@ -12,7 +12,7 @@ import com.roy.morago.exception.finance.*;
 import com.roy.morago.mapper.TransactionMapper;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
-import com.roy.morago.service.user.UserService;
+import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -25,12 +25,12 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
     private final WalletRepository walletRepository;
-    private final UserService userService;
+    private final UserHelper userHelper;
     private final WalletService walletService;
 
     @Transactional
     public TransactionResponse createTransaction(TransactionDTO dto, Authentication authentication) {
-        User user = userService.findUserWithAuthentication(authentication);
+        User user = userHelper.findUserWithAuthentication(authentication);
         Wallet wallet = user.getWallet();
         Long currentBalance = wallet.getBalance();
         Long transactionAmount = dto.getAmount();

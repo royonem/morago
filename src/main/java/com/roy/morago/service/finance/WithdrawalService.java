@@ -11,6 +11,7 @@ import com.roy.morago.enums.WithdrawalStatus;
 import com.roy.morago.exception.finance.*;
 import com.roy.morago.mapper.WithdrawalRequestMapper;
 import com.roy.morago.repository.finance.WithdrawalRequestRepository;
+import com.roy.morago.service.user.UserHelper;
 import com.roy.morago.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -23,12 +24,12 @@ import java.time.LocalDateTime;
 public class WithdrawalService {
     private final WithdrawalRequestMapper mapper;
     private final TransactionService transactionService;
-    private final UserService userService;
+    private final UserHelper userHelper;
     private final WithdrawalRequestRepository withdrawalRequestRepository;
 
     @Transactional
     public WithdrawalRequestResponse createWithdrawalRequest(WithdrawalRequestDTO dto, Authentication authentication) {
-        User user = userService.findUserWithAuthentication(authentication);
+        User user = userHelper.findUserWithAuthentication(authentication);
         Wallet wallet = user.getWallet();
         checkExistingPendingWithdrawal(user);
 
@@ -85,7 +86,7 @@ public class WithdrawalService {
     }
 
     private void logReview(WithdrawalRequest request, Authentication adminAuth) {
-        request.setReviewer(userService.findUserWithAuthentication(adminAuth));
+        request.setReviewer(userHelper.findUserWithAuthentication(adminAuth));
         request.setReviewedAt(LocalDateTime.now());
     }
 

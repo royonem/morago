@@ -30,7 +30,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users/{id}")
     public UserResponse getUser(@PathVariable Long id) {
-        return userService.getUserById(id);
+        return userService.getUser(id);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
