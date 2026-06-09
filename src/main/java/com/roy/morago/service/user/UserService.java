@@ -31,12 +31,12 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(Long id, UpdateUserRequest userDto) {
+    public void updateUser(Long id, UpdateUserRequest updateUserRequest) {
         User user = helper.findUserById(id);
-        userMapper.updateUserFromDto(userDto, user);
+        userMapper.updateUserFromDto(updateUserRequest, user);
 
-        if (userDto.getLanguages() != null) {
-            Set<Language> languages = languageRepository.findAllByNameIn(userDto.getLanguages());
+        if (updateUserRequest.languages() != null) {
+            Set<Language> languages = languageRepository.findAllByNameIn(updateUserRequest.languages());
             user.setLanguages(languages);
         }
         userRepository.save(user);
