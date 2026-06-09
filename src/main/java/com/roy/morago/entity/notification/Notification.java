@@ -26,8 +26,6 @@ public class Notification extends BaseEntity {
     @Column(nullable = false)
     private Boolean isRead = false;
     @Column
-    private LocalDateTime scheduledFor;
-    @Column
     private LocalDateTime sentAt;
     @Column
     private LocalDateTime readAt;
