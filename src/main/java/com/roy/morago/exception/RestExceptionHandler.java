@@ -208,4 +208,11 @@ public class RestExceptionHandler {
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
+
+    @ExceptionHandler(LanguageNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleLanguageNotFound(LanguageNotFoundException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
 }
