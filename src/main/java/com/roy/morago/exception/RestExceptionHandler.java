@@ -7,6 +7,7 @@ import com.roy.morago.exception.file.FileValidationException;
 import com.roy.morago.exception.finance.*;
 import com.roy.morago.exception.notification.AlreadySentNotificationException;
 import com.roy.morago.exception.notification.NotificationNotFoundException;
+import com.roy.morago.exception.notification.UnauthorizedNotificationException;
 import com.roy.morago.exception.topic.*;
 import com.roy.morago.exception.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -199,5 +200,12 @@ public class RestExceptionHandler {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(UnauthorizedNotificationException.class)
+    public ResponseEntity<Map<String, String>> handleUnauthorizedNotification(UnauthorizedNotificationException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 }
