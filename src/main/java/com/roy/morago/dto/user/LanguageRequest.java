@@ -1,3 +1,5 @@
 package com.roy.morago.dto.user;
 
-public record LanguageRequest(String name) { }
+import jakarta.validation.constraints.NotBlank;
+
+public record LanguageRequest(@NotBlank String name) { }
