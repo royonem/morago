@@ -24,7 +24,7 @@ public class Notification extends BaseEntity {
     @Column
     private String actionUrl;
     @Column(nullable = false)
-    private Boolean isRead = false;
+    private Boolean isRead;
     @Column
     private LocalDateTime sentAt;
     @Column
