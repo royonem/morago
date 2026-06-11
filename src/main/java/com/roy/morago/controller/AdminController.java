@@ -2,15 +2,21 @@ package com.roy.morago.controller;
 
 import com.roy.morago.dto.notification.NotificationRequest;
 import com.roy.morago.dto.notification.NotificationResponse;
+import com.roy.morago.dto.file.FileDTO;
+import com.roy.morago.dto.user.LanguageRequest;
+import com.roy.morago.dto.user.LanguageResponse;
 import com.roy.morago.dto.user.UpdateUserRequest;
 import com.roy.morago.dto.user.UserResponse;
 import com.roy.morago.service.notification.NotificationService;
+import com.roy.morago.service.file.FileService;
+import com.roy.morago.service.user.LanguageService;
 import com.roy.morago.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,6 +25,8 @@ import java.util.List;
 @RequestMapping("/api/admin")
 public class AdminController {
     private final UserService userService;
+    private final FileService fileService;
+    private final LanguageService languageService;
     private final NotificationService notificationService;
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -44,6 +52,45 @@ public class AdminController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/topics/icon")
+    @ResponseStatus(HttpStatus.CREATED)
+    public FileDTO uploadIcon(@RequestParam MultipartFile icon) {
+        return fileService.uploadTopicIcon(icon);
+    }
+
+    @GetMapping("/topics/icon/{id}")
+    public FileDTO viewIcon(@PathVariable Long id) {
+        return fileService.viewFile(id);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/topics/{id}/icon")
+    public void saveIcon(@PathVariable Long id, @RequestParam Long iconId) {
+        fileService.saveTopicIcon(id, iconId);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/topics/{id}/icon")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteIcon(@PathVariable Long id) {
+        fileService.deleteTopicIcon(id);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/languages")
+    @ResponseStatus(HttpStatus.CREATED)
+    public LanguageResponse createLanguage(@Valid @RequestBody LanguageRequest request) {
+        return languageService.createLanguage(request);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/languages/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLanguage(@PathVariable Long id) {
+        languageService.deleteLanguage(id);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
