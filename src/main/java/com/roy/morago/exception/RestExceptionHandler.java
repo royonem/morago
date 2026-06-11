@@ -1,6 +1,10 @@
 package com.roy.morago.exception;
 
 import com.roy.morago.exception.finance.*;
+import com.roy.morago.exception.topic.CategoryNotFoundException;
+import com.roy.morago.exception.topic.DuplicateCategoryNameException;
+import com.roy.morago.exception.topic.DuplicateTopicNameException;
+import com.roy.morago.exception.topic.TopicNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -149,5 +153,33 @@ public class RestExceptionHandler {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCategoryNotFound(CategoryNotFoundException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(DuplicateCategoryNameException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicateCategoryName(DuplicateCategoryNameException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(TopicNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleTopicNotFound(TopicNotFoundException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(DuplicateTopicNameException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicateTopicName(DuplicateTopicNameException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 }
