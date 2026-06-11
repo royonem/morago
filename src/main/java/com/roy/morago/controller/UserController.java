@@ -29,11 +29,6 @@ public class UserController {
         return fileService.uploadProfilePicture(picture);
     }
 
-    @GetMapping("/profile-picture/{id}")
-    public FileDTO viewIcon(@PathVariable Long id) {
-        return fileService.viewFile(id);
-    }
-
     @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @PutMapping("/{id}/profile-picture")
     public void saveProfilePicture(@PathVariable Long id, @RequestParam Long pictureId) {

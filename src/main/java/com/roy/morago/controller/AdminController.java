@@ -61,11 +61,6 @@ public class AdminController {
         return fileService.uploadTopicIcon(icon);
     }
 
-    @GetMapping("/topics/icon/{id}")
-    public FileDTO viewIcon(@PathVariable Long id) {
-        return fileService.viewFile(id);
-    }
-
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/topics/{id}/icon")
     public void saveIcon(@PathVariable Long id, @RequestParam Long iconId) {
