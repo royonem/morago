@@ -21,8 +21,8 @@ public class TopicService {
 
     @Transactional
     public TopicResponse createTopic(TopicRequest dto) {
-        topicHelper.checkDuplicateTopics(dto.getName());
         Topic topic = new Topic();
+        topicHelper.checkDuplicateTopics(dto.getName());
         topic.setName(dto.getName());
         topic.setActive(dto.getActive());
         if (dto.getCategoryId() != null) {
@@ -52,8 +52,8 @@ public class TopicService {
 
     @Transactional
     public TopicResponse updateTopic(Long id, TopicRequest dto) {
-        topicHelper.checkDuplicateTopics(dto.getName());
         Topic topic = topicHelper.findTopicById(id);
+        topicHelper.checkDuplicateTopicsForUpdate(topic, dto.getName());
         topic.setName(dto.getName());
         if (dto.getCategoryId() != null) {
             topic.setCategory(topicHelper.findCategoryById(dto.getCategoryId()));

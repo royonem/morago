@@ -20,13 +20,31 @@ public class TopicHelper {
     private final TopicRepository topicRepository;
 
     protected void checkDuplicateTopics(String name) {
-        if (topicRepository.existByNameIgnoreCase(name)) {
+        boolean exists = topicRepository.existsByNameIgnoreCase(name);
+        if (exists) {
+            throw new DuplicateTopicNameException("Topic with name " + name + " already exists");
+        }
+    }
+
+    protected void checkDuplicateTopicsForUpdate(Topic topic, String name) {
+        boolean exists = topicRepository.existsByNameIgnoreCase(name);
+        boolean differentName = !(topic.getName().equalsIgnoreCase(name));
+        if (exists && differentName) {
             throw new DuplicateTopicNameException("Topic with name " + name + " already exists");
         }
     }
 
     protected void checkDuplicateCategories(String name) {
-        if (categoryRepository.existByNameIgnoreCase(name)) {
+        boolean exists = categoryRepository.existsByNameIgnoreCase(name);
+        if (exists) {
+            throw new DuplicateCategoryNameException("Category with name " + name + " already exists");
+        }
+    }
+
+    protected void checkDuplicateCategoriesForUpdate(Category category, String name) {
+        boolean exists = categoryRepository.existsByNameIgnoreCase(name);
+        boolean differentName = !(category.getName().equalsIgnoreCase(name));
+        if (exists && differentName) {
             throw new DuplicateCategoryNameException("Category with name " + name + " already exists");
         }
     }
@@ -34,7 +52,10 @@ public class TopicHelper {
     protected TopicResponse createTopicResponse(Topic topic) {
         TopicResponse response = new TopicResponse();
         response.setId(topic.getId());
+        response.setCategoryId(topic.getCategory() != null ? topic.getCategory().getId() : null);
         response.setName(topic.getName());
+        response.setIconId(topic.getIcon() != null ? topic.getIcon().getId() : null);
+        response.setActive(topic.getActive());
         return response;
     }
 

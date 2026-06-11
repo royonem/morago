@@ -42,8 +42,8 @@ public class CategoryService {
 
     @Transactional
     public CategoryDTO updateCategory(Long id, CategoryDTO dto) {
-        topicHelper.checkDuplicateCategories(dto.getName());
         Category category = topicHelper.findCategoryById(id);
+        topicHelper.checkDuplicateCategoriesForUpdate(category, dto.getName());
         category.setName(dto.getName());
         category.setActive(dto.getActive());
         return topicHelper.createCategoryDTO(category);
