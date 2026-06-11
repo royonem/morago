@@ -31,7 +31,7 @@ public class Call extends BaseEntity {
     private Topic topic;
 
     @Column(nullable = false)
-    private Integer cost;
+    private Long cost;
     @Column(nullable = false)
     private CallStatus status;
     @Column
