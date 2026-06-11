@@ -3,6 +3,7 @@ package com.roy.morago.service.finance;
 import com.roy.morago.dto.finance.RejectWithdrawalDTO;
 import com.roy.morago.dto.finance.WithdrawalRequestDTO;
 import com.roy.morago.dto.finance.WithdrawalRequestResponse;
+import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.finance.WithdrawalRequest;
 import com.roy.morago.entity.user.User;
@@ -10,6 +11,7 @@ import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.WithdrawalStatus;
 import com.roy.morago.exception.finance.*;
 import com.roy.morago.mapper.WithdrawalRequestMapper;
+import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WithdrawalRequestRepository;
 import com.roy.morago.service.user.UserHelper;
 import com.roy.morago.service.user.UserService;
@@ -26,6 +28,8 @@ public class WithdrawalService {
     private final TransactionService transactionService;
     private final UserHelper userHelper;
     private final WithdrawalRequestRepository withdrawalRequestRepository;
+    private final TransactionHelper transactionHelper;
+    private final TransactionRepository transactionRepository;
 
     @Transactional
     public WithdrawalRequestResponse createWithdrawalRequest(WithdrawalRequestDTO dto, Authentication authentication) {
@@ -40,7 +44,8 @@ public class WithdrawalService {
         request.setWallet(wallet);
         request.setRequester(user);
 
-        transactionService.createWithdrawalTransaction(request, user);
+        Transaction transaction = transactionHelper.createWithdrawalTransaction(request, user);
+        transactionRepository.save(transaction);
         withdrawalRequestRepository.save(request);
 
         return mapper.createWithdrawalRequestResponse(request);
@@ -66,7 +71,7 @@ public class WithdrawalService {
         logReview(request, adminAuth);
         request.setRejectionReason(rejectionDTO.rejectionReason());
         request.setStatus(WithdrawalStatus.REJECTED);
-        transactionService.failTransaction(request.getTransaction().getId());
+        transactionHelper.failTransaction(request.getTransaction());
     }
 
     @Transactional
@@ -80,8 +85,8 @@ public class WithdrawalService {
 
         request.setStatus(WithdrawalStatus.APPROVED);
 
-        transactionService.processTransaction(request.getTransaction().getId());
-        transactionService.validateTransactionIsPaid(request.getTransaction().getId());
+        transactionHelper.processTransaction(request.getTransaction());
+        transactionHelper.validateTransactionIsPaid(request.getTransaction());
         request.setPaidAt(LocalDateTime.now());
     }
 
