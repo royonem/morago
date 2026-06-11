@@ -4,5 +4,5 @@ import com.roy.morago.entity.topic.Topic;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TopicRepository extends JpaRepository<Topic, Long> {
-    boolean existByNameIgnoreCase(String name);
+    boolean existsByNameIgnoreCase(String name);
 }
