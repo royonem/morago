@@ -33,13 +33,12 @@ public class UserService {
     @Transactional
     public void updateUser(Long id, UpdateUserRequest updateUserRequest) {
         User user = helper.findUserById(id);
-        userMapper.updateUserFromDto(updateUserRequest, user);
 
         if (updateUserRequest.languages() != null) {
             Set<Language> languages = languageRepository.findAllByNameIn(updateUserRequest.languages());
             user.setLanguages(languages);
         }
-        userRepository.save(user);
+        userMapper.updateUserFromDto(updateUserRequest, user);
     }
 
     @Transactional
