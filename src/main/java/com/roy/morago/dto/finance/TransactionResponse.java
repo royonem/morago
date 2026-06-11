@@ -11,5 +11,6 @@ public record TransactionResponse(
      Long amount,
      CurrencyCode currencyCode,
      TransactionStatus status,
-     LocalDateTime createdAt
+     LocalDateTime createdAt,
+     LocalDateTime processedAt
 ) { }
