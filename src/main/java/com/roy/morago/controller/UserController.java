@@ -1,8 +1,7 @@
 package com.roy.morago.controller;
 
-import com.roy.morago.dto.file.FileDTO;
+import com.roy.morago.dto.file.FileResponse;
 import com.roy.morago.dto.notification.NotificationResponse;
-import com.roy.morago.entity.user.Language;
 import com.roy.morago.service.file.FileService;
 import com.roy.morago.service.notification.NotificationService;
 import com.roy.morago.service.user.LanguageService;
@@ -25,7 +24,7 @@ public class UserController {
     @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @PostMapping("/{id}/profile-picture")
     @ResponseStatus(HttpStatus.CREATED)
-    public FileDTO uploadProfilePicture(@PathVariable Long id, @RequestParam MultipartFile picture) {
+    public FileResponse uploadProfilePicture(@PathVariable Long id, @RequestParam MultipartFile picture) {
         return fileService.uploadProfilePicture(picture);
     }
 

@@ -1,8 +1,8 @@
 package com.roy.morago.controller;
 
+import com.roy.morago.dto.file.FileResponse;
 import com.roy.morago.dto.notification.NotificationRequest;
 import com.roy.morago.dto.notification.NotificationResponse;
-import com.roy.morago.dto.file.FileDTO;
 import com.roy.morago.dto.user.LanguageRequest;
 import com.roy.morago.dto.user.LanguageResponse;
 import com.roy.morago.dto.user.UpdateUserRequest;
@@ -57,7 +57,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/topics/icon")
     @ResponseStatus(HttpStatus.CREATED)
-    public FileDTO uploadIcon(@RequestParam MultipartFile icon) {
+    public FileResponse uploadIcon(@RequestParam MultipartFile icon) {
         return fileService.uploadTopicIcon(icon);
     }
 

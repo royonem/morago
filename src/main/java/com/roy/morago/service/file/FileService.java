@@ -1,6 +1,6 @@
 package com.roy.morago.service.file;
 
-import com.roy.morago.dto.file.FileDTO;
+import com.roy.morago.dto.file.FileResponse;
 import com.roy.morago.entity.file.File;
 import com.roy.morago.entity.topic.Topic;
 import com.roy.morago.entity.user.User;
@@ -29,18 +29,18 @@ public class FileService {
     private final TopicRepository topicRepository;
 
     @Transactional
-    public FileDTO uploadProfilePicture(MultipartFile file) {
+    public FileResponse uploadProfilePicture(MultipartFile file) {
         return fileHelper.uploadFile(file, FilePurpose.PICTURE);
     }
 
     @Transactional
-    public FileDTO uploadTopicIcon(MultipartFile file) {
+    public FileResponse uploadTopicIcon(MultipartFile file) {
         return fileHelper.uploadFile(file, FilePurpose.ICON);
     }
 
     @Transactional(readOnly = true)
-    public FileDTO viewFile(Long fileId) {
-        return fileMapper.createFileDTOFromEntity(fileHelper.findFileById(fileId));
+    public FileResponse viewFile(Long fileId) {
+        return fileMapper.createResponseFromEntity(fileHelper.findFileById(fileId));
     }
 
     @Transactional

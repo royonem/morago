@@ -1,6 +1,6 @@
 package com.roy.morago.controller.topic;
 
-import com.roy.morago.dto.file.FileDTO;
+import com.roy.morago.dto.file.FileResponse;
 import com.roy.morago.dto.topic.TopicRequest;
 import com.roy.morago.dto.topic.TopicResponse;
 import com.roy.morago.service.file.FileService;
@@ -54,12 +54,12 @@ public class TopicController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/icon")
     @ResponseStatus(HttpStatus.CREATED)
-    public FileDTO uploadIcon(@RequestParam MultipartFile icon) {
+    public FileResponse uploadIcon(@RequestParam MultipartFile icon) {
         return fileService.uploadTopicIcon(icon);
     }
 
     @GetMapping("/icon/{id}")
-    public FileDTO viewIcon(@PathVariable Long id) {
+    public FileResponse viewIcon(@PathVariable Long id) {
         return fileService.viewFile(id);
     }
 

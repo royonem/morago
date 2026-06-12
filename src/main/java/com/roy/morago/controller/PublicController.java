@@ -1,6 +1,6 @@
 package com.roy.morago.controller;
 
-import com.roy.morago.dto.file.FileDTO;
+import com.roy.morago.dto.file.FileResponse;
 import com.roy.morago.dto.user.LanguageResponse;
 import com.roy.morago.service.file.FileService;
 import com.roy.morago.service.user.LanguageService;
@@ -20,12 +20,12 @@ public class PublicController {
     private final FileService fileService;
 
     @GetMapping("/profile-picture/{id}")
-    public FileDTO viewProfilePicture(@PathVariable Long id) {
+    public FileResponse viewProfilePicture(@PathVariable Long id) {
         return fileService.viewFile(id);
     }
 
     @GetMapping("/topics/icon/{id}")
-    public FileDTO viewIcon(@PathVariable Long id) {
+    public FileResponse viewIcon(@PathVariable Long id) {
         return fileService.viewFile(id);
     }
 
