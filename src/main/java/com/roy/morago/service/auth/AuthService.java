@@ -24,6 +24,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -61,11 +63,13 @@ public class AuthService {
         return new LoginResponse(token);
     }
 
+    @Transactional
     public void registerClient(RegisterClientRequest dto) {
         User client = userMapper.createUserFromDto(dto);
         register(client, dto.getPassword(), dto.getConfirmPassword(), roleService.getClientRole());
     }
 
+    @Transactional
     public void registerTranslator(RegisterTranslatorRequest dto) {
         User translator = userMapper.createUserFromDto(dto);
         register(translator, dto.getPassword(), dto.getConfirmPassword(), roleService.getTranslatorRole());
