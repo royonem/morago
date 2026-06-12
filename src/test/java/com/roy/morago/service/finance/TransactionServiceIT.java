@@ -53,27 +53,27 @@ public class TransactionServiceIT {
     @Test
     void testCreateDepositTransaction() {
         testTransaction = setUpHelper.createTestTransaction(TransactionType.DEPOSIT, 500L);
-        verificationHelper.verifyBalance(1500L, testWallet);
-        verificationHelper.verifyStatus(TransactionStatus.PAID, testTransaction);
-        verificationHelper.verifyProcessed(Boolean.TRUE, testTransaction);
+        verificationHelper.verifyWalletBalance(1500L, testWallet);
+        verificationHelper.verifyTransactionStatus(TransactionStatus.PAID, testTransaction);
+        verificationHelper.verifyTransactionIsProcessed(Boolean.TRUE, testTransaction);
     }
 
     @WithMockUser(username = "johndoe@test.com")
     @Test
     void testCreateCallChargeTransaction() {
         testTransaction = setUpHelper.createTestTransaction(TransactionType.CALL_CHARGE, 400L);
-        verificationHelper.verifyBalance(600L, testWallet);
-        verificationHelper.verifyStatus(TransactionStatus.PAID, testTransaction);
-        verificationHelper.verifyProcessed(Boolean.TRUE, testTransaction);
+        verificationHelper.verifyWalletBalance(600L, testWallet);
+        verificationHelper.verifyTransactionStatus(TransactionStatus.PAID, testTransaction);
+        verificationHelper.verifyTransactionIsProcessed(Boolean.TRUE, testTransaction);
     }
 
     @WithMockUser(username = "johndoe@test.com")
     @Test
     void testCreateCallEarningTransaction() {
         testTransaction = setUpHelper.createTestTransaction(TransactionType.CALL_EARNING, 200L);
-        verificationHelper.verifyBalance(1200L, testWallet);
-        verificationHelper.verifyStatus(TransactionStatus.PAID, testTransaction);
-        verificationHelper.verifyProcessed(Boolean.TRUE, testTransaction);
+        verificationHelper.verifyWalletBalance(1200L, testWallet);
+        verificationHelper.verifyTransactionStatus(TransactionStatus.PAID, testTransaction);
+        verificationHelper.verifyTransactionIsProcessed(Boolean.TRUE, testTransaction);
     }
 
     @WithMockUser(username = "johndoe@test.com")
@@ -81,9 +81,9 @@ public class TransactionServiceIT {
     void testCancelTransaction() {
         testTransaction = setUpHelper.createPendingTestTransaction(TransactionType.DEPOSIT, 400L, testWallet);
         transactionService.cancelTransaction(testTransaction.getId());
-        verificationHelper.verifyStatus(TransactionStatus.CANCELED, testTransaction);
-        verificationHelper.verifyBalance(1000L, testWallet);
-        verificationHelper.verifyProcessed(Boolean.FALSE, testTransaction);
+        verificationHelper.verifyTransactionStatus(TransactionStatus.CANCELED, testTransaction);
+        verificationHelper.verifyWalletBalance(1000L, testWallet);
+        verificationHelper.verifyTransactionIsProcessed(Boolean.FALSE, testTransaction);
     }
 
     @WithMockUser(username = "johndoe@test.com")
@@ -93,7 +93,7 @@ public class TransactionServiceIT {
         TransactionResponse response = transactionService.getTransaction(testTransaction.getId());
         assertThat(response.id()).isEqualTo(testTransaction.getId());
         assertThat(response.amount()).isEqualTo(500L);
-        verificationHelper.verifyStatus(TransactionStatus.PAID,  testTransaction);
+        verificationHelper.verifyTransactionStatus(TransactionStatus.PAID,  testTransaction);
     }
 
     @WithMockUser(username = "johndoe@test.com")

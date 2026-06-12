@@ -6,7 +6,7 @@ import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CurrencyCode;
 import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.TransactionType;
-import com.roy.morago.repository.finance.TransactionRepository;
+import com.roy.morago.enums.WalletStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,17 +36,22 @@ public class VerificationHelper {
         assertNotNull(transaction.getCreatedAt());
     }
 
-    public void verifyStatus(TransactionStatus expectedStatus, Transaction testTransaction) {
+    public void verifyTransactionStatus(TransactionStatus expectedStatus, Transaction testTransaction) {
         Transaction freshTransaction = transactionHelper.findTransaction(testTransaction.getId());
         assertThat(freshTransaction.getStatus()).isEqualTo(expectedStatus);
     }
 
-    public void verifyBalance(Long expectedBalance, Wallet testWallet) {
-        Wallet fresh = walletService.findWalletById(testWallet.getId());
-        assertThat(fresh.getBalance()).isEqualTo(expectedBalance);
+    public void verifyWalletStatus(WalletStatus expectedStatus, Wallet testWallet) {
+        Wallet freshWallet = walletService.findWalletById(testWallet.getId());
+        assertThat(freshWallet.getStatus()).isEqualTo(expectedStatus);
     }
 
-    public void verifyProcessed(Boolean processed, Transaction testTransaction) {
+    public void verifyWalletBalance(Long expectedBalance, Wallet testWallet) {
+        Wallet freshWallet = walletService.findWalletById(testWallet.getId());
+        assertThat(freshWallet.getBalance()).isEqualTo(expectedBalance);
+    }
+
+    public void verifyTransactionIsProcessed(Boolean processed, Transaction testTransaction) {
         Transaction freshTransaction = transactionHelper.findTransaction(testTransaction.getId());
         if (processed) {
             assertThat(freshTransaction.getProcessedAt()).isNotNull();
