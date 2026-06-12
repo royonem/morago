@@ -8,7 +8,7 @@ import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.TransactionType;
 import com.roy.morago.mapper.TransactionMapper;
 import com.roy.morago.repository.finance.TransactionRepository;
-import com.roy.morago.service.user.UserService;
+import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -21,12 +21,12 @@ import java.util.List;
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
-    private final UserService userService;
     private final TransactionHelper helper;
+    private final UserHelper userHelper;
 
     @Transactional
     public TransactionResponse createTransaction(TransactionRequest dto, Authentication authentication) {
-        User user = userService.findUserWithAuthentication(authentication);
+        User user = userHelper.findUserWithAuthentication(authentication);
 
         Transaction transaction = helper.createTransactionEntity(user, dto);
 
