@@ -145,7 +145,7 @@ public class WalletServiceIT {
 
     @Test
     void testGetWallet_ById_success() {
-        WalletDTO result = walletService.getWalletById(testWallet.getId());
+        WalletDTO result = walletService.getWallet(testWallet.getId());
 
         assertThat(result.getBalance()).isEqualTo(0L);
         assertThat(result.getCurrencyCode()).isEqualTo(CurrencyCode.KRW);
@@ -154,7 +154,7 @@ public class WalletServiceIT {
 
     @Test
     void testGetWallet_ById_notFound_throwsException() {
-        assertThatThrownBy(() -> walletService.getWalletById(-1L))
+        assertThatThrownBy(() -> walletService.getWallet(-1L))
                 .isInstanceOf(WalletNotFoundException.class);
     }
 }

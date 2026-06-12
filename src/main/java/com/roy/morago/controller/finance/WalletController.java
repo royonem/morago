@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/wallet")
@@ -36,7 +34,7 @@ public class WalletController {
     @PreAuthorize("hasRole('ADMIN') or @securityService.isWalletOwner(#id, authentication)")
     @GetMapping("/{id}")
     public WalletDTO getWallet(@PathVariable Long id) {
-        return walletService.getWalletById(id);
+        return walletService.getWallet(id);
     }
 
     @PreAuthorize("hasRole('ADMIN') or @securityService.isWalletOwner(#id, authentication)")
