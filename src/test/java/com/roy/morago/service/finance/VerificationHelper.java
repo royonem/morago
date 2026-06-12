@@ -16,8 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Component
 public class VerificationHelper {
     @Autowired
-    private WalletService walletService;
-    @Autowired
     private FinanceHelper financeHelper;
 
     public void verifyTransaction(Transaction transaction, TransactionType type, Long amount, User testClient, Wallet testWallet) {
@@ -42,12 +40,12 @@ public class VerificationHelper {
     }
 
     public void verifyWalletStatus(WalletStatus expectedStatus, Wallet testWallet) {
-        Wallet freshWallet = walletService.findWalletById(testWallet.getId());
+        Wallet freshWallet = financeHelper.findWalletById(testWallet.getId());
         assertThat(freshWallet.getStatus()).isEqualTo(expectedStatus);
     }
 
     public void verifyWalletBalance(Long expectedBalance, Wallet testWallet) {
-        Wallet freshWallet = walletService.findWalletById(testWallet.getId());
+        Wallet freshWallet = financeHelper.findWalletById(testWallet.getId());
         assertThat(freshWallet.getBalance()).isEqualTo(expectedBalance);
     }
 
