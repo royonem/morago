@@ -6,8 +6,8 @@ import com.roy.morago.entity.topic.Topic;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.FilePurpose;
 import com.roy.morago.enums.FileStatus;
-import com.roy.morago.exception.FileNotFoundException;
-import com.roy.morago.exception.FileValidationException;
+import com.roy.morago.exception.file.FileNotFoundException;
+import com.roy.morago.exception.file.FileValidationException;
 import com.roy.morago.mapper.FileMapper;
 import com.roy.morago.repository.file.FileRepository;
 

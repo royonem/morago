@@ -3,7 +3,7 @@ package com.roy.morago.service.file;
 import com.roy.morago.configs.FileProperties;
 import com.roy.morago.entity.file.File;
 import com.roy.morago.enums.FilePurpose;
-import com.roy.morago.exception.FileStorageException;
+import com.roy.morago.exception.file.FileStorageException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

@@ -4,7 +4,7 @@ import com.roy.morago.dto.user.UpdateUserRequest;
 import com.roy.morago.dto.user.UserResponse;
 import com.roy.morago.entity.user.Language;
 import com.roy.morago.entity.user.User;
-import com.roy.morago.exception.UserNotFoundException;
+import com.roy.morago.exception.user.UserNotFoundException;
 import com.roy.morago.mapper.UserMapper;
 import com.roy.morago.repository.user.LanguageRepository;
 import com.roy.morago.repository.user.UserRepository;

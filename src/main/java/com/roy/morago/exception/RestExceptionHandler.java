@@ -1,10 +1,15 @@
 package com.roy.morago.exception;
 
+import com.roy.morago.exception.auth.*;
+import com.roy.morago.exception.file.FileNotFoundException;
+import com.roy.morago.exception.file.FileStorageException;
+import com.roy.morago.exception.file.FileValidationException;
 import com.roy.morago.exception.finance.*;
-import com.roy.morago.exception.topic.CategoryNotFoundException;
-import com.roy.morago.exception.topic.DuplicateCategoryNameException;
-import com.roy.morago.exception.topic.DuplicateTopicNameException;
-import com.roy.morago.exception.topic.TopicNotFoundException;
+import com.roy.morago.exception.notification.AlreadySentNotificationException;
+import com.roy.morago.exception.notification.NotificationNotFoundException;
+import com.roy.morago.exception.notification.UnauthorizedNotificationException;
+import com.roy.morago.exception.topic.*;
+import com.roy.morago.exception.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -181,5 +186,26 @@ public class RestExceptionHandler {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(NotificationNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNotificationNotFound(NotificationNotFoundException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(AlreadySentNotificationException.class)
+    public ResponseEntity<Map<String, String>> handleAlreadySentNotification(AlreadySentNotificationException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(UnauthorizedNotificationException.class)
+    public ResponseEntity<Map<String, String>> handleUnauthorizedNotification(UnauthorizedNotificationException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 }

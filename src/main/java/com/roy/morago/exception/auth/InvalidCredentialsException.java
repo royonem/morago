@@ -1,4 +1,4 @@
-package com.roy.morago.exception;
+package com.roy.morago.exception.auth;
 
 public class InvalidCredentialsException extends RuntimeException {
     public InvalidCredentialsException() { super(); }

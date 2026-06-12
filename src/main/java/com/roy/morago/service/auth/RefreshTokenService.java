@@ -2,7 +2,7 @@ package com.roy.morago.service.auth;
 
 import com.roy.morago.entity.auth.RefreshToken;
 import com.roy.morago.entity.user.User;
-import com.roy.morago.exception.InvalidRefreshTokenException;
+import com.roy.morago.exception.auth.InvalidRefreshTokenException;
 import com.roy.morago.repository.auth.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

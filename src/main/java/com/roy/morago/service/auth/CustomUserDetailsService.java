@@ -1,7 +1,7 @@
 package com.roy.morago.service.auth;
 
 import com.roy.morago.entity.user.User;
-import com.roy.morago.exception.UserNotFoundException;
+import com.roy.morago.exception.user.UserNotFoundException;
 import com.roy.morago.repository.user.UserRepository;
 import com.roy.morago.security.UserPrincipal;
 import lombok.AllArgsConstructor;
