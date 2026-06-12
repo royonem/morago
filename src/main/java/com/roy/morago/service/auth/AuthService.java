@@ -10,13 +10,12 @@ import com.roy.morago.enums.CurrencyCode;
 import com.roy.morago.exception.auth.InvalidCredentialsException;
 import com.roy.morago.exception.auth.DuplicateEmailException;
 import com.roy.morago.exception.auth.PasswordMismatchException;
-import com.roy.morago.exception.auth.RoleNotFoundException;
 import com.roy.morago.mapper.UserMapper;
-import com.roy.morago.repository.user.RoleRepository;
 import com.roy.morago.repository.user.UserRepository;
 import com.roy.morago.security.JwtProvider;
 import com.roy.morago.security.UserPrincipal;
 import com.roy.morago.service.finance.WalletService;
+import com.roy.morago.service.user.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,9 +34,9 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
     private final UserMapper userMapper;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final WalletService walletService;
+    private final RoleService roleService;
 
     public LoginResponse login(LoginRequest loginRequest) {
         try {
@@ -64,24 +63,22 @@ public class AuthService {
 
     public void registerClient(RegisterClientRequest dto) {
         User client = userMapper.createUserFromDto(dto);
-        register(client, dto.getPassword(), dto.getConfirmPassword(), "ROLE_CLIENT");
+        register(client, dto.getPassword(), dto.getConfirmPassword(), roleService.getClientRole());
     }
 
     public void registerTranslator(RegisterTranslatorRequest dto) {
         User translator = userMapper.createUserFromDto(dto);
-        register(translator, dto.getPassword(), dto.getConfirmPassword(), "ROLE_TRANSLATOR");
+        register(translator, dto.getPassword(), dto.getConfirmPassword(), roleService.getTranslatorRole());
     }
 
-    private void register(User user, String password, String confirmPassword, String role) {
+    private void register(User user, String password, String confirmPassword, Role role) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new DuplicateEmailException("Email already in use.");
         }
         if (!password.equals(confirmPassword)) {
             throw new PasswordMismatchException("Passwords do not match.");
         }
-        Role defaultRole = roleRepository.findByName(role)
-                .orElseThrow(() -> new RoleNotFoundException("Role not found"));
-        user.getRoles().add(defaultRole);
+        user.getRoles().add(role);
         user.setPasswordHash(passwordEncoder.encode(password));
         User savedUser = userRepository.save(user);
         walletService.createWallet(savedUser, CurrencyCode.KRW);
