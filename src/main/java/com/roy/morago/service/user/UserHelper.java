@@ -2,8 +2,8 @@ package com.roy.morago.service.user;
 
 import com.roy.morago.entity.user.Language;
 import com.roy.morago.entity.user.User;
-import com.roy.morago.exception.LanguageNotFoundException;
-import com.roy.morago.exception.UserNotFoundException;
+import com.roy.morago.exception.user.LanguageNotFoundException;
+import com.roy.morago.exception.user.UserNotFoundException;
 import com.roy.morago.repository.user.LanguageRepository;
 import com.roy.morago.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;

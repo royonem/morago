@@ -1,4 +1,4 @@
-package com.roy.morago.exception;
+package com.roy.morago.exception.user;
 
 public class LanguageNotFoundException extends RuntimeException {
     public LanguageNotFoundException(String message) {

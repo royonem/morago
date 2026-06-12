@@ -9,6 +9,7 @@ import com.roy.morago.exception.notification.AlreadySentNotificationException;
 import com.roy.morago.exception.notification.NotificationNotFoundException;
 import com.roy.morago.exception.notification.UnauthorizedNotificationException;
 import com.roy.morago.exception.topic.*;
+import com.roy.morago.exception.user.LanguageNotFoundException;
 import com.roy.morago.exception.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
