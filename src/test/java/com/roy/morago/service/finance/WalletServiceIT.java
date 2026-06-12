@@ -5,10 +5,7 @@ import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CurrencyCode;
 import com.roy.morago.enums.WalletStatus;
-import com.roy.morago.exception.finance.DeficientFundsException;
-import com.roy.morago.exception.finance.InvalidTransactionStateException;
-import com.roy.morago.exception.finance.NonPositiveTransactionException;
-import com.roy.morago.exception.finance.WalletNotFoundException;
+import com.roy.morago.exception.finance.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +78,7 @@ public class WalletServiceIT {
     void testSubtractFunds_negativeAmount_throwsException() {
         walletService.addFunds(testWallet.getId(), 500L);
         assertThatThrownBy(() -> walletService.subtractFunds(testWallet.getId(), -100L))
-                .isInstanceOf(InvalidTransactionStateException.class);
+                .isInstanceOf(NonPositiveTransactionException.class);
         verificationHelper.verifyWalletBalance(500L, testWallet);
     }
 
@@ -109,7 +106,7 @@ public class WalletServiceIT {
     void testAddFunds_whenWalletSuspended_throwsException() {
         walletService.suspendWallet(testWallet.getId());
         assertThatThrownBy(() -> walletService.addFunds(testWallet.getId(), 100L))
-                .isInstanceOf(InvalidTransactionStateException.class);
+                .isInstanceOf(NonActiveWalletException.class);
         verificationHelper.verifyWalletBalance(0L, testWallet);
     }
 
@@ -117,7 +114,7 @@ public class WalletServiceIT {
     void testSubtractFunds_whenWalletSuspended_throwsException() {
         walletService.suspendWallet(testWallet.getId());
         assertThatThrownBy(() -> walletService.subtractFunds(testWallet.getId(), 100L))
-                .isInstanceOf(InvalidTransactionStateException.class);
+                .isInstanceOf(NonActiveWalletException.class);
         verificationHelper.verifyWalletBalance(0L, testWallet);
     }
 
@@ -131,7 +128,7 @@ public class WalletServiceIT {
     void testAddFunds_whenWalletBlocked_throwsException() {
         walletService.blockWallet(testWallet.getId());
         assertThatThrownBy(() -> walletService.addFunds(testWallet.getId(), 100L))
-                .isInstanceOf(InvalidTransactionStateException.class);
+                .isInstanceOf(NonActiveWalletException.class);
         verificationHelper.verifyWalletBalance(0L, testWallet);
     }
 
@@ -139,7 +136,7 @@ public class WalletServiceIT {
     void testSubtractFunds_whenWalletBlocked_throwsException() {
         walletService.blockWallet(testWallet.getId());
         assertThatThrownBy(() -> walletService.subtractFunds(testWallet.getId(), 100L))
-                .isInstanceOf(InvalidTransactionStateException.class);
+                .isInstanceOf(NonActiveWalletException.class);
         verificationHelper.verifyWalletBalance(0L, testWallet);
     }
 
