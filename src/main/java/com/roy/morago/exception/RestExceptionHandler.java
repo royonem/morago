@@ -206,6 +206,6 @@ public class RestExceptionHandler {
     public ResponseEntity<Map<String, String>> handleUnauthorizedNotification(UnauthorizedNotificationException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 }
