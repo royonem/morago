@@ -1,6 +1,7 @@
 package com.roy.morago.service.finance;
 
 import com.roy.morago.dto.finance.TransactionRequest;
+import com.roy.morago.entity.finance.BankAccount;
 import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.finance.WithdrawalRequest;
@@ -10,6 +11,7 @@ import com.roy.morago.enums.TransactionType;
 import com.roy.morago.enums.WalletStatus;
 import com.roy.morago.exception.finance.*;
 import com.roy.morago.mapper.TransactionMapper;
+import com.roy.morago.repository.finance.BankRepository;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class FinanceHelper {
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
     private final WalletRepository walletRepository;
+    private final BankRepository bankRepository;
 
     // Find Helpers
     protected Transaction findTransactionById(Long id) {
@@ -34,6 +37,11 @@ public class FinanceHelper {
     protected Wallet findWalletById(Long id) {
         return walletRepository.findById(id)
                 .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
+    }
+
+    protected BankAccount findBankAccountById(Long id) {
+        return bankRepository.findById(id).orElseThrow(()
+                -> new BankNotFoundException("Bank account not found"));
     }
 
     // Transaction Helpers

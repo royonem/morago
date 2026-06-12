@@ -24,7 +24,7 @@ public class BankController {
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isBankAccountOwner(#id, authentication)")
     public BankAccountDTO getBankAccount(@PathVariable Long id) {
-        return bankService.getBankAccountById(id);
+        return bankService.getBankAccount(id);
     }
 
     @DeleteMapping("/{id}/unlink")
