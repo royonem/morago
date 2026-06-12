@@ -21,7 +21,7 @@ import java.util.List;
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
-    private final TransactionHelper helper;
+    private final FinanceHelper helper;
     private final UserHelper userHelper;
 
     @Transactional

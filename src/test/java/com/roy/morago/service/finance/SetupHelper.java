@@ -26,7 +26,7 @@ public class SetupHelper {
     @Autowired
     private TransactionRepository transactionRepository;
     @Autowired
-    private TransactionHelper transactionHelper;
+    private FinanceHelper financeHelper;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -91,7 +91,7 @@ public class SetupHelper {
         TransactionRequest testTransactionRequest = createTestTransactionRequest(type, amount);
         TransactionResponse responseDto = transactionService.createTransaction(testTransactionRequest, userAuth);
 
-        Transaction testTransaction = transactionHelper.findTransaction(responseDto.id());
+        Transaction testTransaction = financeHelper.findTransaction(responseDto.id());
         Wallet testWallet = testTransaction.getWallet();
         User testUser = testWallet.getUser();
 
@@ -104,8 +104,8 @@ public class SetupHelper {
         pendingTransaction.setType(type);
         pendingTransaction.setAmount(amount);
         pendingTransaction.setCurrencyCode(CurrencyCode.KRW);
-        pendingTransaction.setDescription(transactionHelper.generateTransactionDescription(type, amount));
-        pendingTransaction.setReference(transactionHelper.generateTransactionReference(type));
+        pendingTransaction.setDescription(financeHelper.generateTransactionDescription(type, amount));
+        pendingTransaction.setReference(financeHelper.generateTransactionReference(type));
         pendingTransaction.setStatus(TransactionStatus.PENDING);
         pendingTransaction.setWallet(testWallet);
         pendingTransaction.setBalanceBefore(testWallet.getBalance());

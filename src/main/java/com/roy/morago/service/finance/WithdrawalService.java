@@ -14,7 +14,6 @@ import com.roy.morago.mapper.WithdrawalRequestMapper;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WithdrawalRequestRepository;
 import com.roy.morago.service.user.UserHelper;
-import com.roy.morago.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ public class WithdrawalService {
     private final TransactionService transactionService;
     private final UserHelper userHelper;
     private final WithdrawalRequestRepository withdrawalRequestRepository;
-    private final TransactionHelper transactionHelper;
+    private final FinanceHelper financeHelper;
     private final TransactionRepository transactionRepository;
 
     @Transactional
@@ -44,7 +43,7 @@ public class WithdrawalService {
         request.setWallet(wallet);
         request.setRequester(user);
 
-        Transaction transaction = transactionHelper.createWithdrawalTransaction(request, user);
+        Transaction transaction = financeHelper.createWithdrawalTransaction(request, user);
         transactionRepository.save(transaction);
         withdrawalRequestRepository.save(request);
 
@@ -71,7 +70,7 @@ public class WithdrawalService {
         logReview(request, adminAuth);
         request.setRejectionReason(rejectionDTO.rejectionReason());
         request.setStatus(WithdrawalStatus.REJECTED);
-        transactionHelper.failTransaction(request.getTransaction());
+        financeHelper.failTransaction(request.getTransaction());
     }
 
     @Transactional
@@ -85,8 +84,8 @@ public class WithdrawalService {
 
         request.setStatus(WithdrawalStatus.APPROVED);
 
-        transactionHelper.processTransaction(request.getTransaction());
-        transactionHelper.validateTransactionIsPaid(request.getTransaction());
+        financeHelper.processTransaction(request.getTransaction());
+        financeHelper.validateTransactionIsPaid(request.getTransaction());
         request.setPaidAt(LocalDateTime.now());
     }
 

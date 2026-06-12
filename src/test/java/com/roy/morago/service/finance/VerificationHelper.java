@@ -18,7 +18,7 @@ public class VerificationHelper {
     @Autowired
     private WalletService walletService;
     @Autowired
-    private TransactionHelper transactionHelper;
+    private FinanceHelper financeHelper;
 
     public void verifyTransaction(Transaction transaction, TransactionType type, Long amount, User testClient, Wallet testWallet) {
         assertNotNull(transaction.getId());
@@ -37,7 +37,7 @@ public class VerificationHelper {
     }
 
     public void verifyTransactionStatus(TransactionStatus expectedStatus, Transaction testTransaction) {
-        Transaction freshTransaction = transactionHelper.findTransaction(testTransaction.getId());
+        Transaction freshTransaction = financeHelper.findTransaction(testTransaction.getId());
         assertThat(freshTransaction.getStatus()).isEqualTo(expectedStatus);
     }
 
@@ -52,7 +52,7 @@ public class VerificationHelper {
     }
 
     public void verifyTransactionIsProcessed(Boolean processed, Transaction testTransaction) {
-        Transaction freshTransaction = transactionHelper.findTransaction(testTransaction.getId());
+        Transaction freshTransaction = financeHelper.findTransaction(testTransaction.getId());
         if (processed) {
             assertThat(freshTransaction.getProcessedAt()).isNotNull();
         } else {

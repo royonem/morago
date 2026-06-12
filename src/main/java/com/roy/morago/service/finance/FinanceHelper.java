@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class TransactionHelper {
+public class FinanceHelper {
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
     private final WalletRepository walletRepository;
