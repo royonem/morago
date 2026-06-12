@@ -17,6 +17,7 @@ import com.roy.morago.repository.finance.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Component
@@ -63,8 +64,8 @@ public class TransactionHelper {
         Wallet wallet = transaction.getWallet();
         wallet.setBalance(transaction.getBalanceAfter());
         walletRepository.save(wallet);
-
         transaction.setStatus(TransactionStatus.PAID);
+        transaction.setProcessedAt(LocalDateTime.now());
     }
 
     protected void failTransaction(Transaction transaction) {
