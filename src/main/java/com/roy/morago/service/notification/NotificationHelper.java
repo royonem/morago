@@ -31,6 +31,7 @@ public class NotificationHelper {
 
     protected NotificationResponse createNotificationResponse(Notification notification) {
         return new NotificationResponse(
+                notification.getId(),
                 notification.getTitle(),
                 notification.getContent(),
                 notification.getActionUrl(),
