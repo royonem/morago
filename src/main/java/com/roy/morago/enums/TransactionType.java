@@ -4,5 +4,5 @@ public enum TransactionType {
     DEPOSIT,
     WITHDRAWAL,
     CALL_CHARGE,
-    CALL_EARNING;
+    CALL_EARNING
 }
