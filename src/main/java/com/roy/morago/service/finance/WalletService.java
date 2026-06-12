@@ -9,6 +9,7 @@ import com.roy.morago.enums.WalletStatus;
 import com.roy.morago.exception.finance.*;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
+import com.roy.morago.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 public class WalletService {
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public void createWallet(User user, CurrencyCode code) {
@@ -28,6 +30,8 @@ public class WalletService {
         wallet.setBalance(0L);
         wallet.setCurrencyCode(code);
         wallet.setStatus(WalletStatus.ACTIVE);
+        user.setWallet(wallet);
+        userRepository.save(user);
         walletRepository.save(wallet);
     }
 
