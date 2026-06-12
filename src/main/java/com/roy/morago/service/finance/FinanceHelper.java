@@ -26,7 +26,7 @@ public class FinanceHelper {
     private final WalletRepository walletRepository;
 
     // Find Helpers
-    protected Transaction findTransaction(Long id) {
+    protected Transaction findTransactionById(Long id) {
         return transactionRepository.findById(id)
                 .orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
     }

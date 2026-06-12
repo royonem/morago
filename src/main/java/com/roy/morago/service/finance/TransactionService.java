@@ -38,7 +38,7 @@ public class TransactionService {
     }
 
     public TransactionResponse getTransaction(Long transactionId) {
-        return transactionMapper.createTransactionResponse(helper.findTransaction(transactionId));
+        return transactionMapper.createTransactionResponse(helper.findTransactionById(transactionId));
     }
 
     public List<TransactionResponse> getAllUserTransactions(Long userId) {
@@ -48,7 +48,7 @@ public class TransactionService {
 
     @Transactional
     public void cancelTransaction(Long id) {
-        Transaction transaction = helper.findTransaction(id);
+        Transaction transaction = helper.findTransactionById(id);
         helper.validateTransactionIsPending(transaction, "Error cancelling non-pending transaction.");
         transaction.setStatus(TransactionStatus.CANCELED);
     }

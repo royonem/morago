@@ -37,7 +37,7 @@ public class VerificationHelper {
     }
 
     public void verifyTransactionStatus(TransactionStatus expectedStatus, Transaction testTransaction) {
-        Transaction freshTransaction = financeHelper.findTransaction(testTransaction.getId());
+        Transaction freshTransaction = financeHelper.findTransactionById(testTransaction.getId());
         assertThat(freshTransaction.getStatus()).isEqualTo(expectedStatus);
     }
 
@@ -52,7 +52,7 @@ public class VerificationHelper {
     }
 
     public void verifyTransactionIsProcessed(Boolean processed, Transaction testTransaction) {
-        Transaction freshTransaction = financeHelper.findTransaction(testTransaction.getId());
+        Transaction freshTransaction = financeHelper.findTransactionById(testTransaction.getId());
         if (processed) {
             assertThat(freshTransaction.getProcessedAt()).isNotNull();
         } else {

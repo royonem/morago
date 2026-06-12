@@ -91,7 +91,7 @@ public class SetupHelper {
         TransactionRequest testTransactionRequest = createTestTransactionRequest(type, amount);
         TransactionResponse responseDto = transactionService.createTransaction(testTransactionRequest, userAuth);
 
-        Transaction testTransaction = financeHelper.findTransaction(responseDto.id());
+        Transaction testTransaction = financeHelper.findTransactionById(responseDto.id());
         Wallet testWallet = testTransaction.getWallet();
         User testUser = testWallet.getUser();
 
