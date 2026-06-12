@@ -4,10 +4,8 @@ import com.roy.morago.dto.finance.WalletDTO;
 import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CurrencyCode;
-import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.WalletStatus;
 import com.roy.morago.exception.finance.*;
-import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
 import com.roy.morago.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
@@ -20,8 +18,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class WalletService {
     private final WalletRepository walletRepository;
-    private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final FinanceHelper helper;
 
     @Transactional
     public void createWallet(User user, CurrencyCode code) {
@@ -35,57 +33,8 @@ public class WalletService {
         walletRepository.save(wallet);
     }
 
-    @Transactional
-    public void suspendWallet(Long id) {
-        Wallet wallet = findWalletById(id);
-        wallet.setStatus(WalletStatus.SUSPENDED);
-    }
-
-    @Transactional
-    public void blockWallet(Long id) {
-        Wallet wallet = findWalletById(id);
-        wallet.setStatus(WalletStatus.BLOCKED);
-    }
-
-    @Transactional
-    public void activateWallet(Long id) {
-        Wallet wallet = findWalletById(id);
-        wallet.setStatus(WalletStatus.ACTIVE);
-    }
-
-    @Transactional
-    public void updateCurrency(Long id, CurrencyCode newCode) {
-        Wallet wallet = findWalletById(id);
-        User user = wallet.getUser();
-        checkPending(user);
-        checkActive(wallet);
-        wallet.setCurrencyCode(newCode);
-    }
-
-    @Transactional
-    public void addFunds(Long id, Long funds) {
-        Wallet wallet = findWalletById(id);
-        User user = wallet.getUser();
-        checkPending(user);
-        checkActive(wallet);
-        checkPositiveMovingFunds(funds);
-        wallet.setBalance(wallet.getBalance() + funds);
-    }
-
-    @Transactional
-    public void subtractFunds(Long id, Long funds) {
-        Wallet wallet = findWalletById(id);
-        User user = wallet.getUser();
-        checkPending(user);
-        checkActive(wallet);
-        checkPositiveMovingFunds(funds);
-        long newBalance = wallet.getBalance() - funds;
-        validateNonNegativeBalance(newBalance);
-        wallet.setBalance(newBalance);
-    }
-
     public WalletDTO getWalletById(Long id) {
-        Wallet wallet = findWalletById(id);
+        Wallet wallet = helper.findWalletById(id);
         WalletDTO walletDTO = new WalletDTO();
         walletDTO.setBalance(wallet.getBalance());
         walletDTO.setCurrencyCode(wallet.getCurrencyCode());
@@ -93,32 +42,53 @@ public class WalletService {
         return walletDTO;
     }
 
-    private Wallet findWalletById(Long id) {
-        return walletRepository.findById(id)
-                .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
+    @Transactional
+    public void suspendWallet(Long id) {
+        Wallet wallet = helper.findWalletById(id);
+        wallet.setStatus(WalletStatus.SUSPENDED);
     }
 
-    private void checkPending(User user) {
-        if (transactionRepository.existsByWalletUserIdAndStatus(user.getId(), TransactionStatus.PENDING)) {
-            throw new ExistingTransactionException("Cannot update wallet while there is a pending transaction.");
-        }
+    @Transactional
+    public void blockWallet(Long id) {
+        Wallet wallet = helper.findWalletById(id);
+        wallet.setStatus(WalletStatus.BLOCKED);
     }
 
-    private void checkActive(Wallet wallet) {
-        if (wallet.getStatus() != WalletStatus.ACTIVE) {
-            throw new NonActiveWalletException("Cannot access wallet.");
-        }
+    @Transactional
+    public void activateWallet(Long id) {
+        Wallet wallet = helper.findWalletById(id);
+        wallet.setStatus(WalletStatus.ACTIVE);
     }
 
-    private void checkPositiveMovingFunds(Long funds) {
-        if (funds <= 0) {
-            throw new NonPositiveTransactionException("Transactions must include a positive amount.");
-        }
+    @Transactional
+    public void updateCurrency(Long id, CurrencyCode newCode) {
+        Wallet wallet = helper.findWalletById(id);
+        User user = wallet.getUser();
+        helper.validateNoPendingTransactions(user);
+        helper.validateWalletIsActive(wallet);
+        wallet.setCurrencyCode(newCode);
     }
 
-    protected void validateNonNegativeBalance(Long balance) {
-        if (balance < 0L) {
-            throw new DeficientFundsException("Wallet does not have enough funds");
-        }
+    @Transactional
+    public void addFunds(Long id, Long funds) {
+        Wallet wallet = helper.findWalletById(id);
+        User user = wallet.getUser();
+
+        helper.validateNoPendingTransactions(user);
+        helper.validateWalletIsActive(wallet);
+        helper.validatePositiveTransaction(funds);
+        wallet.setBalance(wallet.getBalance() + funds);
+    }
+
+    @Transactional
+    public void subtractFunds(Long id, Long funds) {
+        Wallet wallet = helper.findWalletById(id);
+        User user = wallet.getUser();
+        helper.validateNoPendingTransactions(user);
+        helper.validateWalletIsActive(wallet);
+        helper.validatePositiveTransaction(funds);
+        long newBalance = wallet.getBalance() - funds;
+        helper.validateNonNegativeWalletBalance(newBalance);
+        wallet.setBalance(newBalance);
     }
 }

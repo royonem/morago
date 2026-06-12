@@ -7,10 +7,8 @@ import com.roy.morago.entity.finance.WithdrawalRequest;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.TransactionType;
-import com.roy.morago.exception.finance.DeficientFundsException;
-import com.roy.morago.exception.finance.ExistingTransactionException;
-import com.roy.morago.exception.finance.InvalidTransactionStateException;
-import com.roy.morago.exception.finance.TransactionNotFoundException;
+import com.roy.morago.enums.WalletStatus;
+import com.roy.morago.exception.finance.*;
 import com.roy.morago.mapper.TransactionMapper;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
@@ -27,6 +25,18 @@ public class FinanceHelper {
     private final TransactionMapper transactionMapper;
     private final WalletRepository walletRepository;
 
+    // Find Helpers
+    protected Transaction findTransaction(Long id) {
+        return transactionRepository.findById(id)
+                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
+    }
+
+    protected Wallet findWalletById(Long id) {
+        return walletRepository.findById(id)
+                .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
+    }
+
+    // Transaction Helpers
     protected Transaction createTransactionEntity(User user, TransactionRequest dto) {
         validateNoPendingTransactions(user);
         Transaction transaction = transactionMapper.createTransactionFromDto(dto);
@@ -56,7 +66,6 @@ public class FinanceHelper {
         return transaction;
     }
 
-    // Complete Transaction Process and update User Wallet
     protected void processTransaction(Transaction transaction) {
         validateTransactionIsPending(transaction, "Error processing non-pending transaction.");
 
@@ -72,12 +81,6 @@ public class FinanceHelper {
         transaction.setStatus(TransactionStatus.FAILED);
     }
 
-    protected Transaction findTransaction(Long id) {
-        return transactionRepository.findById(id)
-                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
-    }
-
-    // Set transaction balanceBefore & balanceAfter fields and trigger balance validation helpers
     protected void setBalanceBeforeAndAfter(Transaction transaction) {
         Wallet wallet = transaction.getWallet();
         Long balanceBefore = wallet.getBalance();
@@ -92,41 +95,50 @@ public class FinanceHelper {
         validateWalletBalanceAfter(transaction.getBalanceAfter());
     }
 
-    // Throws exception if there are existing pending transactions
+    // Validation Helpers
     protected void validateNoPendingTransactions(User user) {
         if (transactionRepository.existsByWalletUserIdAndStatus(user.getId(), TransactionStatus.PENDING)) {
             throw new ExistingTransactionException("Pending transaction already exists.");
         }
     }
 
-    // Throws exception if the transaction type is not pending
     protected void validateTransactionIsPending(Transaction transaction, String message) {
         if (transaction.getStatus() != TransactionStatus.PENDING) {
             throw new InvalidTransactionStateException(message);
         }
     }
 
-    // Throws exception if transaction type is not paid
     protected void validateTransactionIsPaid(Transaction transaction) {
         if (transaction.getStatus() != TransactionStatus.PAID) {
             throw new InvalidTransactionStateException("Error validating transaction.");
         }
     }
 
-    // Throws exception if wallet balance WOULD be negative after transaction
     protected void validateWalletBalanceAfter(Long balanceAfter) {
         if (balanceAfter < 0L) {
             throw new DeficientFundsException("Not enough funds to complete transaction");
         }
     }
 
-    // Throws exception if current wallet balance is negative
     protected void validateNonNegativeWalletBalance(Long balance) {
         if (balance < 0L) {
             throw new DeficientFundsException("Wallet does not have enough funds");
         }
     }
 
+    protected void validateWalletIsActive(Wallet wallet) {
+        if (wallet.getStatus() != WalletStatus.ACTIVE) {
+            throw new NonActiveWalletException("Cannot access wallet.");
+        }
+    }
+
+    protected void validatePositiveTransaction(Long amount) {
+        if (amount <= 0) {
+            throw new NonPositiveTransactionException("Transactions must include a positive amount.");
+        }
+    }
+
+    // Generation Helpers
     protected String generateTransactionReference(TransactionType type) {
         String random = UUID.randomUUID().toString();
         return type + "-" + random;
@@ -135,4 +147,5 @@ public class FinanceHelper {
     protected String generateTransactionDescription(TransactionType type, Long amount) {
         return type + " transaction of " + amount;
     }
+
 }
