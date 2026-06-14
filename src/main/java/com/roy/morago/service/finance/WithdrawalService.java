@@ -10,7 +10,7 @@ import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.WithdrawalStatus;
 import com.roy.morago.exception.finance.*;
-import com.roy.morago.mapper.WithdrawalRequestMapper;
+import com.roy.morago.mapper.WithdrawalMapper;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WithdrawalRepository;
 import com.roy.morago.service.user.UserHelper;
@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Service
 public class WithdrawalService {
-    private final WithdrawalRequestMapper mapper;
+    private final WithdrawalMapper mapper;
     private final TransactionService transactionService;
     private final UserHelper userHelper;
     private final WithdrawalRepository withdrawalRepository;
