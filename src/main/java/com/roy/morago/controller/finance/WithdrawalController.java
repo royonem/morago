@@ -1,8 +1,8 @@
 package com.roy.morago.controller.finance;
 
 import com.roy.morago.dto.finance.RejectWithdrawalDTO;
-import com.roy.morago.dto.finance.WithdrawalRequestDTO;
-import com.roy.morago.dto.finance.WithdrawalRequestResponse;
+import com.roy.morago.dto.finance.WithdrawalRequest;
+import com.roy.morago.dto.finance.WithdrawalResponse;
 import com.roy.morago.service.finance.WithdrawalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,31 +20,31 @@ public class WithdrawalController {
 
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public WithdrawalRequestResponse createWithdrawalRequest(@RequestBody @Valid WithdrawalRequestDTO dto, Authentication authentication) {
-        return withdrawalService.createWithdrawalRequest(dto, authentication);
+    public WithdrawalResponse createWithdrawal(@RequestBody @Valid WithdrawalRequest request, Authentication authentication) {
+        return withdrawalService.createWithdrawal(request, authentication);
     }
 
     @PreAuthorize("hasRole('ADMIN') or @securityService.isWithdrawalOwner(#id, authentication)")
     @GetMapping("/{id}")
-    public WithdrawalRequestResponse getWithdrawalRequest(@PathVariable Long id) {
-        return withdrawalService.getWithdrawalRequest(id);
+    public WithdrawalResponse getWithdrawal(@PathVariable Long id) {
+        return withdrawalService.getWithdrawal(id);
     }
 
     @PreAuthorize("hasRole('ADMIN') or @securityService.isWithdrawalOwner(#id, authentication)")
     @PatchMapping("/{id}/cancel")
-    public void cancelWithdrawalRequest(@PathVariable Long id) {
-        withdrawalService.cancelWithdrawalRequest(id);
+    public void cancelWithdrawal(@PathVariable Long id) {
+        withdrawalService.cancelWithdrawal(id);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/reject")
-    public void rejectWithdrawalRequest(@PathVariable Long id, Authentication authentication, @RequestBody RejectWithdrawalDTO rejectionDTO) {
-        withdrawalService.rejectWithdrawalRequest(id, authentication, rejectionDTO);
+    public void rejectWithdrawal(@PathVariable Long id, Authentication authentication, @RequestBody RejectWithdrawalDTO rejectionDTO) {
+        withdrawalService.rejectWithdrawal(id, authentication, rejectionDTO);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/approve")
-    public void approveWithdrawalRequest(@PathVariable Long id, Authentication authentication) {
-        withdrawalService.approveWithdrawalRequest(id, authentication);
+    public void approveWithdrawal(@PathVariable Long id, Authentication authentication) {
+        withdrawalService.approveWithdrawal(id, authentication);
     }
 }

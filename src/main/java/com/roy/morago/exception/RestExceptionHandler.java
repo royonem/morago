@@ -78,7 +78,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(InvalidWithdrawalStateException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidWithdrawalRequest(InvalidWithdrawalStateException ex) {
+    public ResponseEntity<Map<String, String>> handleInvalidWithdrawalState(InvalidWithdrawalStateException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
@@ -112,8 +112,8 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    @ExceptionHandler(ExistingWithdrawalRequestException.class)
-    public ResponseEntity<Map<String, String>> handleExistingWithdrawalRequest(ExistingWithdrawalRequestException ex) {
+    @ExceptionHandler(ExistingWithdrawalException.class)
+    public ResponseEntity<Map<String, String>> handleExistingWithdrawal(ExistingWithdrawalException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);

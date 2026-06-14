@@ -4,7 +4,7 @@ import com.roy.morago.dto.finance.TransactionRequest;
 import com.roy.morago.dto.finance.TransactionResponse;
 import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
-import com.roy.morago.entity.finance.WithdrawalRequest;
+import com.roy.morago.entity.finance.Withdrawal;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.TransactionType;
@@ -67,7 +67,7 @@ public class TransactionService {
         return transaction;
     }
 
-    protected Transaction createWithdrawalTransaction(User user, WithdrawalRequest request) {
+    protected Transaction createWithdrawalTransaction(User user, Withdrawal request) {
         Transaction transaction = new Transaction();
         transaction.setType(TransactionType.WITHDRAWAL);
         transaction.setWallet(user.getWallet());
@@ -79,7 +79,7 @@ public class TransactionService {
         transaction.setReference(helper.generateTransactionReference(TransactionType.WITHDRAWAL));
         transaction.setDescription(helper.generateTransactionDescription(TransactionType.WITHDRAWAL, request.getAmount()));
 
-        transaction.setWithdrawalRequest(request);
+        transaction.setWithdrawal(request);
         request.setTransaction(transaction);
         return transaction;
     }

@@ -17,8 +17,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "withdrawal_requests")
-public class WithdrawalRequest extends BaseEntity {
+@Table(name = "withdrawals")
+public class Withdrawal extends BaseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "requester_id", nullable = false)
     private User requester;
@@ -35,7 +35,7 @@ public class WithdrawalRequest extends BaseEntity {
     @JoinColumn(name = "bank_account_id", nullable = false)
     private BankAccount bankAccount;
 
-    @OneToOne(mappedBy = "withdrawalRequest")
+    @OneToOne(mappedBy = "withdrawal")
     @JsonIgnore
     private Transaction transaction;
 
