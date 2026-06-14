@@ -12,7 +12,7 @@ import com.roy.morago.enums.WithdrawalStatus;
 import com.roy.morago.exception.finance.*;
 import com.roy.morago.mapper.WithdrawalRequestMapper;
 import com.roy.morago.repository.finance.TransactionRepository;
-import com.roy.morago.repository.finance.WithdrawalRequestRepository;
+import com.roy.morago.repository.finance.WithdrawalRepository;
 import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -26,7 +26,7 @@ public class WithdrawalService {
     private final WithdrawalRequestMapper mapper;
     private final TransactionService transactionService;
     private final UserHelper userHelper;
-    private final WithdrawalRequestRepository withdrawalRequestRepository;
+    private final WithdrawalRepository withdrawalRepository;
     private final FinanceHelper financeHelper;
     private final TransactionRepository transactionRepository;
 
@@ -45,7 +45,7 @@ public class WithdrawalService {
 
         Transaction transaction = transactionService.createWithdrawalTransaction(user, request);
         transactionRepository.save(transaction);
-        withdrawalRequestRepository.save(request);
+        withdrawalRepository.save(request);
 
         return mapper.createWithdrawalRequestResponse(request);
     }
@@ -95,7 +95,7 @@ public class WithdrawalService {
     }
 
     private void checkExistingPendingWithdrawal(User user) {
-        if (withdrawalRequestRepository.existsByRequesterAndStatus(user, WithdrawalStatus.PENDING)) {
+        if (withdrawalRepository.existsByRequesterAndStatus(user, WithdrawalStatus.PENDING)) {
             throw new ExistingWithdrawalRequestException("Pending withdrawal request already exists.");
         }
     }
@@ -115,7 +115,7 @@ public class WithdrawalService {
     }
 
     private WithdrawalRequest findWithdrawalRequest(Long id) {
-        return withdrawalRequestRepository.findById(id)
+        return withdrawalRepository.findById(id)
                 .orElseThrow(() -> new WithdrawalNotFoundException("Withdrawal request not found"));
     }
 }
