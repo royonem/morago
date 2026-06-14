@@ -43,7 +43,7 @@ public class WithdrawalService {
         request.setWallet(wallet);
         request.setRequester(user);
 
-        Transaction transaction = financeHelper.createWithdrawalTransaction(request, user);
+        Transaction transaction = transactionService.createWithdrawalTransaction(user, request);
         transactionRepository.save(transaction);
         withdrawalRequestRepository.save(request);
 
@@ -70,7 +70,7 @@ public class WithdrawalService {
         logReview(request, adminAuth);
         request.setRejectionReason(rejectionDTO.rejectionReason());
         request.setStatus(WithdrawalStatus.REJECTED);
-        financeHelper.failTransaction(request.getTransaction());
+        request.getTransaction().setStatus(TransactionStatus.FAILED);
     }
 
     @Transactional
@@ -84,7 +84,7 @@ public class WithdrawalService {
 
         request.setStatus(WithdrawalStatus.APPROVED);
 
-        financeHelper.processTransaction(request.getTransaction());
+        transactionService.processTransaction(request.getTransaction());
         financeHelper.validateTransactionIsPaid(request.getTransaction());
         request.setPaidAt(LocalDateTime.now());
     }
