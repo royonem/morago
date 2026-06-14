@@ -9,7 +9,6 @@ import com.roy.morago.entity.finance.Withdrawal;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.WithdrawalStatus;
-import com.roy.morago.exception.finance.*;
 import com.roy.morago.mapper.WithdrawalMapper;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WithdrawalRepository;
@@ -34,9 +33,9 @@ public class WithdrawalService {
     public WithdrawalResponse createWithdrawal(WithdrawalRequest request, Authentication authentication) {
         User user = userHelper.findUserWithAuthentication(authentication);
         Wallet wallet = user.getWallet();
-        checkExistingPendingWithdrawal(user);
+        financeHelper.validateNoPendingWithdrawals(user);
 
-        validateSufficientFunds(request.amount(), wallet);
+        financeHelper.validateSufficientWalletBalance(request.amount(), wallet);
 
         Withdrawal withdrawal = mapper.createEntityFromRequest(request);
         withdrawal.setStatus(WithdrawalStatus.PENDING);
@@ -51,22 +50,22 @@ public class WithdrawalService {
     }
 
     public WithdrawalResponse getWithdrawal(Long withdrawalId) {
-        Withdrawal request = findWithdrawalById(withdrawalId);
-        return mapper.createResponseFromEntity(request);
+        Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
+        return mapper.createResponseFromEntity(withdrawal);
     }
 
     @Transactional
     public void cancelWithdrawal(Long withdrawalId) {
-        Withdrawal withdrawal = findWithdrawalById(withdrawalId);
-        validatePendingWithdrawal(withdrawal);
+        Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
+        financeHelper.validateWithdrawalIsPending(withdrawal);
         withdrawal.setStatus(WithdrawalStatus.CANCELED);
         transactionService.cancelTransaction(withdrawal.getTransaction().getId());
     }
 
     @Transactional
     public void rejectWithdrawal(Long withdrawalId, Authentication adminAuth, RejectWithdrawalDTO rejectionDTO) {
-        Withdrawal withdrawal = findWithdrawalById(withdrawalId);
-        validatePendingWithdrawal(withdrawal);
+        Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
+        financeHelper.validateWithdrawalIsPending(withdrawal);
         logReview(withdrawal, adminAuth);
         withdrawal.setRejectionReason(rejectionDTO.rejectionReason());
         withdrawal.setStatus(WithdrawalStatus.REJECTED);
@@ -75,10 +74,10 @@ public class WithdrawalService {
 
     @Transactional
     public void approveWithdrawal(Long withdrawalId, Authentication adminAuth) {
-        Withdrawal withdrawal = findWithdrawalById(withdrawalId);
+        Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
 
-        validatePendingWithdrawal(withdrawal);
-        validateSufficientFunds(withdrawal.getAmount(), withdrawal.getWallet());
+        financeHelper.validateWithdrawalIsPending(withdrawal);
+        financeHelper.validateSufficientWalletBalance(withdrawal.getAmount(), withdrawal.getWallet());
         logReview(withdrawal, adminAuth);
 
         withdrawal.setStatus(WithdrawalStatus.APPROVED);
@@ -91,30 +90,5 @@ public class WithdrawalService {
     private void logReview(Withdrawal withdrawal, Authentication adminAuth) {
         withdrawal.setReviewer(userHelper.findUserWithAuthentication(adminAuth));
         withdrawal.setReviewedAt(LocalDateTime.now());
-    }
-
-    private void checkExistingPendingWithdrawal(User user) {
-        if (withdrawalRepository.existsByRequesterAndStatus(user, WithdrawalStatus.PENDING)) {
-            throw new ExistingWithdrawalException("Pending withdrawal request already exists.");
-        }
-    }
-
-    private void validateSufficientFunds(Long withdrawalAmount, Wallet wallet) {
-        if (withdrawalAmount > wallet.getBalance()) {
-            throw new DeficientFundsException("Request amount exceeds balance.");
-        }
-    }
-
-    private void validatePendingWithdrawal(Withdrawal withdrawal) {
-        if (withdrawal.getStatus() != WithdrawalStatus.PENDING) {
-            throw new InvalidWithdrawalStateException("Withdrawal state is invalid.");
-        } else if (withdrawal.getTransaction().getStatus() != TransactionStatus.PENDING) {
-            throw new InvalidTransactionStateException("Transaction is not pending.");
-        }
-    }
-
-    private Withdrawal findWithdrawalById(Long id) {
-        return withdrawalRepository.findById(id)
-                .orElseThrow(() -> new WithdrawalNotFoundException("Withdrawal not found"));
     }
 }
