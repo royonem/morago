@@ -36,9 +36,9 @@ public class TransactionServiceIT {
     @Autowired
     private TransactionService transactionService;
     @Autowired
-    SetupHelper setUpHelper;
+    private SetupHelper setUpHelper;
     @Autowired
-    VerificationHelper verificationHelper;
+    private VerificationHelper verificationHelper;
 
     private Wallet testWallet;
     private Transaction testTransaction;
