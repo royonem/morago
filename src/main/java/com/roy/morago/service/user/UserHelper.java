@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UserHelper {
-    UserRepository userRepository;
-    LanguageRepository languageRepository;
+    private final UserRepository userRepository;
+    private final LanguageRepository languageRepository;
 
     public User findUserById(Long id) {
         return userRepository.findById(id)
