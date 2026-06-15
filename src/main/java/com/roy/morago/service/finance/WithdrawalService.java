@@ -41,6 +41,7 @@ public class WithdrawalService {
         withdrawal.setStatus(WithdrawalStatus.PENDING);
         withdrawal.setWallet(wallet);
         withdrawal.setRequester(user);
+        withdrawal.setBankAccount(user.getBankAccount());
 
         Transaction transaction = transactionService.createWithdrawalTransaction(user, withdrawal);
         transactionRepository.save(transaction);
