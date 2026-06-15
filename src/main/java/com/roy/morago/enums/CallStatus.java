@@ -6,7 +6,7 @@ public enum CallStatus {
     RINGING,
     IN_PROGRESS,
     ENDED,
-    CANCELLED,
+    CANCELED,
     DECLINED,
     MISSED,
     FAILED

@@ -15,5 +15,5 @@ public record CallResponse(
         LocalDateTime acceptedAt,
         LocalDateTime startedAt,
         LocalDateTime endedAt,
-        LocalDateTime cancelledAt
+        LocalDateTime canceledAt
 ) { }

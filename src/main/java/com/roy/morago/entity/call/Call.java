@@ -47,5 +47,5 @@ public class Call extends BaseEntity {
     @Column
     private LocalDateTime endedAt;
     @Column
-    private LocalDateTime cancelledAt;
+    private LocalDateTime canceledAt;
 }
