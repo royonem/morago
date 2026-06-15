@@ -55,6 +55,13 @@ public class FinanceHelper {
         }
     }
 
+    protected void validateNoOtherPendingTransactions(User user, Long transactionId) {
+        if (transactionRepository.existsByWalletUserIdAndStatusAndIdNot
+                (user.getId(), TransactionStatus.PENDING, transactionId)) {
+            throw new ExistingTransactionException("ending transaction already exists.");
+        }
+    }
+
     protected void validateTransactionIsPending(Transaction transaction, String message) {
         if (transaction.getStatus() != TransactionStatus.PENDING) {
             throw new InvalidTransactionStateException(message);

@@ -111,12 +111,15 @@ public class TransactionService {
 
     private void setWalletBalance(Transaction transaction) {
         Wallet wallet = transaction.getWallet();
+        User user = wallet.getUser();
         Long transactionAmount = transaction.getAmount();
         switch (transaction.getType()) {
             case DEPOSIT, CALL_EARNING -> {
+                helper.validateNoOtherPendingTransactions(user, transaction.getId());
                 walletService.addFunds(wallet.getId(), transactionAmount);
             }
             case WITHDRAWAL, CALL_CHARGE -> {
+                helper.validateNoOtherPendingTransactions(user, transaction.getId());
                 walletService.subtractFunds(wallet.getId(), transactionAmount);
             }
         }
