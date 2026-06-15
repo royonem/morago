@@ -15,4 +15,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> getAllByWalletUserId(Long userId);
 
     Transaction findByWithdrawal(Withdrawal withdrawal);
+
+    boolean existsByWalletUserIdAndStatusAndIdNot(Long walletUserId, TransactionStatus status, Long id);
 }
