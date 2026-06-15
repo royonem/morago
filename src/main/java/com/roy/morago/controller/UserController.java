@@ -1,9 +1,10 @@
 package com.roy.morago.controller;
 
-import com.roy.morago.dto.file.FileDTO;
+import com.roy.morago.dto.file.FileResponse;
 import com.roy.morago.dto.notification.NotificationResponse;
 import com.roy.morago.service.file.FileService;
 import com.roy.morago.service.notification.NotificationService;
+import com.roy.morago.service.user.LanguageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,17 +19,13 @@ import java.util.List;
 public class UserController {
     private final FileService fileService;
     private final NotificationService notificationService;
+    private final LanguageService languageService;
 
     @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @PostMapping("/{id}/profile-picture")
     @ResponseStatus(HttpStatus.CREATED)
-    public FileDTO uploadProfilePicture(@PathVariable Long id, @RequestParam MultipartFile picture) {
+    public FileResponse uploadProfilePicture(@PathVariable Long id, @RequestParam MultipartFile picture) {
         return fileService.uploadProfilePicture(picture);
-    }
-
-    @GetMapping("/profile-picture/{id}")
-    public FileDTO viewIcon(@PathVariable Long id) {
-        return fileService.viewFile(id);
     }
 
     @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
@@ -98,5 +95,12 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteNotifications(@PathVariable Long id, @RequestParam List<Long> notificationIds) {
         notificationService.deleteNotifications(id, notificationIds);
+    }
+
+    @PreAuthorize("@securityService.isCurrentTranslator(#id, authentication)")
+    @PatchMapping("/{id}/languages")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addLanguage(@PathVariable Long id, @RequestBody List<Long> languageIds) {
+        languageService.addLanguages(id, languageIds);
     }
 }

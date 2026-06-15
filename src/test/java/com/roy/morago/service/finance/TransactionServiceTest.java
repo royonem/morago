@@ -13,6 +13,7 @@ import com.roy.morago.mapper.TransactionMapper;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
 import com.roy.morago.repository.user.UserRepository;
+import com.roy.morago.service.user.UserHelper;
 import com.roy.morago.service.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,8 @@ public class TransactionServiceTest {
     @Mock
     private UserService userService;
     @Mock
+    private UserHelper userHelper;
+    @Mock
     private UserRepository userRepository;
     @Mock
     private WalletService walletService;
@@ -56,7 +59,7 @@ public class TransactionServiceTest {
 
     // Stubs
     private void stubFindUserWithAuthentication() {
-        when(userService.findUserWithAuthentication(authentication))
+        when(userHelper.findUserWithAuthentication(authentication))
                 .thenReturn(testUser);
     }
 

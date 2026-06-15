@@ -4,10 +4,8 @@ import com.roy.morago.dto.notification.NotificationRequest;
 import com.roy.morago.dto.notification.NotificationResponse;
 import com.roy.morago.entity.notification.Notification;
 import com.roy.morago.entity.user.User;
-import com.roy.morago.exception.notification.AlreadySentNotificationException;
-import com.roy.morago.exception.notification.UnauthorizedNotificationException;
 import com.roy.morago.repository.notification.NotificationRepository;
-import com.roy.morago.service.user.UserService;
+import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +18,8 @@ import java.util.List;
 @Service
 public class NotificationService {
     private final NotificationRepository notificationRepository;
-    private final UserService userService;
     private final NotificationHelper helper;
+    private final UserHelper userHelper;
 
     @Transactional
     public NotificationResponse createNotification(NotificationRequest dto) {
@@ -35,7 +33,7 @@ public class NotificationService {
 
     @Transactional
     public void sendNotification(Long userId, Long notificationId) {
-        User user = userService.findUserById(userId);
+        User user = userHelper.findUserById(userId);
         Notification notification = helper.findNotificationById(notificationId);
         helper.verifyNotSent(notification);
         notification.setUser(user);

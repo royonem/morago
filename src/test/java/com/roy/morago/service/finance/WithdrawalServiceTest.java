@@ -16,6 +16,7 @@ import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
 import com.roy.morago.repository.finance.WithdrawalRequestRepository;
 import com.roy.morago.repository.user.UserRepository;
+import com.roy.morago.service.user.UserHelper;
 import com.roy.morago.service.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,8 @@ public class WithdrawalServiceTest {
     @Mock
     private UserService userService;
     @Mock
+    private UserHelper userHelper;
+    @Mock
     private WithdrawalRequestRepository withdrawalRequestRepository;
     @Mock
     private TransactionRepository transactionRepository;
@@ -65,12 +68,12 @@ public class WithdrawalServiceTest {
 
     // Stubs
     private void stubFindUserWithAuthentication() {
-        when(userService.findUserWithAuthentication(userAuthentication))
+        when(userHelper.findUserWithAuthentication(userAuthentication))
                 .thenReturn(testUser);
     }
 
     private void stubFindAdminWithAuthentication() {
-        when(userService.findUserWithAuthentication(adminAuthentication))
+        when(userHelper.findUserWithAuthentication(adminAuthentication))
                 .thenReturn(testAdmin);
     }
 

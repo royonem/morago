@@ -4,6 +4,7 @@ import com.roy.morago.repository.finance.BankRepository;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
 import com.roy.morago.repository.finance.WithdrawalRequestRepository;
+import com.roy.morago.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -11,10 +12,27 @@ import org.springframework.stereotype.Component;
 @Component("securityService")
 @RequiredArgsConstructor
 public class SecurityService {
+    private final UserRepository userRepository;
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
     private final WithdrawalRequestRepository withdrawalRequestRepository;
     private final BankRepository bankRepository;
+
+    public boolean isCurrentTranslator(Long userId, Authentication authentication) {
+        Long currentUserId = getUserId(authentication);
+        if (userRepository.existsByIdAndRolesName(userId, "ROLE_TRANSLATOR")) {
+            return currentUserId.equals(userId);
+        }
+        return false;
+    }
+
+    public boolean isCurrentClient(Long userId, Authentication authentication) {
+        Long currentUserId = getUserId(authentication);
+        if (userRepository.existsByIdAndRolesName(userId, "ROLE_CLIENT")) {
+            return currentUserId.equals(userId);
+        }
+        return false;
+    }
 
     public boolean isWalletOwner(Long walletId, Authentication authentication) {
         Long userId = getUserId(authentication);

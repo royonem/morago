@@ -1,6 +1,6 @@
 package com.roy.morago.service.file;
 
-import com.roy.morago.dto.file.FileDTO;
+import com.roy.morago.dto.file.FileResponse;
 import com.roy.morago.entity.file.File;
 import com.roy.morago.entity.topic.Topic;
 import com.roy.morago.entity.user.User;
@@ -27,12 +27,12 @@ public class FileHelper {
     private static final List<String> ALLOWED_TYPES =
             List.of("image/png", "image/jpeg");
 
-    protected FileDTO uploadFile(MultipartFile file, FilePurpose filePurpose) {
+    protected FileResponse uploadFile(MultipartFile file, FilePurpose filePurpose) {
         validateFile(file, filePurpose);
         String tempPath = fileStorageService.storeTempFile(file);
         File fileEntity = buildFileEntity(file, tempPath, filePurpose);
         fileRepository.save(fileEntity);
-        return fileMapper.createFileDTOFromEntity(fileEntity);
+        return fileMapper.createResponseFromEntity(fileEntity);
     }
 
     protected File buildFileEntity(MultipartFile file, String tempPath, FilePurpose filePurpose) {
