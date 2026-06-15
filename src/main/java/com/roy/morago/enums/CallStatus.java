@@ -1,11 +1,11 @@
 package com.roy.morago.enums;
 
 public enum CallStatus {
-    REQUESTED,
-    PENDING,
     ACCEPTED,
+    REQUESTED,
+    RINGING,
     IN_PROGRESS,
-    COMPLETED,
+    ENDED,
     CANCELLED,
     DECLINED,
     MISSED,
