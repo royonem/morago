@@ -1,6 +1,6 @@
 package com.roy.morago.controller.finance;
 
-import com.roy.morago.dto.finance.RejectWithdrawalDTO;
+import com.roy.morago.dto.finance.WithdrawalRejection;
 import com.roy.morago.dto.finance.WithdrawalRequest;
 import com.roy.morago.dto.finance.WithdrawalResponse;
 import com.roy.morago.service.finance.WithdrawalService;
@@ -38,7 +38,7 @@ public class WithdrawalController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/reject")
-    public void rejectWithdrawal(@PathVariable Long id, Authentication authentication, @RequestBody RejectWithdrawalDTO rejectionDTO) {
+    public void rejectWithdrawal(@PathVariable Long id, Authentication authentication, @RequestBody WithdrawalRejection rejectionDTO) {
         withdrawalService.rejectWithdrawal(id, authentication, rejectionDTO);
     }
 

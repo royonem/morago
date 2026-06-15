@@ -1,6 +1,6 @@
 package com.roy.morago.service.finance;
 
-import com.roy.morago.dto.finance.RejectWithdrawalDTO;
+import com.roy.morago.dto.finance.WithdrawalRejection;
 import com.roy.morago.dto.finance.WithdrawalRequest;
 import com.roy.morago.dto.finance.WithdrawalResponse;
 import com.roy.morago.entity.finance.Transaction;
@@ -64,7 +64,7 @@ public class WithdrawalService {
     }
 
     @Transactional
-    public void rejectWithdrawal(Long withdrawalId, Authentication adminAuth, RejectWithdrawalDTO rejectionDTO) {
+    public void rejectWithdrawal(Long withdrawalId, Authentication adminAuth, WithdrawalRejection rejectionDTO) {
         Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
         financeHelper.validateWithdrawalIsPending(withdrawal);
         logReview(withdrawal, adminAuth);
