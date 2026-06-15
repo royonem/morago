@@ -1,6 +1,6 @@
 package com.roy.morago.controller.finance;
 
-import com.roy.morago.dto.finance.WalletDTO;
+import com.roy.morago.dto.finance.WalletResponse;
 import com.roy.morago.enums.CurrencyCode;
 import com.roy.morago.service.finance.WalletService;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class WalletController {
 
     @PreAuthorize("hasRole('ADMIN') or @securityService.isWalletOwner(#id, authentication)")
     @GetMapping("/{id}")
-    public WalletDTO getWallet(@PathVariable Long id) {
+    public WalletResponse getWallet(@PathVariable Long id) {
         return walletService.getWallet(id);
     }
 

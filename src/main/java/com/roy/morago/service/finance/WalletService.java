@@ -1,6 +1,6 @@
 package com.roy.morago.service.finance;
 
-import com.roy.morago.dto.finance.WalletDTO;
+import com.roy.morago.dto.finance.WalletResponse;
 import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CurrencyCode;
@@ -32,13 +32,13 @@ public class WalletService {
         walletRepository.save(wallet);
     }
 
-    public WalletDTO getWallet(Long id) {
+    public WalletResponse getWallet(Long id) {
         Wallet wallet = helper.findWalletById(id);
-        WalletDTO walletDTO = new WalletDTO();
-        walletDTO.setBalance(wallet.getBalance());
-        walletDTO.setCurrencyCode(wallet.getCurrencyCode());
-        walletDTO.setStatus(wallet.getStatus());
-        return walletDTO;
+        return new WalletResponse(
+                wallet.getBalance(),
+                wallet.getCurrencyCode(),
+                wallet.getStatus()
+        );
     }
 
     @Transactional
