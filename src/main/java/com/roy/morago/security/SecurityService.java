@@ -29,14 +29,6 @@ public class SecurityService {
         return false;
     }
 
-    public boolean isCurrentClient(Long userId, Authentication authentication) {
-        Long currentUserId = getUserId(authentication);
-        if (userRepository.existsByIdAndRolesName(userId, "ROLE_CLIENT")) {
-            return currentUserId.equals(userId);
-        }
-        return false;
-    }
-
     public boolean isWalletOwner(Long walletId, Authentication authentication) {
         Long userId = getUserId(authentication);
         return walletRepository.existsByIdAndUserId(walletId, userId);
@@ -67,6 +59,11 @@ public class SecurityService {
         boolean client = callRepository.existsByIdAndClientId(callId, currentUserId);
         boolean translator = callRepository.existsByIdAndTranslatorId(callId, currentUserId);
         return client || translator;
+    }
+
+    public boolean isCallClient(Long callId, Authentication authentication) {
+        Long currentUserId = getUserId(authentication);
+        return callRepository.existsByIdAndClientId(callId, currentUserId);
     }
 
     private Long getUserId(Authentication authentication) {

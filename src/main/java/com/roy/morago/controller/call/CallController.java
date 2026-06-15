@@ -28,7 +28,7 @@ public class CallController {
     }
 
     @PreAuthorize("@securityService.isCallParticipant(#id, authentication)")
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/accept")
     public CallResponse acceptCall(@PathVariable Long id) {
         return callService.acceptCall(id);
     }
@@ -51,7 +51,8 @@ public class CallController {
         return callService.endCall(id);
     }
 
-    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isCallClient(#id, authentication)")
+    @PatchMapping("/{id}/rate")
     public void rateCall(@PathVariable Long id, @RequestParam Integer rating) {
         callService.rateCall(id, rating);
     }
