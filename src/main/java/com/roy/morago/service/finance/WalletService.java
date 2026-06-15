@@ -71,9 +71,7 @@ public class WalletService {
     @Transactional
     public void addFunds(Long id, Long funds) {
         Wallet wallet = helper.findWalletById(id);
-        User user = wallet.getUser();
 
-        helper.validateNoPendingTransactions(user);
         helper.validateWalletIsActive(wallet);
         helper.validatePositiveTransaction(funds);
         wallet.setBalance(wallet.getBalance() + funds);
@@ -82,8 +80,7 @@ public class WalletService {
     @Transactional
     public void subtractFunds(Long id, Long funds) {
         Wallet wallet = helper.findWalletById(id);
-        User user = wallet.getUser();
-        helper.validateNoPendingTransactions(user);
+
         helper.validateWalletIsActive(wallet);
         helper.validatePositiveTransaction(funds);
         long newBalance = wallet.getBalance() - funds;
