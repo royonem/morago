@@ -37,8 +37,10 @@ public class CallService {
     }
 
     @Transactional
-    public CallResponse acceptCall(Long callId) {
+    public CallResponse acceptCall(Long callId, User recipient) {
         Call call = helper.findCallById(callId);
+        helper.validateRecipient(call, recipient, "Cannot accept own call");
+        helper.validateCallIsRinging(call);
         call.setStatus(CallStatus.ACCEPTED);
         call.setAcceptedAt(LocalDateTime.now());
         return mapper.createResponseFromEntity(call);
@@ -47,6 +49,7 @@ public class CallService {
     @Transactional
     public CallResponse startCall(Long callId) {
         Call call = helper.findCallById(callId);
+        helper.validateCallIsAccepted(call);
         call.setStatus(CallStatus.IN_PROGRESS);
         call.setStartedAt(LocalDateTime.now());
         return mapper.createResponseFromEntity(call);
@@ -55,6 +58,8 @@ public class CallService {
     @Transactional
     public CallResponse cancelCall(Long callId, User caller) {
         Call call = helper.findCallById(callId);
+        helper.validateCaller(call, caller);
+        helper.validateCallIsRinging(call);
         helper.resolveCancelDecline(call, caller);
         call.setCanceledAt(LocalDateTime.now());
         return mapper.createResponseFromEntity(call);
@@ -63,26 +68,28 @@ public class CallService {
     @Transactional
     public CallResponse declineCall(Long callId, User recipient) {
         Call call = helper.findCallById(callId);
+        helper.validateRecipient(call, recipient, "Cannot decline own call");
+        helper.validateCallIsRinging(call);
         helper.resolveCancelDecline(call, recipient);
         call.setCanceledAt(LocalDateTime.now());
         return mapper.createResponseFromEntity(call);
     }
 
     @Transactional
-    public CallResponse autoEndCall(Long callId, User caller) {
+    public CallResponse autoEndCall(Long callId) {
         Call call = helper.findCallById(callId);
         call.setStatus(CallStatus.ENDED);
         call.setEndedAt(LocalDateTime.now());
-        Long cost = helper.calculateCallCost(call);
-        call.setCost(cost);
+        call.setCost(helper.calculateCallCost(call));
         // some scheduling logic
-        // some finance logic maybe
+        helper.createCallTransactions(call);
         return mapper.createResponseFromEntity(call);
     }
 
     @Transactional
     public CallResponse endCall(Long callId) {
         Call call = helper.findCallById(callId);
+        helper.validateCallIsInProgress(call);
         call.setStatus(CallStatus.ENDED);
         call.setEndedAt(LocalDateTime.now());
         call.setCost(helper.calculateCallCost(call));
@@ -92,6 +99,7 @@ public class CallService {
 
     @Transactional
     public void rateCall(Long id, Integer rating) {
+        helper.validateCallRating(rating);
         Call call = helper.findCallById(id);
         call.setRating(rating);
     }

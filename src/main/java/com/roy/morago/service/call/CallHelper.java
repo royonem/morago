@@ -4,8 +4,7 @@ import com.roy.morago.dto.call.CallRequest;
 import com.roy.morago.entity.call.Call;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CallStatus;
-import com.roy.morago.exception.call.CallNotFoundException;
-import com.roy.morago.exception.call.InvalidCallStateException;
+import com.roy.morago.exception.call.*;
 import com.roy.morago.exception.finance.DeficientFundsException;
 import com.roy.morago.mapper.CallMapper;
 import com.roy.morago.repository.call.CallRepository;
@@ -55,7 +54,7 @@ public class CallHelper {
     }
 
     protected void setMaxDuration(Call call, CallRequest request) {
-        validateCallStatusIsRequested(call);
+        validateCallIsRequested(call);
         User client = userHelper.findUserById(request.clientId());
         long maxDuration = client.getWallet().getBalance() / 1000;
         validateCallFundsAreSufficient(call, maxDuration);
@@ -74,9 +73,47 @@ public class CallHelper {
         return Duration.between(startedAt, endedAt).toSeconds();
     }
 
-    private void validateCallStatusIsRequested(Call call) {
+    protected void validateRecipient(Call call, User user, String message) {
+        Long initiatorId = call.getIsClientInitiator()
+                ? call.getClient().getId()
+                : call.getTranslator().getId();
+
+        if (user.getId().equals(initiatorId)) {
+            throw new InvalidCallRecipientException(message);
+        }
+    }
+
+    protected void validateCaller(Call call, User user) {
+        Long initiatorId = call.getIsClientInitiator()
+                ? call.getClient().getId()
+                : call.getTranslator().getId();
+
+        if (!user.getId().equals(initiatorId)) {
+            throw new InvalidCallerException("Cannot cancel this call");
+        }
+    }
+
+    private void validateCallIsRequested(Call call) {
         if (call.getStatus() != CallStatus.REQUESTED) {
             throw new InvalidCallStateException("Cannot set a max duration for this call");
+        }
+    }
+
+    protected void validateCallIsAccepted(Call call) {
+        if (call.getStatus() != CallStatus.ACCEPTED) {
+            throw new InvalidCallStateException("Cannot start this call");
+        }
+    }
+
+    protected void validateCallIsRinging(Call call) {
+        if (call.getStatus() != CallStatus.RINGING) {
+            throw new InvalidCallStateException("Cannot access this call");
+        }
+    }
+
+    protected void validateCallIsInProgress(Call call) {
+        if (call.getStatus() != CallStatus.IN_PROGRESS) {
+            throw new InvalidCallStateException("Cannot end this call");
         }
     }
 
@@ -84,6 +121,12 @@ public class CallHelper {
         if (maxDuration <= 0) {
             failCall(call);
             throw new DeficientFundsException("Client does not have enough funds for a call");
+        }
+    }
+
+    protected void validateCallRating(Integer rating) {
+        if (rating == null || rating < 1 || rating > 5) {
+            throw new InvalidCallRatingException("Rating must be 1-5");
         }
     }
 

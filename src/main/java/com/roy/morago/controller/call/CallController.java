@@ -29,8 +29,8 @@ public class CallController {
 
     @PreAuthorize("@securityService.isCallParticipant(#id, authentication)")
     @PatchMapping("/{id}/accept")
-    public CallResponse acceptCall(@PathVariable Long id) {
-        return callService.acceptCall(id);
+    public CallResponse acceptCall(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
+        return callService.acceptCall(id, principal.getUser());
     }
 
     @PreAuthorize("@securityService.isCallParticipant(#id, authentication)")
