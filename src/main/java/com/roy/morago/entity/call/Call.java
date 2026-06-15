@@ -33,7 +33,11 @@ public class Call extends BaseEntity {
     @Column(nullable = false)
     private Long cost;
     @Column(nullable = false)
+    private Long maxCallTime;
+    @Column(nullable = false)
     private CallStatus status;
+    @Column(nullable = false)
+    private Boolean isClientInitiator;
     @Column
     private Integer rating;
     @Column
