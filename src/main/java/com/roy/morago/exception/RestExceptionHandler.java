@@ -1,6 +1,8 @@
 package com.roy.morago.exception;
 
 import com.roy.morago.exception.auth.*;
+import com.roy.morago.exception.call.CallNotFoundException;
+import com.roy.morago.exception.call.InvalidCallStateException;
 import com.roy.morago.exception.file.FileNotFoundException;
 import com.roy.morago.exception.file.FileStorageException;
 import com.roy.morago.exception.file.FileValidationException;
