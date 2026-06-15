@@ -2,10 +2,13 @@ package com.roy.morago.service.finance;
 
 import com.roy.morago.dto.finance.TransactionRequest;
 import com.roy.morago.dto.finance.TransactionResponse;
+import com.roy.morago.dto.finance.WithdrawalRequest;
+import com.roy.morago.entity.finance.BankAccount;
 import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.*;
+import com.roy.morago.repository.finance.BankRepository;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
 import com.roy.morago.repository.user.UserRepository;
@@ -33,6 +36,8 @@ public class SetupHelper {
     private RoleService roleService;
     @Autowired
     private VerificationHelper verificationHelper;
+    @Autowired
+    private BankRepository bankRepository;
 
 
     public User createTestClient() {
@@ -45,19 +50,7 @@ public class SetupHelper {
         testUser.setAvailability(Availability.IDLE);
         testUser.setStatus(UserStatus.VERIFIED);
         testUser.getRoles().add(roleService.getClientRole());
-        return userRepository.save(testUser);
-    }
-
-    public User createTestTranslator() {
-        User testUser = new User();
-        testUser.setFirstName("Sarah");
-        testUser.setLastName("Collins");
-        testUser.setEmail("sarah@test.com");
-        testUser.setPasswordHash("password2");
-        testUser.setPhone("010-1111-1111");
-        testUser.setAvailability(Availability.ONLINE);
-        testUser.setStatus(UserStatus.VERIFIED);
-        testUser.getRoles().add(roleService.getTranslatorRole());
+        testUser.setBankAccount(createTestBankAccount(testUser));
         return userRepository.save(testUser);
     }
 
@@ -79,6 +72,14 @@ public class SetupHelper {
         Wallet testWallet = walletRepository.findByUserId(testUser.getId()).orElseThrow();
         walletService.addFunds(testWallet.getId(), 1000L);
         return walletRepository.save(testWallet);
+    }
+
+    public BankAccount createTestBankAccount(User testUser) {
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setBankName("Hana Bank");
+        bankAccount.setAccountNumber("0000111122223333");
+        bankAccount.setUser(testUser);
+        return bankRepository.save(bankAccount);
     }
 
     public TransactionRequest createTestTransactionRequest(TransactionType type, Long amount) {
@@ -117,4 +118,7 @@ public class SetupHelper {
         return transactionRepository.save(pendingTransaction);
     }
 
+    public WithdrawalRequest createTestWithdrawalRequest(Long withdrawalAmount) {
+        return new WithdrawalRequest(withdrawalAmount, CurrencyCode.KRW);
+    }
 }

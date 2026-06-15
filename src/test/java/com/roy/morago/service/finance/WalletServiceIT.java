@@ -1,6 +1,6 @@
 package com.roy.morago.service.finance;
 
-import com.roy.morago.dto.finance.WalletDTO;
+import com.roy.morago.dto.finance.WalletResponse;
 import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CurrencyCode;
@@ -142,11 +142,11 @@ public class WalletServiceIT {
 
     @Test
     void testGetWallet_ById_success() {
-        WalletDTO result = walletService.getWallet(testWallet.getId());
+        WalletResponse result = walletService.getWallet(testWallet.getId());
 
-        assertThat(result.getBalance()).isEqualTo(0L);
-        assertThat(result.getCurrencyCode()).isEqualTo(CurrencyCode.KRW);
-        assertThat(result.getStatus()).isEqualTo(WalletStatus.ACTIVE);
+        assertThat(result.balance()).isEqualTo(0L);
+        assertThat(result.currencyCode()).isEqualTo(CurrencyCode.KRW);
+        assertThat(result.status()).isEqualTo(WalletStatus.ACTIVE);
     }
 
     @Test
