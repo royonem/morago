@@ -59,6 +59,36 @@ public class TransactionService {
     }
 
     @Transactional
+    public void createCallChargeTransaction(Call call, User client) {
+        Transaction transaction = new Transaction();
+        transaction.setType(TransactionType.CALL_CHARGE);
+        transaction.setWallet(client.getWallet());
+        transaction.setCall(call);
+        transaction.setAmount(call.getCost());
+        transaction.setCurrencyCode(client.getWallet().getCurrencyCode());
+        transaction.setStatus(TransactionStatus.PENDING);
+        setTransactionBalance(transaction);
+        transaction.setReference(helper.generateTransactionReference(TransactionType.CALL_CHARGE));
+        transaction.setDescription(helper.generateTransactionDescription(TransactionType.CALL_CHARGE, call.getCost()));
+        processTransaction(transaction);
+    }
+
+    @Transactional
+    public void createCallEarningTransaction(Call call, User translator) {
+        Transaction transaction = new Transaction();
+        transaction.setType(TransactionType.CALL_EARNING);
+        transaction.setWallet(translator.getWallet());
+        transaction.setCall(call);
+        transaction.setAmount(call.getCost());
+        transaction.setCurrencyCode(translator.getWallet().getCurrencyCode());
+        transaction.setStatus(TransactionStatus.PENDING);
+        setTransactionBalance(transaction);
+        transaction.setReference(helper.generateTransactionReference(TransactionType.CALL_EARNING));
+        transaction.setDescription(helper.generateTransactionDescription(TransactionType.CALL_EARNING, call.getCost()));
+        processTransaction(transaction);
+    }
+
+    @Transactional
     public TransactionResponse createTransaction(TransactionRequest dto, Authentication authentication) {
         User user = userHelper.findUserWithAuthentication(authentication);
         helper.validateNoPendingTransactions(user);
@@ -94,36 +124,6 @@ public class TransactionService {
         transaction.setReference(helper.generateTransactionReference(dto.type()));
         transaction.setDescription(helper.generateTransactionDescription(dto.type(), dto.amount()));
         return transaction;
-    }
-
-    @Transactional
-    public void createCallChargeTransaction(Call call, User client) {
-        Transaction transaction = new Transaction();
-        transaction.setType(TransactionType.CALL_CHARGE);
-        transaction.setWallet(client.getWallet());
-        transaction.setCall(call);
-        transaction.setAmount(call.getCost());
-        transaction.setCurrencyCode(client.getWallet().getCurrencyCode());
-        transaction.setStatus(TransactionStatus.PENDING);
-        setTransactionBalance(transaction);
-        transaction.setReference(helper.generateTransactionReference(TransactionType.CALL_CHARGE));
-        transaction.setDescription(helper.generateTransactionDescription(TransactionType.CALL_CHARGE, call.getCost()));
-        processTransaction(transaction);
-    }
-
-    @Transactional
-    public void createCallEarningTransaction(Call call, User translator) {
-        Transaction transaction = new Transaction();
-        transaction.setType(TransactionType.CALL_EARNING);
-        transaction.setWallet(translator.getWallet());
-        transaction.setCall(call);
-        transaction.setAmount(call.getCost());
-        transaction.setCurrencyCode(translator.getWallet().getCurrencyCode());
-        transaction.setStatus(TransactionStatus.PENDING);
-        setTransactionBalance(transaction);
-        transaction.setReference(helper.generateTransactionReference(TransactionType.CALL_EARNING));
-        transaction.setDescription(helper.generateTransactionDescription(TransactionType.CALL_EARNING, call.getCost()));
-        processTransaction(transaction);
     }
 
     protected void processTransaction(Transaction transaction) {
