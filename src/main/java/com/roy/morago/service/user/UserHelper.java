@@ -30,4 +30,9 @@ public class UserHelper {
         return languageRepository.findById(languageId)
                 .orElseThrow(() -> new LanguageNotFoundException("Language not found"));
     }
+
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+    }
 }
