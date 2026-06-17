@@ -2,6 +2,7 @@ package com.roy.morago.entity.user;
 
 import com.roy.morago.entity.BaseEntity;
 import com.roy.morago.entity.file.File;
+import com.roy.morago.entity.finance.BankAccount;
 import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.topic.Topic;
 import com.roy.morago.entity.notification.Notification;
@@ -26,12 +27,15 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 public class User extends BaseEntity {
-    @OneToOne(optional = true, cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "profile_picture_id")
     private File profilePicture;
 
     @OneToOne(mappedBy = "user")
     private Wallet wallet;
+
+    @OneToOne(mappedBy = "user")
+    private BankAccount bankAccount;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications = new ArrayList<>();

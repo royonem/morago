@@ -1,13 +1,11 @@
 package com.roy.morago.controller.finance;
 
-import com.roy.morago.dto.finance.WalletDTO;
+import com.roy.morago.dto.finance.WalletResponse;
 import com.roy.morago.enums.CurrencyCode;
 import com.roy.morago.service.finance.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
 
 @RequiredArgsConstructor
 @RestController
@@ -35,8 +33,8 @@ public class WalletController {
 
     @PreAuthorize("hasRole('ADMIN') or @securityService.isWalletOwner(#id, authentication)")
     @GetMapping("/{id}")
-    public WalletDTO getWallet(@PathVariable Long id) {
-        return walletService.getWalletById(id);
+    public WalletResponse getWallet(@PathVariable Long id) {
+        return walletService.getWallet(id);
     }
 
     @PreAuthorize("hasRole('ADMIN') or @securityService.isWalletOwner(#id, authentication)")

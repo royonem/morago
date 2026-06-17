@@ -9,5 +9,5 @@ public enum CallStatus {
     CANCELLED,
     DECLINED,
     MISSED,
-    FAILED;
+    FAILED
 }

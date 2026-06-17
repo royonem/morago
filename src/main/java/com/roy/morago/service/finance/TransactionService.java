@@ -1,150 +1,138 @@
 package com.roy.morago.service.finance;
 
-import com.roy.morago.dto.finance.TransactionDTO;
+import com.roy.morago.dto.finance.TransactionRequest;
 import com.roy.morago.dto.finance.TransactionResponse;
 import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
-import com.roy.morago.entity.finance.WithdrawalRequest;
+import com.roy.morago.entity.finance.Withdrawal;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.TransactionType;
-import com.roy.morago.exception.finance.*;
 import com.roy.morago.mapper.TransactionMapper;
 import com.roy.morago.repository.finance.TransactionRepository;
-import com.roy.morago.repository.finance.WalletRepository;
 import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.UUID;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
 public class TransactionService {
+    private final WalletService walletService;
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
-    private final WalletRepository walletRepository;
+    private final FinanceHelper helper;
     private final UserHelper userHelper;
-    private final WalletService walletService;
 
     @Transactional
-    public TransactionResponse createTransaction(TransactionDTO dto, Authentication authentication) {
+    public TransactionResponse createDepositTransaction(TransactionRequest dto, Authentication authentication) {
         User user = userHelper.findUserWithAuthentication(authentication);
-        Wallet wallet = user.getWallet();
-        Long currentBalance = wallet.getBalance();
-        Long transactionAmount = dto.getAmount();
-        Long balanceAfter = calculateBalanceAfter(dto.getType(), currentBalance, transactionAmount);
+        helper.validateNoPendingTransactions(user);
+        helper.validateDepositTransaction(dto);
+        Transaction deposit = createTransactionEntity(user, dto);
 
-        checkExistingPendingTransaction(user);
-        walletService.validateNonNegativeBalance(currentBalance);
-        validateBalanceAfter(balanceAfter);
+        processTransaction(deposit);
+        transactionRepository.save(deposit);
+        return transactionMapper.createTransactionResponse(deposit);
+    }
 
-        Transaction transaction = transactionMapper.createTransactionFromDto(dto);
+    protected Transaction createWithdrawalTransaction(User user, Withdrawal request) {
+        Transaction transaction = new Transaction();
+        transaction.setType(TransactionType.WITHDRAWAL);
+        transaction.setWallet(user.getWallet());
+        transaction.setAmount(request.getAmount());
+        transaction.setCurrencyCode(request.getCurrencyCode());
+        setTransactionBalance(transaction);
+
         transaction.setStatus(TransactionStatus.PENDING);
-        transaction.setWallet(wallet);
-        transaction.setBalanceBefore(currentBalance);
-        transaction.setBalanceAfter(balanceAfter);
-        transaction.setReference(generateTransactionReference(dto.getType()));
-        transaction.setDescription(generateTransactionDescription(dto.getType(), dto.getAmount()));
+        transaction.setReference(helper.generateTransactionReference(TransactionType.WITHDRAWAL));
+        transaction.setDescription(helper.generateTransactionDescription(TransactionType.WITHDRAWAL, request.getAmount()));
 
+        transaction.setWithdrawal(request);
+        request.setTransaction(transaction);
+        return transaction;
+    }
+
+    @Transactional
+    public TransactionResponse createTransaction(TransactionRequest dto, Authentication authentication) {
+        User user = userHelper.findUserWithAuthentication(authentication);
+        helper.validateNoPendingTransactions(user);
+        helper.validateNonWithdrawalTransaction(dto);
+        Transaction transaction = createTransactionEntity(user, dto);
+
+        processTransaction(transaction);
         transactionRepository.save(transaction);
-        if (!dto.getType().equals(TransactionType.WITHDRAWAL)) {
-            processTransaction(transaction.getId());
-        }
         return transactionMapper.createTransactionResponse(transaction);
+    }
+
+    public TransactionResponse getTransaction(Long transactionId) {
+        return transactionMapper.createTransactionResponse(helper.findTransactionById(transactionId));
+    }
+
+    public List<TransactionResponse> getAllUserTransactions(Long userId) {
+        List<Transaction> transactionList = transactionRepository.getAllByWalletUserId(userId);
+        return transactionMapper.createTransactionResponseList(transactionList);
     }
 
     @Transactional
     public void cancelTransaction(Long id) {
-        Transaction transaction = findTransaction(id);
-        validatePendingTransaction(transaction, "Error cancelling transaction.");
+        Transaction transaction = helper.findTransactionById(id);
+        helper.validateTransactionIsPending(transaction, "Error cancelling non-pending transaction.");
         transaction.setStatus(TransactionStatus.CANCELED);
     }
 
-    public TransactionResponse getTransaction(Long transactionId) {
-        return transactionMapper.createTransactionResponse(findTransaction(transactionId));
-    }
-
-    protected void createWithdrawalTransaction(WithdrawalRequest request, User user) {
-        Transaction transaction = new Transaction();
-        Wallet wallet = user.getWallet();
-        transaction.setWallet(wallet);
-        transaction.setType(TransactionType.WITHDRAWAL);
-        transaction.setAmount(request.getAmount());
-        transaction.setCurrencyCode(request.getCurrencyCode());
+    // Transaction Helper Methods
+    private Transaction createTransactionEntity(User user, TransactionRequest dto) {
+        Transaction transaction = transactionMapper.createTransactionFromDto(dto);
+        transaction.setWallet(user.getWallet());
         transaction.setStatus(TransactionStatus.PENDING);
-        transaction.setBalanceBefore(wallet.getBalance());
-        transaction.setBalanceAfter
-                (calculateBalanceAfter(TransactionType.WITHDRAWAL, wallet.getBalance(), request.getAmount()));
-        transaction.setReference(generateTransactionReference(TransactionType.WITHDRAWAL));
-        transaction.setDescription(generateTransactionDescription(TransactionType.WITHDRAWAL, request.getAmount()));
-        transaction.setWithdrawalRequest(request);
-        request.setTransaction(transaction);
-        transactionRepository.save(transaction);
+        transaction.setReference(helper.generateTransactionReference(dto.type()));
+        transaction.setDescription(helper.generateTransactionDescription(dto.type(), dto.amount()));
+        return transaction;
     }
 
-    protected void processTransaction(Long id) {
-        Transaction transaction = findTransaction(id);
-        Wallet wallet = transaction.getWallet();
-        validatePendingTransaction(transaction, "Error processing transaction.");
-        Long balanceAfter = calculateBalanceAfter(transaction.getType(), wallet.getBalance(), transaction.getAmount());
-        transaction.setBalanceBefore(wallet.getBalance());
-        transaction.setBalanceAfter(balanceAfter);
-        wallet.setBalance(balanceAfter);
-        walletRepository.save(wallet);
+    protected void processTransaction(Transaction transaction) {
+        helper.validateTransactionIsPending(transaction, "Error processing non-pending transaction.");
+        setTransactionBalance(transaction);
+        setWalletBalance(transaction);
         transaction.setStatus(TransactionStatus.PAID);
+        transaction.setProcessedAt(LocalDateTime.now());
     }
 
-    @Transactional
-    protected void failTransaction(Long id) {
-        Transaction transaction = findTransaction(id);
-        transaction.setStatus(TransactionStatus.FAILED);
-    }
+    private void setTransactionBalance(Transaction transaction) {
+        Wallet wallet = transaction.getWallet();
+        Long currentBalance = wallet.getBalance();
+        Long transactionAmount = transaction.getAmount();
 
-    protected void validateTransactionIsPaid(Long transactionId) {
-        Transaction transaction = findTransaction(transactionId);
-        if (transaction.getStatus() != TransactionStatus.PAID) {
-            throw new InvalidTransactionStateException("Error validating transaction.");
+        transaction.setBalanceBefore(currentBalance);
+        switch (transaction.getType()) {
+            case DEPOSIT, CALL_EARNING -> {
+                transaction.setBalanceAfter(currentBalance + transactionAmount);
+            }
+            case WITHDRAWAL, CALL_CHARGE -> {
+                transaction.setBalanceAfter(currentBalance - transactionAmount);
+            }
         }
+        helper.validateNonNegativeWalletBalance(transaction.getBalanceAfter());
     }
 
-    private Transaction findTransaction(Long id) {
-        return transactionRepository.findById(id)
-                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
-    }
-
-    private Long calculateBalanceAfter(TransactionType type, Long currentBalance, Long transactionBalance) {
-        return switch (type) {
-            case DEPOSIT, CALL_EARNING -> currentBalance + transactionBalance;
-            case WITHDRAWAL, CALL_CHARGE -> currentBalance - transactionBalance;
-        };
-    }
-
-    private void checkExistingPendingTransaction(User user) {
-        if (transactionRepository.existsByWalletUserIdAndStatus(user.getId(), TransactionStatus.PENDING)) {
-            throw new ExistingTransactionException("Pending transaction already exists.");
+    private void setWalletBalance(Transaction transaction) {
+        Wallet wallet = transaction.getWallet();
+        User user = wallet.getUser();
+        Long transactionAmount = transaction.getAmount();
+        switch (transaction.getType()) {
+            case DEPOSIT, CALL_EARNING -> {
+                helper.validateNoOtherPendingTransactions(user, transaction.getId());
+                walletService.addFunds(wallet.getId(), transactionAmount);
+            }
+            case WITHDRAWAL, CALL_CHARGE -> {
+                helper.validateNoOtherPendingTransactions(user, transaction.getId());
+                walletService.subtractFunds(wallet.getId(), transactionAmount);
+            }
         }
-    }
-
-    private void validatePendingTransaction(Transaction transaction, String message) {
-        if (transaction.getStatus() != TransactionStatus.PENDING) {
-            throw new InvalidTransactionStateException(message);
-        }
-    }
-
-    private void validateBalanceAfter(Long balanceAfter) {
-        if (balanceAfter < 0L) {
-            throw new DeficientFundsException("Not enough funds to complete transaction");
-        }
-    }
-
-    private String generateTransactionReference(TransactionType type) {
-        String random = UUID.randomUUID().toString();
-        return type + "-" + random;
-    }
-
-    private String generateTransactionDescription(TransactionType type, Long amount) {
-        return type + " transaction of " + amount;
     }
 }

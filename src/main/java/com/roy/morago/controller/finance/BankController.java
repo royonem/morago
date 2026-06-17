@@ -15,20 +15,20 @@ import org.springframework.web.bind.annotation.*;
 public class BankController {
     private final BankService bankService;
 
-    @PostMapping("/link")
+    @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
     public BankAccountDTO linkBankAccount(@Valid @RequestBody BankAccountDTO dto, Authentication authentication) {
         return bankService.linkBankAccount(dto, authentication);
     }
 
-    @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isBankAccountOwner(#id, authentication)")
+    @GetMapping("/{id}")
     public BankAccountDTO getBankAccount(@PathVariable Long id) {
-        return bankService.getBankAccountById(id);
+        return bankService.getBankAccount(id);
     }
 
-    @DeleteMapping("/{id}/unlink")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isBankAccountOwner(#id, authentication)")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void unlinkBankAccount(@PathVariable Long id) {
         bankService.unlinkBankAccount(id);

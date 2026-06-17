@@ -1,18 +1,18 @@
 package com.roy.morago.service.finance;
 
-import com.roy.morago.dto.finance.RejectWithdrawalDTO;
-import com.roy.morago.dto.finance.WithdrawalRequestDTO;
-import com.roy.morago.dto.finance.WithdrawalRequestResponse;
+import com.roy.morago.dto.finance.WithdrawalRejection;
+import com.roy.morago.dto.finance.WithdrawalRequest;
+import com.roy.morago.dto.finance.WithdrawalResponse;
+import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
-import com.roy.morago.entity.finance.WithdrawalRequest;
+import com.roy.morago.entity.finance.Withdrawal;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.WithdrawalStatus;
-import com.roy.morago.exception.finance.*;
-import com.roy.morago.mapper.WithdrawalRequestMapper;
-import com.roy.morago.repository.finance.WithdrawalRequestRepository;
+import com.roy.morago.mapper.WithdrawalMapper;
+import com.roy.morago.repository.finance.TransactionRepository;
+import com.roy.morago.repository.finance.WithdrawalRepository;
 import com.roy.morago.service.user.UserHelper;
-import com.roy.morago.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -22,96 +22,74 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Service
 public class WithdrawalService {
-    private final WithdrawalRequestMapper mapper;
+    private final WithdrawalMapper mapper;
     private final TransactionService transactionService;
     private final UserHelper userHelper;
-    private final WithdrawalRequestRepository withdrawalRequestRepository;
+    private final WithdrawalRepository withdrawalRepository;
+    private final FinanceHelper financeHelper;
+    private final TransactionRepository transactionRepository;
 
     @Transactional
-    public WithdrawalRequestResponse createWithdrawalRequest(WithdrawalRequestDTO dto, Authentication authentication) {
+    public WithdrawalResponse createWithdrawal(WithdrawalRequest request, Authentication authentication) {
         User user = userHelper.findUserWithAuthentication(authentication);
         Wallet wallet = user.getWallet();
-        checkExistingPendingWithdrawal(user);
+        financeHelper.validateNoPendingWithdrawals(user);
 
-        validateSufficientFunds(dto.getAmount(), wallet);
+        financeHelper.validateSufficientWalletBalance(request.amount(), wallet);
 
-        WithdrawalRequest request = mapper.createWithdrawalRequestFromDto(dto);
-        request.setStatus(WithdrawalStatus.PENDING);
-        request.setWallet(wallet);
-        request.setRequester(user);
+        Withdrawal withdrawal = mapper.createEntityFromRequest(request);
+        withdrawal.setStatus(WithdrawalStatus.PENDING);
+        withdrawal.setWallet(wallet);
+        withdrawal.setRequester(user);
+        withdrawal.setBankAccount(user.getBankAccount());
 
-        transactionService.createWithdrawalTransaction(request, user);
-        withdrawalRequestRepository.save(request);
+        Transaction transaction = transactionService.createWithdrawalTransaction(user, withdrawal);
+        transactionRepository.save(transaction);
+        withdrawalRepository.save(withdrawal);
 
-        return mapper.createWithdrawalRequestResponse(request);
+        return mapper.createResponseFromEntity(withdrawal);
     }
 
-    public WithdrawalRequestResponse getWithdrawalRequest(Long requestId) {
-        WithdrawalRequest request = findWithdrawalRequest(requestId);
-        return mapper.createWithdrawalRequestResponse(request);
-    }
-
-    @Transactional
-    public void cancelWithdrawalRequest(Long requestId) {
-        WithdrawalRequest request = findWithdrawalRequest(requestId);
-        validatePendingWithdrawal(request);
-        request.setStatus(WithdrawalStatus.CANCELED);
-        transactionService.cancelTransaction(request.getTransaction().getId());
+    public WithdrawalResponse getWithdrawal(Long withdrawalId) {
+        Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
+        return mapper.createResponseFromEntity(withdrawal);
     }
 
     @Transactional
-    public void rejectWithdrawalRequest(Long requestId, Authentication adminAuth, RejectWithdrawalDTO rejectionDTO) {
-        WithdrawalRequest request = findWithdrawalRequest(requestId);
-        validatePendingWithdrawal(request);
-        logReview(request, adminAuth);
-        request.setRejectionReason(rejectionDTO.rejectionReason());
-        request.setStatus(WithdrawalStatus.REJECTED);
-        transactionService.failTransaction(request.getTransaction().getId());
+    public void cancelWithdrawal(Long withdrawalId) {
+        Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
+        financeHelper.validateWithdrawalIsPending(withdrawal);
+        withdrawal.setStatus(WithdrawalStatus.CANCELED);
+        transactionService.cancelTransaction(withdrawal.getTransaction().getId());
     }
 
     @Transactional
-    public void approveWithdrawalRequest(Long requestId, Authentication adminAuth) {
-        WithdrawalRequest request = findWithdrawalRequest(requestId);
-
-        // Final check for valid withdrawal
-        validatePendingWithdrawal(request);
-        validateSufficientFunds(request.getAmount(), request.getWallet());
-        logReview(request, adminAuth);
-
-        request.setStatus(WithdrawalStatus.APPROVED);
-
-        transactionService.processTransaction(request.getTransaction().getId());
-        transactionService.validateTransactionIsPaid(request.getTransaction().getId());
-        request.setPaidAt(LocalDateTime.now());
+    public void rejectWithdrawal(Long withdrawalId, Authentication adminAuth, WithdrawalRejection rejectionDTO) {
+        Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
+        financeHelper.validateWithdrawalIsPending(withdrawal);
+        logReview(withdrawal, adminAuth);
+        withdrawal.setRejectionReason(rejectionDTO.rejectionReason());
+        withdrawal.setStatus(WithdrawalStatus.REJECTED);
+        withdrawal.getTransaction().setStatus(TransactionStatus.FAILED);
     }
 
-    private void logReview(WithdrawalRequest request, Authentication adminAuth) {
-        request.setReviewer(userHelper.findUserWithAuthentication(adminAuth));
-        request.setReviewedAt(LocalDateTime.now());
+    @Transactional
+    public void approveWithdrawal(Long withdrawalId, Authentication adminAuth) {
+        Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
+
+        financeHelper.validateWithdrawalIsPending(withdrawal);
+        financeHelper.validateSufficientWalletBalance(withdrawal.getAmount(), withdrawal.getWallet());
+        logReview(withdrawal, adminAuth);
+
+        withdrawal.setStatus(WithdrawalStatus.APPROVED);
+
+        transactionService.processTransaction(withdrawal.getTransaction());
+        financeHelper.validateTransactionIsPaid(withdrawal.getTransaction());
+        withdrawal.setPaidAt(LocalDateTime.now());
     }
 
-    private void checkExistingPendingWithdrawal(User user) {
-        if (withdrawalRequestRepository.existsByRequesterAndStatus(user, WithdrawalStatus.PENDING)) {
-            throw new ExistingWithdrawalRequestException("Pending withdrawal request already exists.");
-        }
-    }
-
-    private void validateSufficientFunds(Long requestAmount, Wallet wallet) {
-        if (requestAmount > wallet.getBalance()) {
-            throw new DeficientFundsException("Request amount exceeds balance.");
-        }
-    }
-
-    private void validatePendingWithdrawal(WithdrawalRequest request) {
-        if (request.getStatus() != WithdrawalStatus.PENDING) {
-            throw new InvalidWithdrawalStateException("Withdrawal state is invalid.");
-        } else if (request.getTransaction().getStatus() != TransactionStatus.PENDING) {
-            throw new InvalidTransactionStateException("Transaction is not pending.");
-        }
-    }
-
-    private WithdrawalRequest findWithdrawalRequest(Long id) {
-        return withdrawalRequestRepository.findById(id)
-                .orElseThrow(() -> new WithdrawalNotFoundException("Withdrawal request not found"));
+    private void logReview(Withdrawal withdrawal, Authentication adminAuth) {
+        withdrawal.setReviewer(userHelper.findUserWithAuthentication(adminAuth));
+        withdrawal.setReviewedAt(LocalDateTime.now());
     }
 }

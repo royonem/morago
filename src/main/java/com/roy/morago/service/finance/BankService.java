@@ -2,7 +2,6 @@ package com.roy.morago.service.finance;
 
 import com.roy.morago.dto.finance.BankAccountDTO;
 import com.roy.morago.entity.finance.BankAccount;
-import com.roy.morago.exception.finance.BankNotFoundException;
 import com.roy.morago.mapper.BankAccountMapper;
 import com.roy.morago.repository.finance.BankRepository;
 import com.roy.morago.service.user.UserHelper;
@@ -17,6 +16,7 @@ public class BankService {
     private final BankRepository bankRepository;
     private final UserHelper userHelper;
     private final BankAccountMapper bankAccountMapper;
+    private final FinanceHelper helper;
 
     @Transactional
     public BankAccountDTO linkBankAccount(BankAccountDTO dto, Authentication authentication) {
@@ -28,16 +28,11 @@ public class BankService {
 
     @Transactional
     public void unlinkBankAccount(Long id) {
-        if (bankRepository.existsById(id)) {
-            bankRepository.deleteById(id);
-        } else {
-            throw new BankNotFoundException("Bank account not found");
-        }
+        BankAccount account = helper.findBankAccountById(id);
+        bankRepository.delete(account);
     }
 
-    public BankAccountDTO getBankAccountById(Long id) {
-        BankAccount bankAccount = bankRepository.findById(id).orElseThrow(()
-                -> new BankNotFoundException("Bank account not found"));
-        return bankAccountMapper.createBankAccountDTO(bankAccount);
+    public BankAccountDTO getBankAccount(Long id) {
+        return bankAccountMapper.createBankAccountDTO(helper.findBankAccountById(id));
     }
 }
