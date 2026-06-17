@@ -7,14 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class LoginRequest {
-    @Email
-    @NotBlank(message = "Email is required.")
-    private String email;
-    @NotBlank(message = "Password is required.")
-    private String password;
+public record LoginRequest(
+        @Email
+        @NotBlank(message = "Email is required.")
+        String email,
+        @NotBlank(message = "Password is required.")
+        String password
+) {
 }
