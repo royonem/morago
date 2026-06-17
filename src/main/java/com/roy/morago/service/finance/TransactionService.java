@@ -29,14 +29,42 @@ public class TransactionService {
     private final UserHelper userHelper;
 
     @Transactional
+    public TransactionResponse createDepositTransaction(TransactionRequest dto, Authentication authentication) {
+        User user = userHelper.findUserWithAuthentication(authentication);
+        helper.validateNoPendingTransactions(user);
+        helper.validateDepositTransaction(dto);
+        Transaction deposit = createTransactionEntity(user, dto);
+
+        processTransaction(deposit);
+        transactionRepository.save(deposit);
+        return transactionMapper.createTransactionResponse(deposit);
+    }
+
+    protected Transaction createWithdrawalTransaction(User user, Withdrawal request) {
+        Transaction transaction = new Transaction();
+        transaction.setType(TransactionType.WITHDRAWAL);
+        transaction.setWallet(user.getWallet());
+        transaction.setAmount(request.getAmount());
+        transaction.setCurrencyCode(request.getCurrencyCode());
+        setTransactionBalance(transaction);
+
+        transaction.setStatus(TransactionStatus.PENDING);
+        transaction.setReference(helper.generateTransactionReference(TransactionType.WITHDRAWAL));
+        transaction.setDescription(helper.generateTransactionDescription(TransactionType.WITHDRAWAL, request.getAmount()));
+
+        transaction.setWithdrawal(request);
+        request.setTransaction(transaction);
+        return transaction;
+    }
+
+    @Transactional
     public TransactionResponse createTransaction(TransactionRequest dto, Authentication authentication) {
         User user = userHelper.findUserWithAuthentication(authentication);
         helper.validateNoPendingTransactions(user);
+        helper.validateNonWithdrawalTransaction(dto);
         Transaction transaction = createTransactionEntity(user, dto);
 
-        if (!dto.type().equals(TransactionType.WITHDRAWAL)) {
-            processTransaction(transaction);
-        }
+        processTransaction(transaction);
         transactionRepository.save(transaction);
         return transactionMapper.createTransactionResponse(transaction);
     }
@@ -64,23 +92,6 @@ public class TransactionService {
         transaction.setStatus(TransactionStatus.PENDING);
         transaction.setReference(helper.generateTransactionReference(dto.type()));
         transaction.setDescription(helper.generateTransactionDescription(dto.type(), dto.amount()));
-        return transaction;
-    }
-
-    protected Transaction createWithdrawalTransaction(User user, Withdrawal request) {
-        Transaction transaction = new Transaction();
-        transaction.setType(TransactionType.WITHDRAWAL);
-        transaction.setWallet(user.getWallet());
-        transaction.setAmount(request.getAmount());
-        transaction.setCurrencyCode(request.getCurrencyCode());
-        setTransactionBalance(transaction);
-
-        transaction.setStatus(TransactionStatus.PENDING);
-        transaction.setReference(helper.generateTransactionReference(TransactionType.WITHDRAWAL));
-        transaction.setDescription(helper.generateTransactionDescription(TransactionType.WITHDRAWAL, request.getAmount()));
-
-        transaction.setWithdrawal(request);
-        request.setTransaction(transaction);
         return transaction;
     }
 

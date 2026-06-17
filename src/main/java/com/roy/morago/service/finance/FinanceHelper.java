@@ -1,5 +1,6 @@
 package com.roy.morago.service.finance;
 
+import com.roy.morago.dto.finance.TransactionRequest;
 import com.roy.morago.entity.finance.BankAccount;
 import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
@@ -49,6 +50,18 @@ public class FinanceHelper {
     }
 
     // Validation Helpers
+    protected void validateDepositTransaction(TransactionRequest dto) {
+        if (dto.type() !=  TransactionType.DEPOSIT) {
+            throw new InvalidTransactionStateException("Transaction type is invalid.");
+        }
+    }
+
+    protected void validateNonWithdrawalTransaction(TransactionRequest dto) {
+        if (dto.type() == TransactionType.WITHDRAWAL) {
+            throw new InvalidTransactionStateException("Transaction type is invalid.");
+        }
+    }
+
     protected void validateNoPendingTransactions(User user) {
         if (transactionRepository.existsByWalletUserIdAndStatus(user.getId(), TransactionStatus.PENDING)) {
             throw new ExistingTransactionException("Pending transaction already exists.");

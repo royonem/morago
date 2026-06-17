@@ -19,10 +19,10 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/")
+    @PostMapping("/deposits")
     @ResponseStatus(HttpStatus.CREATED)
-    public TransactionResponse createTransaction(@Valid @RequestBody TransactionRequest dto, Authentication authentication) {
-        return transactionService.createTransaction(dto, authentication);
+    public TransactionResponse createDeposit(@Valid @RequestBody TransactionRequest dto, Authentication authentication) {
+        return transactionService.createDepositTransaction(dto, authentication);
     }
 
     @PreAuthorize("hasRole('ADMIN') or @securityService.isTransactionOwner(#id, authentication)")
