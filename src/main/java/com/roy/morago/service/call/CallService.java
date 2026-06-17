@@ -20,6 +20,7 @@ public class CallService {
     private final CallMapper mapper;
     private final CallHelper helper;
 
+    @Transactional
     public CallResponse requestCall(CallRequest callRequest, User caller) {
         Call call = helper.createCall(callRequest);
         call.setStatus(CallStatus.REQUESTED);
@@ -98,9 +99,10 @@ public class CallService {
     }
 
     @Transactional
-    public void rateCall(Long id, Integer rating) {
+    public void rateCall(Long callId, Integer rating) {
+        Call call = helper.findCallById(callId);
         helper.validateCallRating(rating);
-        Call call = helper.findCallById(id);
+        helper.validateCallIsEnded(call);
         call.setRating(rating);
     }
 }

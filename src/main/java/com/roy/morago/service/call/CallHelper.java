@@ -64,7 +64,7 @@ public class CallHelper {
         validateCallIsRequested(call);
         User client = userHelper.findUserById(request.clientId());
         long maxDuration = client.getWallet().getBalance() / 1000;
-        validateCallFundsAreSufficient(call, maxDuration);
+        validateCallFundsAreSufficient(maxDuration);
         call.setMaxCallTime(maxDuration);
     }
 
@@ -124,9 +124,14 @@ public class CallHelper {
         }
     }
 
-    private void validateCallFundsAreSufficient(Call call, Long maxDuration) {
+    protected void validateCallIsEnded(Call call) {
+        if (call.getStatus() != CallStatus.ENDED) {
+            throw new InvalidCallStateException("Cannot rate this call");
+        }
+    }
+
+    private void validateCallFundsAreSufficient(Long maxDuration) {
         if (maxDuration <= 0) {
-            failCall(call);
             throw new DeficientFundsException("Client does not have enough funds for a call");
         }
     }
@@ -135,11 +140,5 @@ public class CallHelper {
         if (rating == null || rating < 1 || rating > 5) {
             throw new InvalidCallRatingException("Rating must be 1-5");
         }
-    }
-
-    private void failCall(Call call) {
-        call.setStatus(CallStatus.FAILED);
-        call.setMaxCallTime(0L);
-        callRepository.save(call);
     }
 }
