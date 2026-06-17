@@ -4,7 +4,9 @@ import com.roy.morago.dto.auth.*;
 import com.roy.morago.entity.auth.RefreshToken;
 import com.roy.morago.entity.user.Role;
 import com.roy.morago.entity.user.User;
+import com.roy.morago.enums.Availability;
 import com.roy.morago.enums.CurrencyCode;
+import com.roy.morago.enums.UserStatus;
 import com.roy.morago.exception.auth.InvalidCredentialsException;
 import com.roy.morago.exception.auth.DuplicateEmailException;
 import com.roy.morago.exception.auth.PasswordMismatchException;
@@ -19,6 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +48,7 @@ public class AuthService {
                             loginRequest.password()
                     )
             );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
             return createLoginResponse(userHelper.findUserWithAuthentication(authentication));
         } catch (AuthenticationException e) {
             throw new InvalidCredentialsException("Invalid username or password");
@@ -94,6 +98,8 @@ public class AuthService {
         }
         user.getRoles().add(role);
         user.setPasswordHash(passwordEncoder.encode(password));
+        user.setAvailability(Availability.OFFLINE);
+        user.setStatus(UserStatus.UNVERIFIED);
         User savedUser = userRepository.save(user);
         walletService.createWallet(savedUser, CurrencyCode.KRW);
     }
