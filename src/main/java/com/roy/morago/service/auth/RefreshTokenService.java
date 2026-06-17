@@ -18,14 +18,13 @@ public class RefreshTokenService {
     @Value("${app.jwt.refresh-expiration-ms}")
     private long refreshExpiration;
 
-    public String createRefreshToken(User user) {
+    public RefreshToken createRefreshToken(User user) {
         RefreshToken refreshToken = new RefreshToken();
         String token = UUID.randomUUID().toString();
         refreshToken.setToken(token);
         refreshToken.setUser(user);
         refreshToken.setExpiresAt(Instant.now().plusMillis(refreshExpiration));
-        refreshTokenRepository.save(refreshToken);
-        return token;
+        return refreshTokenRepository.save(refreshToken);
     }
 
     public RefreshToken findByToken(String token) {
@@ -47,8 +46,13 @@ public class RefreshTokenService {
         return refreshToken;
     }
 
-    public void revokeRefreshToken(String token) {
-        RefreshToken refreshToken = findByToken(token);
+    public void validateRefreshTokenOwner(RefreshToken refreshToken, User currentUser) {
+        if (!refreshToken.getUser().getId().equals(currentUser.getId())) {
+            throw new InvalidRefreshTokenException("Cannot revoke another user's token");
+        }
+    }
+
+    public void revokeRefreshToken(RefreshToken refreshToken) {
         refreshToken.setRevoked(true);
         refreshTokenRepository.save(refreshToken);
     }
