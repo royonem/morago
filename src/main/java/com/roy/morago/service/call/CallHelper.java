@@ -9,6 +9,7 @@ import com.roy.morago.exception.finance.DeficientFundsException;
 import com.roy.morago.mapper.CallMapper;
 import com.roy.morago.repository.call.CallRepository;
 import com.roy.morago.service.finance.TransactionService;
+import com.roy.morago.service.topic.TopicHelper;
 import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -23,9 +24,15 @@ public class CallHelper {
     private final CallRepository callRepository;
     private final UserHelper userHelper;
     private final TransactionService transactionService;
+    private final TopicHelper topicHelper;
 
     protected Call createCall(CallRequest callRequest) {
-        return callMapper.createEntityFromRequest(callRequest);
+        Call call = callMapper.createEntityFromRequest(callRequest);
+        call.setClient(userHelper.findUserById(callRequest.clientId()));
+        call.setTranslator(userHelper.findUserById(callRequest.translatorId()));
+        call.setTopic(topicHelper.findTopicById(callRequest.topicId()));
+        call.setCost(0L);
+        return call;
     }
 
     protected void createCallTransactions(Call call) {
