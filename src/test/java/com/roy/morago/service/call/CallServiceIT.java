@@ -8,10 +8,7 @@ import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CallStatus;
 import com.roy.morago.exception.call.*;
 import com.roy.morago.exception.finance.DeficientFundsException;
-import com.roy.morago.exception.finance.TransactionNotFoundException;
 import com.roy.morago.service.SetupHelper;
-import com.roy.morago.service.user.UserHelper;
-import com.roy.morago.service.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,9 +73,9 @@ public class CallServiceIT {
     void testRequestCallAsClient() {
         testCallResponse = callService.requestCall(testCallRequest, testClient);
         testCall = callHelper.findCallById(testCallResponse.id());
-        assertThat(testCall.getClient().getId().equals(testClient.getId()));
-        assertThat(testCall.getTranslator().getId().equals(testTranslator.getId()));
-        assertThat(testCall.getStatus().equals(CallStatus.RINGING));
+        assertThat(testCall.getClient().getId()).isEqualTo(testClient.getId());
+        assertThat(testCall.getTranslator().getId()).isEqualTo(testTranslator.getId());
+        assertThat(testCall.getStatus()).isEqualTo(CallStatus.RINGING);
         assertThat(testCall.getIsClientInitiator()).isEqualTo(true);
     }
 
@@ -88,9 +85,9 @@ public class CallServiceIT {
         testCallResponse = callService.acceptCall(testCallResponse.id(), testTranslator);
         testCall = callHelper.findCallById(testCallResponse.id());
 
-        assertThat(testCall.getClient().getId().equals(testClient.getId()));
-        assertThat(testCall.getTranslator().getId().equals(testTranslator.getId()));
-        assertThat(testCall.getStatus().equals(CallStatus.ACCEPTED));
+        assertThat(testCall.getClient().getId()).isEqualTo(testClient.getId());
+        assertThat(testCall.getTranslator().getId()).isEqualTo(testTranslator.getId());
+        assertThat(testCall.getStatus()).isEqualTo(CallStatus.ACCEPTED);
         assertThat(testCall.getIsClientInitiator()).isEqualTo(true);
         assertNotNull(testCall.getAcceptedAt());
     }
@@ -102,7 +99,7 @@ public class CallServiceIT {
         testCallResponse = callService.startCall(testCallResponse.id());
         testCall = callHelper.findCallById(testCallResponse.id());
 
-        assertThat(testCall.getStatus().equals(CallStatus.IN_PROGRESS));
+        assertThat(testCall.getStatus()).isEqualTo(CallStatus.IN_PROGRESS);
         assertNotNull(testCall.getStartedAt());
     }
 
@@ -118,7 +115,7 @@ public class CallServiceIT {
         testCallResponse = callService.endCall(testCallResponse.id());
         testCall = callHelper.findCallById(testCallResponse.id());
 
-        assertThat(testCall.getStatus().equals(CallStatus.ENDED));
+        assertThat(testCall.getStatus()).isEqualTo(CallStatus.ENDED);
         assertNotNull(testCall.getEndedAt());
         assertThat(testCall.getCost()).isEqualTo(1000L);
         assertThat(testWalletClient.getBalance()).isEqualTo(0L);
@@ -138,7 +135,7 @@ public class CallServiceIT {
         testCallResponse = callService.endCall(testCallResponse.id());
         testCall = callHelper.findCallById(testCallResponse.id());
 
-        assertThat(testCall.getStatus().equals(CallStatus.ENDED));
+        assertThat(testCall.getStatus()).isEqualTo(CallStatus.ENDED);
         assertNotNull(testCall.getEndedAt());
         assertThat(testCall.getCost()).isEqualTo(1000L);
         assertThat(testWalletClient.getBalance()).isEqualTo(0L);
@@ -152,9 +149,9 @@ public class CallServiceIT {
         testCall = callHelper.findCallById(testCallResponse.id());
 
         CallResponse callResponse = callService.getCall(testCall.getId());
-        assertThat(callResponse.clientId().equals(testClient.getId()));
-        assertThat(callResponse.translatorId().equals(testTranslator.getId()));
-        assertThat(callResponse.status().equals(CallStatus.RINGING));
+        assertThat(callResponse.clientId()).isEqualTo(testClient.getId());
+        assertThat(callResponse.translatorId()).isEqualTo(testTranslator.getId());
+        assertThat(callResponse.status()).isEqualTo(CallStatus.RINGING);
     }
 
     @Test
@@ -164,7 +161,7 @@ public class CallServiceIT {
         testCallResponse = callService.cancelCall(testCall.getId(), testClient);
         testCall = callHelper.findCallById(testCallResponse.id());
 
-        assertThat(testCall.getStatus().equals(CallStatus.CANCELED));
+        assertThat(testCall.getStatus()).isEqualTo(CallStatus.CANCELED);
         assertNotNull(testCall.getCanceledAt());
     }
 
@@ -174,7 +171,7 @@ public class CallServiceIT {
         testCall = callHelper.findCallById(testCallResponse.id());
         testCallResponse = callService.declineCall(testCall.getId(), testTranslator);
 
-        assertThat(testCall.getStatus().equals(CallStatus.DECLINED));
+        assertThat(testCall.getStatus()).isEqualTo(CallStatus.DECLINED);
         assertNotNull(testCall.getCanceledAt());
     }
 
