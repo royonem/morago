@@ -55,7 +55,6 @@ public class TransactionServiceIT {
         testWallet = setUpHelper.createTestWallet(testUser);
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testCreateDepositTransaction() {
         testTransaction = setUpHelper.createTestTransaction(TransactionType.DEPOSIT, 500L);
@@ -85,7 +84,6 @@ public class TransactionServiceIT {
         verificationHelper.verifyTransactionIsProcessed(Boolean.TRUE, testTransaction);
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testCreateCallEarningTransaction() {
         testTransaction = setUpHelper.createTestTransaction(TransactionType.CALL_EARNING, 200L);
@@ -94,7 +92,6 @@ public class TransactionServiceIT {
         verificationHelper.verifyTransactionIsProcessed(Boolean.TRUE, testTransaction);
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testCancelTransaction() {
         testTransaction = setUpHelper.createPendingTestTransaction(TransactionType.DEPOSIT, 400L, testWallet);
@@ -104,7 +101,6 @@ public class TransactionServiceIT {
         verificationHelper.verifyTransactionIsProcessed(Boolean.FALSE, testTransaction);
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testGetTransaction() {
         testTransaction = setUpHelper.createTestTransaction(TransactionType.DEPOSIT, 500L);
@@ -114,21 +110,18 @@ public class TransactionServiceIT {
         verificationHelper.verifyTransactionStatus(TransactionStatus.PAID,  testTransaction);
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testGetTransaction_notFound_throwsException() {
         assertThatThrownBy(() -> transactionService.getTransaction(-1L))
                 .isInstanceOf(TransactionNotFoundException.class);
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testCreateCallChargeTransaction_insufficientFunds_throwsException() {
         assertThatThrownBy(() -> setUpHelper.createTestTransaction(TransactionType.CALL_CHARGE, 1100L))
                 .isInstanceOf(DeficientFundsException.class);
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testCreateTransaction_existingPending_throwsException() {
         testTransaction = setUpHelper.createPendingTestTransaction(TransactionType.CALL_CHARGE, 500L,  testWallet);
