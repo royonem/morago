@@ -13,6 +13,8 @@ import com.roy.morago.mapper.TransactionMapper;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -104,9 +106,9 @@ public class TransactionService {
         return transactionMapper.createTransactionResponse(helper.findTransactionById(transactionId));
     }
 
-    public List<TransactionResponse> getAllUserTransactions(Long userId) {
-        List<Transaction> transactionList = transactionRepository.getAllByWalletUserId(userId);
-        return transactionMapper.createTransactionResponseList(transactionList);
+    public Page<TransactionResponse> getAllUserTransactions(Long userId, Pageable pageable) {
+        return transactionRepository.findByWalletUserId(userId, pageable)
+                .map(transactionMapper::createTransactionResponse);
     }
 
     @Transactional
