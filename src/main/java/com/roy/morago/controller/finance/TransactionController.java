@@ -38,7 +38,7 @@ public class TransactionController {
     @PreAuthorize("hasRole('ADMIN') or @securityService.isTransactionOwner(#id, authentication)")
     @GetMapping("/user/{id}")
     public Page<TransactionResponse> getAllTransactions(@PathVariable Long id
-            , @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            , @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return transactionService.getAllUserTransactions(id, pageable);
     }
