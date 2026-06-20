@@ -2,12 +2,16 @@ package com.roy.morago.service.call;
 
 import com.roy.morago.dto.call.CallRequest;
 import com.roy.morago.dto.call.CallResponse;
+import com.roy.morago.dto.call.CallSearchRequest;
 import com.roy.morago.entity.call.Call;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CallStatus;
 import com.roy.morago.mapper.CallMapper;
 import com.roy.morago.repository.call.CallRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +39,26 @@ public class CallService {
     public CallResponse getCall(Long callId) {
         Call call = helper.findCallById(callId);
         return mapper.createResponseFromEntity(call);
+    }
+
+    public Page<CallResponse> getAllCalls(Pageable pageable) {
+        return repo.findAll(pageable).map(mapper::createResponseFromEntity);
+    }
+
+    public Page<CallResponse> getCallsByUserId(Long userId, Pageable pageable) {
+        return repo.findByClientIdOrTranslatorId(userId, pageable).map(mapper::createResponseFromEntity);
+    }
+
+    public Page<CallResponse> searchCalls(CallSearchRequest request) {
+        Specification<Call> spec = helper.buildSpecification(request);
+        return repo.findAll(spec, request.toPageable())
+                .map(mapper::createResponseFromEntity);
+    }
+
+    public Page<CallResponse> searchCallsByUserId(Long userId, CallSearchRequest request) {
+        Specification<Call> spec = helper.buildSpecificationForUser(userId, request);
+        return repo.findAll(spec, request.toPageable())
+                .map(mapper::createResponseFromEntity);
     }
 
     @Transactional
@@ -99,10 +123,11 @@ public class CallService {
     }
 
     @Transactional
-    public void rateCall(Long callId, Integer rating) {
+    public CallResponse rateCall(Long callId, Integer rating) {
         Call call = helper.findCallById(callId);
         helper.validateCallRating(rating);
         helper.validateCallIsEnded(call);
         call.setRating(rating);
+        return mapper.createResponseFromEntity(call);
     }
 }
