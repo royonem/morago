@@ -2,6 +2,7 @@ package com.roy.morago.service.finance;
 
 import com.roy.morago.dto.finance.TransactionRequest;
 import com.roy.morago.dto.finance.TransactionResponse;
+import com.roy.morago.dto.finance.TransactionSearchRequest;
 import com.roy.morago.entity.call.Call;
 import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
@@ -15,12 +16,12 @@ import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -106,8 +107,24 @@ public class TransactionService {
         return transactionMapper.createTransactionResponse(helper.findTransactionById(transactionId));
     }
 
-    public Page<TransactionResponse> getAllUserTransactions(Long userId, Pageable pageable) {
+    public Page<TransactionResponse> getAllTransactions(Pageable pageable) {
+        return transactionRepository.findAll(pageable).map(transactionMapper::createTransactionResponse);
+    }
+
+    public Page<TransactionResponse> getTransactionsByUserId(Long userId, Pageable pageable) {
         return transactionRepository.findByWalletUserId(userId, pageable)
+                .map(transactionMapper::createTransactionResponse);
+    }
+
+    public Page<TransactionResponse> searchTransactions(TransactionSearchRequest request) {
+        Specification<Transaction> spec = helper.buildSpecification(request);
+        return transactionRepository.findAll(spec, request.toPageable())
+                .map(transactionMapper::createTransactionResponse);
+    }
+
+    public Page<TransactionResponse> searchTransactionsByUserId(Long userId, TransactionSearchRequest request) {
+        Specification<Transaction> spec = helper.buildSpecificationForUser(userId, request);
+        return transactionRepository.findAll(spec, request.toPageable())
                 .map(transactionMapper::createTransactionResponse);
     }
 

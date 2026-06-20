@@ -131,7 +131,7 @@ public class TransactionServiceIT {
             transactionService.createDepositTransaction(request, authentication);
         }
         Pageable firstPage = PageRequest.of(0, 20, Sort.by("id").descending());
-        Page<TransactionResponse> page1 = transactionService.getAllUserTransactions(user.getId(), firstPage);
+        Page<TransactionResponse> page1 = transactionService.getTransactionsByUserId(user.getId(), firstPage);
 
         assertEquals(50, page1.getTotalElements());
         assertEquals(3, page1.getTotalPages());
@@ -141,7 +141,7 @@ public class TransactionServiceIT {
         assertEquals(3100L, page1.getContent().getLast().amount());
 
         Pageable thirdPage = PageRequest.of(2, 20, Sort.by("id").descending());
-        Page<TransactionResponse> page3 = transactionService.getAllUserTransactions(user.getId(), thirdPage);
+        Page<TransactionResponse> page3 = transactionService.getTransactionsByUserId(user.getId(), thirdPage);
         assertEquals(10, page3.getContent().size());
         assertEquals(2, page3.getNumber());
         assertEquals(100L, page3.getContent().getLast().amount());
