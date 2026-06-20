@@ -1,6 +1,7 @@
 package com.roy.morago.service.call;
 
 import com.roy.morago.dto.call.CallRequest;
+import com.roy.morago.dto.call.CallSearchRequest;
 import com.roy.morago.entity.call.Call;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CallStatus;
@@ -11,11 +12,18 @@ import com.roy.morago.repository.call.CallRepository;
 import com.roy.morago.service.finance.TransactionService;
 import com.roy.morago.service.topic.TopicHelper;
 import com.roy.morago.service.user.UserHelper;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -40,9 +48,74 @@ public class CallHelper {
         transactionService.createCallEarningTransaction(call, call.getTranslator());
     }
 
-    protected Call findCallById(Long callId) {
+    public Call findCallById(Long callId) {
         return callRepository.findById(callId)
                 .orElseThrow(() -> new CallNotFoundException("Call not found"));
+    }
+
+    protected Specification<Call> buildSpecification(CallSearchRequest request) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = buildPredicates(request, root, cb);
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    protected Specification<Call> buildSpecificationForUser(Long userId, CallSearchRequest request) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(
+                    cb.or(
+                            cb.equal(root.join("client").get("id"), userId),
+                            cb.equal(root.join("translator").get("id"), userId)
+                    )
+            );
+            predicates.addAll(buildPredicates(request, root, cb));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private List<Predicate> buildPredicates(CallSearchRequest request, Root<Call> root, CriteriaBuilder cb) {
+        List<Predicate> predicates = new ArrayList<>();
+        Optional.ofNullable(request.clientId()).ifPresent(id ->
+                predicates.add(cb.equal(root.join("client").get("id"), id)));
+        Optional.ofNullable(request.translatorId()).ifPresent(id ->
+                predicates.add(cb.equal(root.join("translator").get("id"), id)));
+        Optional.ofNullable(request.topicId()).ifPresent(id ->
+                predicates.add(cb.equal(root.join("topic").get("id"), id)));
+
+        Optional.ofNullable(request.status()).ifPresent(status ->
+                predicates.add(cb.equal(root.get("status"), status)));
+
+        // Rating range
+        Optional.ofNullable(request.ratingFrom()).ifPresent(rating ->
+                predicates.add(cb.greaterThanOrEqualTo(root.get("rating"), rating)));
+        Optional.ofNullable(request.ratingTo()).ifPresent(rating ->
+                predicates.add(cb.lessThanOrEqualTo(root.get("rating"), rating)));
+
+        // Accepted date range
+        Optional.ofNullable(request.acceptedFrom()).ifPresent(date ->
+                predicates.add(cb.greaterThanOrEqualTo(root.get("acceptedAt"), date)));
+        Optional.ofNullable(request.acceptedTo()).ifPresent(date ->
+                predicates.add(cb.lessThanOrEqualTo(root.get("acceptedAt"), date)));
+
+        // Started date range
+        Optional.ofNullable(request.startedFrom()).ifPresent(date ->
+                predicates.add(cb.greaterThanOrEqualTo(root.get("startedAt"), date)));
+        Optional.ofNullable(request.startedTo()).ifPresent(date ->
+                predicates.add(cb.lessThanOrEqualTo(root.get("startedAt"), date)));
+
+        // Ended date range
+        Optional.ofNullable(request.endedFrom()).ifPresent(date ->
+                predicates.add(cb.greaterThanOrEqualTo(root.get("endedAt"), date)));
+        Optional.ofNullable(request.endedTo()).ifPresent(date ->
+                predicates.add(cb.lessThanOrEqualTo(root.get("endedAt"), date)));
+
+        // Canceled date range
+        Optional.ofNullable(request.canceledFrom()).ifPresent(date ->
+                predicates.add(cb.greaterThanOrEqualTo(root.get("canceledAt"), date)));
+        Optional.ofNullable(request.canceledTo()).ifPresent(date ->
+                predicates.add(cb.lessThanOrEqualTo(root.get("canceledAt"), date)));
+        return predicates;
     }
 
     protected void setCallInitiator(Call call, User caller) {
