@@ -39,12 +39,6 @@ public class CallController {
         return callService.getAllCalls(pageable);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/search")
-    public Page<CallResponse> searchCalls(@RequestBody CallSearchRequest request) {
-        return callService.searchCalls(request);
-    }
-
     @PreAuthorize("hasRole('ADMIN') or @securityService.isCurrentUser(#userId, authentication)")
     @GetMapping("/list/{userId}")
     public Page<CallResponse> getUserCalls(@PathVariable Long userId
@@ -53,6 +47,12 @@ public class CallController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/search")
+    public Page<CallResponse> searchCalls(@RequestBody CallSearchRequest request) {
+        return callService.searchCalls(request);
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isCurrentUser(#userId, authentication)")
     @PostMapping("/search/{userId}")
     public Page<CallResponse> searchUserCalls(@PathVariable Long userId, @RequestBody CallSearchRequest request) {
         return callService.searchCallsByUserId(userId, request);
