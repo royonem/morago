@@ -7,6 +7,7 @@ public record CallRequest(
         Long clientId,
         @NotNull(message = "translatorId is required")
         Long translatorId,
+        @NotNull(message = "topicId is required")
         Long topicId
 ) {
 }
