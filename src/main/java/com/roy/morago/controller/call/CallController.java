@@ -5,6 +5,7 @@ import com.roy.morago.dto.call.CallResponse;
 import com.roy.morago.dto.call.CallSearchRequest;
 import com.roy.morago.security.UserPrincipal;
 import com.roy.morago.service.call.CallService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,7 @@ public class CallController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/")
-    public CallResponse requestCall(@RequestBody CallRequest callRequest, @AuthenticationPrincipal UserPrincipal principal) {
+    public CallResponse requestCall(@Valid @RequestBody CallRequest callRequest, @AuthenticationPrincipal UserPrincipal principal) {
         return callService.requestCall(callRequest, principal.getUser());
     }
 
