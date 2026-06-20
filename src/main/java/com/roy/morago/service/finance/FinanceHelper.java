@@ -1,6 +1,9 @@
 package com.roy.morago.service.finance;
 
+import com.roy.morago.dto.call.CallSearchRequest;
 import com.roy.morago.dto.finance.TransactionRequest;
+import com.roy.morago.dto.finance.TransactionSearchRequest;
+import com.roy.morago.entity.call.Call;
 import com.roy.morago.entity.finance.BankAccount;
 import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
@@ -15,9 +18,16 @@ import com.roy.morago.repository.finance.BankRepository;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
 import com.roy.morago.repository.finance.WithdrawalRepository;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -133,5 +143,60 @@ public class FinanceHelper {
 
     public String generateTransactionDescription(TransactionType type, Long amount) {
         return type + " transaction of " + amount;
+    }
+
+    // Build Helpers
+    protected Specification<Transaction> buildSpecification(TransactionSearchRequest request) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = buildPredicates(request, root, cb);
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    protected Specification<Transaction> buildSpecificationForUser(Long userId, TransactionSearchRequest request) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(
+                    cb.or(
+                            cb.equal(root.join("user").get("id"), userId)
+                    )
+            );
+            predicates.addAll(buildPredicates(request, root, cb));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private List<Predicate> buildPredicates(TransactionSearchRequest request, Root<Transaction> root, CriteriaBuilder cb) {
+        List<Predicate> predicates = new ArrayList<>();
+        Optional.ofNullable(request.walletUserId()).ifPresent(id ->
+                predicates.add(cb.equal(root.join("wallet").join("user").get("id"), id)));
+        Optional.ofNullable(request.callId()).ifPresent(id ->
+                predicates.add(cb.equal(root.join("call").get("id"), id)));
+
+        Optional.ofNullable(request.type()).ifPresent(type ->
+                predicates.add(cb.equal(root.get("type"), type)));
+        Optional.ofNullable(request.status()).ifPresent(status ->
+                predicates.add(cb.equal(root.get("status"), status)));
+        Optional.ofNullable(request.currencyCode()).ifPresent(code ->
+                predicates.add(cb.equal(root.get("currencyCode"), code)));
+
+        // Amount range
+        Optional.ofNullable(request.amountFrom()).ifPresent(amount ->
+                predicates.add(cb.greaterThanOrEqualTo(root.get("amount"), amount)));
+        Optional.ofNullable(request.amountTo()).ifPresent(amount ->
+                predicates.add(cb.lessThanOrEqualTo(root.get("amount"), amount)));
+
+        // Created date range
+        Optional.ofNullable(request.createdFrom()).ifPresent(date ->
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), date)));
+        Optional.ofNullable(request.createdTo()).ifPresent(date ->
+                predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), date)));
+
+        // Processed date range
+        Optional.ofNullable(request.processedFrom()).ifPresent(date ->
+                predicates.add(cb.greaterThanOrEqualTo(root.get("processedAt"), date)));
+        Optional.ofNullable(request.processedTo()).ifPresent(date ->
+                predicates.add(cb.lessThanOrEqualTo(root.get("processedAt"), date)));
+        return predicates;
     }
 }
