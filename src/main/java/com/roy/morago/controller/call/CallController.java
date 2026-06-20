@@ -65,6 +65,12 @@ public class CallController {
     }
 
     @PreAuthorize("@securityService.isCallParticipant(#id, authentication)")
+    @PostMapping("/{id}/start")
+    public CallResponse startCall(@PathVariable Long id) {
+        return callService.startCall(id);
+    }
+
+    @PreAuthorize("@securityService.isCallParticipant(#id, authentication)")
     @PatchMapping("/{id}/decline")
     public CallResponse declineCall(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
         return callService.declineCall(id, principal.getUser());
