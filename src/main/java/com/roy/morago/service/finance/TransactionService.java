@@ -71,6 +71,7 @@ public class TransactionService {
         transaction.setReference(helper.generateTransactionReference(TransactionType.CALL_CHARGE));
         transaction.setDescription(helper.generateTransactionDescription(TransactionType.CALL_CHARGE, call.getCost()));
         processTransaction(transaction);
+        transactionRepository.save(transaction);
     }
 
     @Transactional
@@ -86,6 +87,7 @@ public class TransactionService {
         transaction.setReference(helper.generateTransactionReference(TransactionType.CALL_EARNING));
         transaction.setDescription(helper.generateTransactionDescription(TransactionType.CALL_EARNING, call.getCost()));
         processTransaction(transaction);
+        transactionRepository.save(transaction);
     }
 
     @Transactional
