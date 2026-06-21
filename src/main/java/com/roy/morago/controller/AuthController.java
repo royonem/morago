@@ -35,13 +35,13 @@ public class AuthController {
 
     @PostMapping("/register/client")
     @ResponseStatus(HttpStatus.CREATED)
-    public void registerClient(@Valid @RequestBody RegisterClientRequest dto) {
+    public void registerClient(@Valid @RequestBody ClientRegisterRequest dto) {
         authService.registerClient(dto);
     }
 
     @PostMapping("/register/translator")
     @ResponseStatus(HttpStatus.CREATED)
-    public void registerTranslator(@Valid @RequestBody RegisterTranslatorRequest dto) {
+    public void registerTranslator(@Valid @RequestBody TranslatorRegisterRequest dto) {
         authService.registerTranslator(dto);
     }
 }

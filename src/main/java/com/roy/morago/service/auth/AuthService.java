@@ -71,13 +71,13 @@ public class AuthService {
     }
 
     @Transactional
-    public void registerClient(RegisterClientRequest dto) {
+    public void registerClient(ClientRegisterRequest dto) {
         User client = userMapper.createEntityFromRequest(dto);
         register(client, dto.password(), dto.confirmPassword(), roleService.getClientRole());
     }
 
     @Transactional
-    public void registerTranslator(RegisterTranslatorRequest dto) {
+    public void registerTranslator(TranslatorRegisterRequest dto) {
         User translator = userMapper.createEntityFromRequest(dto);
         register(translator, dto.password(), dto.confirmPassword(), roleService.getTranslatorRole());
     }

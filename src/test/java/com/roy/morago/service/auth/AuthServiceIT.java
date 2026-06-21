@@ -43,8 +43,8 @@ public class AuthServiceIT {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
-    private RegisterClientRequest testClientRequest;
-    private RegisterTranslatorRequest testTranslatorRequest;
+    private ClientRegisterRequest testClientRequest;
+    private TranslatorRegisterRequest testTranslatorRequest;
     private LoginRequest testLoginRequest;
     private LogoutRequest testLogoutRequest;
     private String testRefreshToken;
@@ -52,7 +52,7 @@ public class AuthServiceIT {
     private User testTranslator;
 
     public void createTestRegisterClientRequest() {
-        testClientRequest = new RegisterClientRequest(
+        testClientRequest = new ClientRegisterRequest(
                 "John",
                 "Doe",
                 "password",
@@ -63,7 +63,7 @@ public class AuthServiceIT {
     }
 
     public void createTestRegisterTranslatorRequest() {
-        testTranslatorRequest = new RegisterTranslatorRequest(
+        testTranslatorRequest = new TranslatorRegisterRequest(
                 "Sara",
                 "Park",
                 "password123",
