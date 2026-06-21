@@ -54,6 +54,12 @@ public class AdminController {
         userService.updateUser(id, dto);
     }
 
+    @PatchMapping("/translators/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void verifyTranslator(@PathVariable Long id) {
+        userService.verifyTranslator(id);
+    }
+
     @DeleteMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
