@@ -7,11 +7,12 @@ import com.roy.morago.entity.user.User;
 import com.roy.morago.repository.notification.NotificationRepository;
 import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -46,22 +47,12 @@ public class NotificationService {
         return helper.createNotificationResponse(notification);
     }
 
-    public List<NotificationResponse> getUserNotifications(Long userId) {
-        List<Notification> notificationList = helper.findByUserId(userId);
-        List<NotificationResponse> responses = new ArrayList<>();
-        for (Notification notification : notificationList) {
-            responses.add(helper.createNotificationResponse(notification));
-        }
-        return responses;
+    public Page<NotificationResponse> getNotificationsByUserId(Long userId, Pageable pageable) {
+        return notificationRepository.findByUserId(userId, pageable).map(helper::createNotificationResponse);
     }
 
-    public List<NotificationResponse> getUnreadNotifications(Long userId) {
-        List<Notification> notificationList = helper.findUnreadByUserId(userId);
-        List<NotificationResponse> unreadResponses = new ArrayList<>();
-        for (Notification notification : notificationList) {
-            unreadResponses.add(helper.createNotificationResponse(notification));
-        }
-        return unreadResponses;
+    public Page<NotificationResponse> getUnreadNotificationsByUserId(Long userId, Pageable pageable) {
+        return notificationRepository.findByUserIdAndIsReadFalse(userId, pageable).map(helper::createNotificationResponse);
     }
 
     public Long getUnreadCount(Long userId) {
@@ -81,38 +72,44 @@ public class NotificationService {
     public void toggleNotificationRead(Long userId, Long notificationId) {
         Notification notification = helper.findNotificationById(notificationId);
         helper.verifyOwnNotification(userId, notification);
+        if (!notification.getIsRead()) {
+            notification.setReadAt(LocalDateTime.now());
+        } else {
+            notification.setReadAt(null);
+        }
         notification.setIsRead(!notification.getIsRead());
-        notification.setReadAt(LocalDateTime.now());
     }
 
     @Transactional
     public void toggleNotificationsRead(Long userId, List<Long> notificationIds) {
-        for (Long notificationId : notificationIds) {
-            toggleNotificationRead(userId, notificationId);
-        }
+        notificationRepository.toggleReadByIdInAndUserId(notificationIds, userId);
+    }
+
+    @Transactional
+    public void markAsRead(Long userId, List<Long> notificationIds) {
+        notificationRepository.markAsReadByIdInAndUserId(notificationIds, userId);
     }
 
     @Transactional
     public void markAllAsRead(Long userId) {
-        List<Notification> allUnread = helper.findUnreadByUserId(userId);
-        for (Notification unread : allUnread) {
-            unread.setIsRead(true);
-            unread.setReadAt(LocalDateTime.now());
-        }
+        notificationRepository.markAsReadByUserId(userId);
     }
 
     @Transactional
-    public void deleteNotification(Long id, Long notificationId) {
+    public void deleteNotificationByUserId(Long id, Long notificationId) {
         Notification notification = helper.findNotificationById(notificationId);
         helper.verifyOwnNotification(id, notification);
         notificationRepository.delete(notification);
     }
 
     @Transactional
-    public void deleteNotifications(Long id, List<Long> notificationIds) {
-        for (Long notificationId : notificationIds) {
-            deleteNotification(id, notificationId);
-        }
+    public void deleteNotificationsByUserId(Long userId, List<Long> notificationIds) {
+        notificationRepository.deleteByIdInAndUserId(notificationIds, userId);
+    }
+
+    @Transactional
+    public void deleteAllReadNotificationsByUserId(Long userId) {
+        notificationRepository.deleteByUserIdAndIsReadTrue(userId);
     }
 
     @Transactional
@@ -124,8 +121,6 @@ public class NotificationService {
 
     @Transactional
     public void deleteUnsentNotifications(List<Long> notificationIds) {
-        for (Long notificationId : notificationIds) {
-            deleteUnsentNotification(notificationId);
-        }
+        notificationRepository.deleteByIdInAndSentAtIsNull(notificationIds);
     }
 }

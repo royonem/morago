@@ -6,6 +6,10 @@ import com.roy.morago.service.file.FileService;
 import com.roy.morago.service.notification.NotificationService;
 import com.roy.morago.service.user.LanguageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,42 +25,42 @@ public class UserController {
     private final NotificationService notificationService;
     private final LanguageService languageService;
 
-    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @PostMapping("/{id}/profile-picture")
+    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @ResponseStatus(HttpStatus.CREATED)
     public FileResponse uploadProfilePicture(@PathVariable Long id, @RequestParam MultipartFile picture) {
         return fileService.uploadProfilePicture(picture);
     }
 
-    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @PutMapping("/{id}/profile-picture")
+    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     public void saveProfilePicture(@PathVariable Long id, @RequestParam Long pictureId) {
         fileService.saveProfilePicture(id, pictureId);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @securityService.isCurrentUser(#id, authentication)")
     @DeleteMapping("/{id}/profile-picture")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isCurrentUser(#id, authentication)")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProfilePicture(@PathVariable Long id) {
         fileService.deleteProfilePicture(id);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @securityService.isCurrentUser(#id, authentication)")
     @GetMapping("/{id}/notifications/unread-count")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isCurrentUser(#id, authentication)")
     public long getUnreadCount(@PathVariable Long id) {
         return notificationService.getUnreadCount(id);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @securityService.isCurrentUser(#id, authentication)")
     @GetMapping("/{id}/notifications")
-    public List<NotificationResponse> getNotifications(@PathVariable Long id) {
-        return notificationService.getUserNotifications(id);
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isCurrentUser(#id, authentication)")
+    public Page<NotificationResponse> getAllNotifications(@PathVariable Long id, @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return notificationService.getNotificationsByUserId(id, pageable);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @securityService.isCurrentUser(#id, authentication)")
     @GetMapping("/{id}/notifications/unread")
-    public List<NotificationResponse> getUnreadNotifications(@PathVariable Long id) {
-        return notificationService.getUnreadNotifications(id);
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isCurrentUser(#id, authentication)")
+    public Page<NotificationResponse> getUnreadNotifications(@PathVariable Long id, @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return notificationService.getUnreadNotificationsByUserId(id, pageable);
     }
 
     @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
@@ -65,41 +69,53 @@ public class UserController {
         return notificationService.readNotification(id, notificationId);
     }
 
-    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @PatchMapping("/{id}/notifications/{notificationId}/toggle")
+    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     public void toggleNotificationRead(@PathVariable Long id, @PathVariable Long notificationId) {
         notificationService.toggleNotificationRead(id, notificationId);
     }
 
-    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @PatchMapping("/{id}/notifications/toggle")
+    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     public void toggleNotificationsRead(@PathVariable Long id, @RequestParam List<Long> notificationIds) {
         notificationService.toggleNotificationsRead(id, notificationIds);
     }
 
-    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @PatchMapping("/{id}/notifications")
+    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
+    public void markNotificationsAsRead(@PathVariable Long id, @RequestParam List<Long> notificationIds) {
+        notificationService.markAsRead(id, notificationIds);
+    }
+
+    @PatchMapping("/{id}/notifications/all")
+    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     public void markAllNotificationsAsRead(@PathVariable Long id) {
         notificationService.markAllAsRead(id);
     }
 
-    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @DeleteMapping("/{id}/notifications/{notificationId}")
+    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteNotification(@PathVariable Long id, @PathVariable Long notificationId) {
-        notificationService.deleteNotification(id, notificationId);
+        notificationService.deleteNotificationByUserId(id, notificationId);
     }
 
-    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @DeleteMapping("/{id}/notifications")
+    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteNotifications(@PathVariable Long id, @RequestParam List<Long> notificationIds) {
-        notificationService.deleteNotifications(id, notificationIds);
+        notificationService.deleteNotificationsByUserId(id, notificationIds);
     }
 
-    @PreAuthorize("@securityService.isCurrentTranslator(#id, authentication)")
+    @DeleteMapping("/{id}/notifications/read")
+    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAllReadNotifications(@PathVariable Long id) {
+        notificationService.deleteAllReadNotificationsByUserId(id);
+    }
+
     @PatchMapping("/{id}/languages")
-    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("@securityService.isCurrentTranslator(#id, authentication)")
     public void addLanguage(@PathVariable Long id, @RequestBody List<Long> languageIds) {
         languageService.addLanguages(id, languageIds);
     }
