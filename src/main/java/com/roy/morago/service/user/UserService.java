@@ -5,6 +5,8 @@ import com.roy.morago.dto.user.UserResponse;
 import com.roy.morago.dto.user.UserSearchRequest;
 import com.roy.morago.entity.user.Language;
 import com.roy.morago.entity.user.User;
+import com.roy.morago.enums.UserStatus;
+import com.roy.morago.exception.user.MissingRoleException;
 import com.roy.morago.mapper.UserMapper;
 import com.roy.morago.repository.user.LanguageRepository;
 import com.roy.morago.repository.user.UserRepository;
@@ -51,9 +53,19 @@ public class UserService {
     }
 
     @Transactional
+    public void verifyTranslator(Long userId) {
+        User user = helper.findUserById(userId);
+        boolean isTranslator = user.getRoles().stream()
+                .anyMatch(role -> "ROLE_TRANSLATOR".equals(role.getName()));
+        if (!isTranslator) {
+            throw new MissingRoleException("User with ID " + userId + " is not a translator");
+        }
+        user.setStatus(UserStatus.VERIFIED);
+    }
+
+    @Transactional
     public void deleteUser(Long id) {
         User user = helper.findUserById(id);
         userRepository.delete(user);
     }
-
 }
