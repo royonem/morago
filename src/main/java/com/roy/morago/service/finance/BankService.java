@@ -1,6 +1,7 @@
 package com.roy.morago.service.finance;
 
-import com.roy.morago.dto.finance.BankAccountDTO;
+import com.roy.morago.dto.finance.BankAccountRequest;
+import com.roy.morago.dto.finance.BankAccountResponse;
 import com.roy.morago.entity.finance.BankAccount;
 import com.roy.morago.mapper.BankAccountMapper;
 import com.roy.morago.repository.finance.BankRepository;
@@ -19,11 +20,11 @@ public class BankService {
     private final FinanceHelper helper;
 
     @Transactional
-    public BankAccountDTO linkBankAccount(BankAccountDTO dto, Authentication authentication) {
-        BankAccount bankAccount = bankAccountMapper.createBankAccountFromDTO(dto);
+    public BankAccountResponse linkBankAccount(BankAccountRequest request, Authentication authentication) {
+        BankAccount bankAccount = bankAccountMapper.createEntityFromRequest(request);
         bankAccount.setUser(userHelper.findUserWithAuthentication(authentication));
         bankRepository.save(bankAccount);
-        return bankAccountMapper.createBankAccountDTO(bankAccount);
+        return bankAccountMapper.createResponseFromEntity(bankAccount);
     }
 
     @Transactional
@@ -32,7 +33,7 @@ public class BankService {
         bankRepository.delete(account);
     }
 
-    public BankAccountDTO getBankAccount(Long id) {
-        return bankAccountMapper.createBankAccountDTO(helper.findBankAccountById(id));
+    public BankAccountResponse getBankAccount(Long id) {
+        return bankAccountMapper.createResponseFromEntity(helper.findBankAccountById(id));
     }
 }
