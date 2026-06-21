@@ -1,7 +1,9 @@
 package com.roy.morago.service.topic;
 
-import com.roy.morago.dto.topic.CategoryDTO;
+import com.roy.morago.dto.topic.CategoryRequest;
+import com.roy.morago.dto.topic.CategoryResponse;
 import com.roy.morago.entity.topic.Category;
+import com.roy.morago.mapper.CategoryMapper;
 import com.roy.morago.repository.topic.CategoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -14,39 +16,40 @@ import java.util.List;
 @Service
 public class CategoryService {
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
     private final TopicHelper topicHelper;
 
     @Transactional
-    public CategoryDTO createCategory(CategoryDTO dto) {
-        topicHelper.checkDuplicateCategories(dto.getName());
+    public CategoryResponse createCategory(CategoryRequest request) {
+        topicHelper.checkDuplicateCategories(request.name());
         Category category = new Category();
-        category.setName(dto.getName());
+        category.setName(request.name());
         category.setActive(true);
         categoryRepository.save(category);
-        return topicHelper.createCategoryDTO(category);
+        return categoryMapper.createResponseFromEntity(category);
     }
 
-    public List<CategoryDTO> getAllCategories() {
+    public List<CategoryResponse> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
-        List<CategoryDTO> categoriesList = new ArrayList<>();
+        List<CategoryResponse> categoriesList = new ArrayList<>();
         for (Category category : categories) {
-            categoriesList.add(topicHelper.createCategoryDTO(category));
+            categoriesList.add(categoryMapper.createResponseFromEntity(category));
         }
         return categoriesList;
     }
 
-    public CategoryDTO getCategory(Long id) {
+    public CategoryResponse getCategory(Long id) {
         Category category = topicHelper.findCategoryById(id);
-        return topicHelper.createCategoryDTO(category);
+        return categoryMapper.createResponseFromEntity(category);
     }
 
     @Transactional
-    public CategoryDTO updateCategory(Long id, CategoryDTO dto) {
+    public CategoryResponse updateCategory(Long id, CategoryRequest request) {
         Category category = topicHelper.findCategoryById(id);
-        topicHelper.checkDuplicateCategoriesForUpdate(category, dto.getName());
-        category.setName(dto.getName());
-        category.setActive(dto.getActive());
-        return topicHelper.createCategoryDTO(category);
+        topicHelper.checkDuplicateCategoriesForUpdate(category, request.name());
+        category.setName(request.name());
+        category.setActive(request.active());
+        return categoryMapper.createResponseFromEntity(category);
     }
 
     @Transactional

@@ -1,6 +1,5 @@
 package com.roy.morago.service.topic;
 
-import com.roy.morago.dto.topic.CategoryDTO;
 import com.roy.morago.dto.topic.TopicResponse;
 import com.roy.morago.entity.topic.Category;
 import com.roy.morago.entity.topic.Topic;
@@ -57,13 +56,6 @@ public class TopicHelper {
                 topic.getName(),
                 topic.getActive()
         );
-    }
-
-    protected CategoryDTO createCategoryDTO(Category category) {
-        CategoryDTO dto = new CategoryDTO();
-        dto.setId(category.getId());
-        dto.setName(category.getName());
-        return dto;
     }
 
     protected Category findCategoryById(Long categoryId) {
