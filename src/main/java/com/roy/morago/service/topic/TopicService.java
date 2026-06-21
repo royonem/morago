@@ -22,15 +22,15 @@ public class TopicService {
     @Transactional
     public TopicResponse createTopic(TopicRequest dto) {
         Topic topic = new Topic();
-        topicHelper.checkDuplicateTopics(dto.getName());
-        topic.setName(dto.getName());
-        topic.setActive(dto.getActive());
-        if (dto.getCategoryId() != null) {
-            topic.setCategory(topicHelper.findCategoryById(dto.getCategoryId()));
+        topicHelper.checkDuplicateTopics(dto.name());
+        topic.setName(dto.name());
+        topic.setActive(dto.active());
+        if (dto.categoryId() != null) {
+            topic.setCategory(topicHelper.findCategoryById(dto.categoryId()));
         }
         topicRepository.save(topic);
-        if (dto.getIconId() != null) {
-            fileService.saveTopicIcon(topic.getId(), dto.getIconId());
+        if (dto.iconId() != null) {
+            fileService.saveTopicIcon(topic.getId(), dto.iconId());
         }
 
         return topicHelper.createTopicResponse(topic);
@@ -53,13 +53,13 @@ public class TopicService {
     @Transactional
     public TopicResponse updateTopic(Long id, TopicRequest dto) {
         Topic topic = topicHelper.findTopicById(id);
-        topicHelper.checkDuplicateTopicsForUpdate(topic, dto.getName());
-        topic.setName(dto.getName());
-        if (dto.getCategoryId() != null) {
-            topic.setCategory(topicHelper.findCategoryById(dto.getCategoryId()));
-        }        topic.setActive(dto.getActive());
-        if (dto.getIconId() != null) {
-            fileService.saveTopicIcon(topic.getId(), dto.getIconId());
+        topicHelper.checkDuplicateTopicsForUpdate(topic, dto.name());
+        topic.setName(dto.name());
+        if (dto.categoryId() != null) {
+            topic.setCategory(topicHelper.findCategoryById(dto.categoryId()));
+        }        topic.setActive(dto.active());
+        if (dto.iconId() != null) {
+            fileService.saveTopicIcon(topic.getId(), dto.iconId());
         }
         return topicHelper.createTopicResponse(topic);
     }
