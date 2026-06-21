@@ -3,16 +3,17 @@ package com.roy.morago.controller;
 import com.roy.morago.dto.file.FileResponse;
 import com.roy.morago.dto.notification.NotificationRequest;
 import com.roy.morago.dto.notification.NotificationResponse;
-import com.roy.morago.dto.user.LanguageRequest;
-import com.roy.morago.dto.user.LanguageResponse;
-import com.roy.morago.dto.user.UpdateUserRequest;
-import com.roy.morago.dto.user.UserResponse;
+import com.roy.morago.dto.user.*;
 import com.roy.morago.service.notification.NotificationService;
 import com.roy.morago.service.file.FileService;
 import com.roy.morago.service.user.LanguageService;
 import com.roy.morago.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,93 +30,99 @@ public class AdminController {
     private final LanguageService languageService;
     private final NotificationService notificationService;
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
-    public List<UserResponse> userList() {
-        return userService.getAllUsers();
+    @PreAuthorize("hasRole('ADMIN')")
+    public Page<UserResponse> getAllUsers(@PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+            return userService.getAllUsers(pageable);
     }
 
+    @PostMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
+    public Page<UserResponse> searchUsers(@RequestBody UserSearchRequest request) {
+        return userService.searchUsers(request);
+    }
+
     @GetMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getUser(@PathVariable Long id) {
         return userService.getUser(id);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest dto) {
         userService.updateUser(id, dto);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/topics/icon")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public FileResponse uploadIcon(@RequestParam MultipartFile icon) {
         return fileService.uploadTopicIcon(icon);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/topics/{id}/icon")
+    @PreAuthorize("hasRole('ADMIN')")
     public void saveIcon(@PathVariable Long id, @RequestParam Long iconId) {
         fileService.saveTopicIcon(id, iconId);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/topics/{id}/icon")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteIcon(@PathVariable Long id) {
         fileService.deleteTopicIcon(id);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/languages")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public LanguageResponse createLanguage(@Valid @RequestBody LanguageRequest request) {
         return languageService.createLanguage(request);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/languages/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteLanguage(@PathVariable Long id) {
         languageService.deleteLanguage(id);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/notifications")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public NotificationResponse createNotification(@Valid @RequestBody NotificationRequest dto) {
         return notificationService.createNotification(dto);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/notifications/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public NotificationResponse getNotification(@PathVariable Long id) {
         return notificationService.getNotification(id);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/notifications/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void sendNotification(@RequestParam Long userId, @PathVariable Long id) {
         notificationService.sendNotification(userId, id);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/notifications/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUnsentNotification(@PathVariable Long id) {
         notificationService.deleteUnsentNotification(id);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/notifications")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUnsentNotifications(@RequestParam List<Long> ids) {
         notificationService.deleteUnsentNotifications(ids);
