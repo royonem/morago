@@ -50,7 +50,7 @@ public class AdminController {
 
     @PatchMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest dto) {
+    public void updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateRequest dto) {
         userService.updateUser(id, dto);
     }
 
