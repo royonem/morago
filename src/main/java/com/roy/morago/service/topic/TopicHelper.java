@@ -48,17 +48,7 @@ public class TopicHelper {
         }
     }
 
-    protected TopicResponse createTopicResponse(Topic topic) {
-        return new TopicResponse(
-                topic.getId(),
-                topic.getCategory() != null ? topic.getCategory().getId() : null,
-                topic.getIcon() != null ? topic.getIcon().getId() : null,
-                topic.getName(),
-                topic.getActive()
-        );
-    }
-
-    protected Category findCategoryById(Long categoryId) {
+    public Category findCategoryById(Long categoryId) {
         return categoryRepository.findById(categoryId).orElseThrow(()
                 -> new CategoryNotFoundException("Category not found."));
     }
