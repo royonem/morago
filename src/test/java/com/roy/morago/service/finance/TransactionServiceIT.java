@@ -11,11 +11,16 @@ import com.roy.morago.exception.finance.ExistingTransactionException;
 import com.roy.morago.exception.finance.TransactionNotFoundException;
 import com.roy.morago.service.SetupHelper;
 import com.roy.morago.service.VerificationHelper;
+import com.roy.morago.service.user.UserHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -26,6 +31,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SuppressWarnings("SpringBootApplicationProperties")
@@ -48,6 +54,8 @@ public class TransactionServiceIT {
 
     private Wallet testWallet;
     private Transaction testTransaction;
+    @Autowired
+    private UserHelper userHelper;
 
     @BeforeEach
     public void setUp() {
@@ -55,7 +63,6 @@ public class TransactionServiceIT {
         testWallet = setUpHelper.createTestWallet(testUser);
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testCreateDepositTransaction() {
         testTransaction = setUpHelper.createTestTransaction(TransactionType.DEPOSIT, 500L);
@@ -76,7 +83,6 @@ public class TransactionServiceIT {
         assertNotNull(depositResponse.processedAt());
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testCreateCallChargeTransaction() {
         testTransaction = setUpHelper.createTestTransaction(TransactionType.CALL_CHARGE, 400L);
@@ -85,7 +91,6 @@ public class TransactionServiceIT {
         verificationHelper.verifyTransactionIsProcessed(Boolean.TRUE, testTransaction);
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testCreateCallEarningTransaction() {
         testTransaction = setUpHelper.createTestTransaction(TransactionType.CALL_EARNING, 200L);
@@ -94,7 +99,6 @@ public class TransactionServiceIT {
         verificationHelper.verifyTransactionIsProcessed(Boolean.TRUE, testTransaction);
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testCancelTransaction() {
         testTransaction = setUpHelper.createPendingTestTransaction(TransactionType.DEPOSIT, 400L, testWallet);
@@ -104,34 +108,60 @@ public class TransactionServiceIT {
         verificationHelper.verifyTransactionIsProcessed(Boolean.FALSE, testTransaction);
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testGetTransaction() {
         testTransaction = setUpHelper.createTestTransaction(TransactionType.DEPOSIT, 500L);
         TransactionResponse response = transactionService.getTransaction(testTransaction.getId());
         assertThat(response.id()).isEqualTo(testTransaction.getId());
         assertThat(response.amount()).isEqualTo(500L);
-        verificationHelper.verifyTransactionStatus(TransactionStatus.PAID,  testTransaction);
+        verificationHelper.verifyTransactionStatus(TransactionStatus.PAID, testTransaction);
     }
 
     @WithMockUser(username = "johndoe@test.com")
+    @Test
+    void testGetAllTransactions_withPagination() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userHelper.findUserWithAuthentication(authentication);
+
+        for (int i = 1; i <= 50; i++) {
+            TransactionRequest request = setUpHelper.createTestTransactionRequest(
+                    TransactionType.DEPOSIT,
+                    (long) (i * 100)
+            );
+            transactionService.createDepositTransaction(request, authentication);
+        }
+        Pageable firstPage = PageRequest.of(0, 20, Sort.by("id").descending());
+        Page<TransactionResponse> page1 = transactionService.getAllUserTransactions(user.getId(), firstPage);
+
+        assertEquals(50, page1.getTotalElements());
+        assertEquals(3, page1.getTotalPages());
+        assertEquals(20, page1.getContent().size());
+        assertEquals(0, page1.getNumber());
+        assertEquals(5000L, page1.getContent().getFirst().amount());
+        assertEquals(3100L, page1.getContent().getLast().amount());
+
+        Pageable thirdPage = PageRequest.of(2, 20, Sort.by("id").descending());
+        Page<TransactionResponse> page3 = transactionService.getAllUserTransactions(user.getId(), thirdPage);
+        assertEquals(10, page3.getContent().size());
+        assertEquals(2, page3.getNumber());
+        assertEquals(100L, page3.getContent().getLast().amount());
+    }
+
     @Test
     void testGetTransaction_notFound_throwsException() {
         assertThatThrownBy(() -> transactionService.getTransaction(-1L))
                 .isInstanceOf(TransactionNotFoundException.class);
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testCreateCallChargeTransaction_insufficientFunds_throwsException() {
         assertThatThrownBy(() -> setUpHelper.createTestTransaction(TransactionType.CALL_CHARGE, 1100L))
                 .isInstanceOf(DeficientFundsException.class);
     }
 
-    @WithMockUser(username = "johndoe@test.com")
     @Test
     void testCreateTransaction_existingPending_throwsException() {
-        testTransaction = setUpHelper.createPendingTestTransaction(TransactionType.CALL_CHARGE, 500L,  testWallet);
+        testTransaction = setUpHelper.createPendingTestTransaction(TransactionType.CALL_CHARGE, 500L, testWallet);
         assertThatThrownBy(() -> setUpHelper.createTestTransaction(TransactionType.CALL_CHARGE, 500L))
                 .isInstanceOf(ExistingTransactionException.class);
     }
