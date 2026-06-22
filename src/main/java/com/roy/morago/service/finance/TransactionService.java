@@ -2,6 +2,7 @@ package com.roy.morago.service.finance;
 
 import com.roy.morago.dto.finance.TransactionRequest;
 import com.roy.morago.dto.finance.TransactionResponse;
+import com.roy.morago.entity.call.Call;
 import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.finance.Withdrawal;
@@ -58,6 +59,38 @@ public class TransactionService {
     }
 
     @Transactional
+    public void createCallChargeTransaction(Call call, User client) {
+        Transaction transaction = new Transaction();
+        transaction.setType(TransactionType.CALL_CHARGE);
+        transaction.setWallet(client.getWallet());
+        transaction.setCall(call);
+        transaction.setAmount(call.getCost());
+        transaction.setCurrencyCode(client.getWallet().getCurrencyCode());
+        transaction.setStatus(TransactionStatus.PENDING);
+        setTransactionBalance(transaction);
+        transaction.setReference(helper.generateTransactionReference(TransactionType.CALL_CHARGE));
+        transaction.setDescription(helper.generateTransactionDescription(TransactionType.CALL_CHARGE, call.getCost()));
+        processTransaction(transaction);
+        transactionRepository.save(transaction);
+    }
+
+    @Transactional
+    public void createCallEarningTransaction(Call call, User translator) {
+        Transaction transaction = new Transaction();
+        transaction.setType(TransactionType.CALL_EARNING);
+        transaction.setWallet(translator.getWallet());
+        transaction.setCall(call);
+        transaction.setAmount(call.getCost());
+        transaction.setCurrencyCode(translator.getWallet().getCurrencyCode());
+        transaction.setStatus(TransactionStatus.PENDING);
+        setTransactionBalance(transaction);
+        transaction.setReference(helper.generateTransactionReference(TransactionType.CALL_EARNING));
+        transaction.setDescription(helper.generateTransactionDescription(TransactionType.CALL_EARNING, call.getCost()));
+        processTransaction(transaction);
+        transactionRepository.save(transaction);
+    }
+
+    @Transactional
     public TransactionResponse createTransaction(TransactionRequest dto, Authentication authentication) {
         User user = userHelper.findUserWithAuthentication(authentication);
         helper.validateNoPendingTransactions(user);
@@ -110,12 +143,8 @@ public class TransactionService {
 
         transaction.setBalanceBefore(currentBalance);
         switch (transaction.getType()) {
-            case DEPOSIT, CALL_EARNING -> {
-                transaction.setBalanceAfter(currentBalance + transactionAmount);
-            }
-            case WITHDRAWAL, CALL_CHARGE -> {
-                transaction.setBalanceAfter(currentBalance - transactionAmount);
-            }
+            case DEPOSIT, CALL_EARNING -> transaction.setBalanceAfter(currentBalance + transactionAmount);
+            case WITHDRAWAL, CALL_CHARGE -> transaction.setBalanceAfter(currentBalance - transactionAmount);
         }
         helper.validateNonNegativeWalletBalance(transaction.getBalanceAfter());
     }

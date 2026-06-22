@@ -1,12 +1,12 @@
-package com.roy.morago.service.finance;
+package com.roy.morago.service;
 
 import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.finance.Withdrawal;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.*;
-import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WithdrawalRepository;
+import com.roy.morago.service.finance.FinanceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ public class VerificationHelper {
     private WithdrawalRepository withdrawalRepository;
 
     // Transaction
-    protected void verifyTransaction(Transaction transaction, TransactionType type, Long amount, User testClient, Wallet testWallet) {
+    public void verifyTransaction(Transaction transaction, TransactionType type, Long amount, User testClient, Wallet testWallet) {
         assertNotNull(transaction.getId());
         assertThat(transaction.getAmount()).isEqualTo(amount);
         assertThat(transaction.getBalanceBefore()).isEqualTo(1000L);
@@ -37,12 +37,12 @@ public class VerificationHelper {
         assertNotNull(transaction.getCreatedAt());
     }
 
-    protected void verifyTransactionStatus(TransactionStatus expectedStatus, Transaction testTransaction) {
+    public void verifyTransactionStatus(TransactionStatus expectedStatus, Transaction testTransaction) {
         Transaction freshTransaction = financeHelper.findTransactionById(testTransaction.getId());
         assertThat(freshTransaction.getStatus()).isEqualTo(expectedStatus);
     }
 
-    protected void verifyTransactionIsProcessed(Boolean processed, Transaction testTransaction) {
+    public void verifyTransactionIsProcessed(Boolean processed, Transaction testTransaction) {
         Transaction freshTransaction = financeHelper.findTransactionById(testTransaction.getId());
         if (processed) {
             assertThat(freshTransaction.getProcessedAt()).isNotNull();
@@ -52,18 +52,18 @@ public class VerificationHelper {
     }
 
     // Wallet
-    protected void verifyWalletStatus(WalletStatus expectedStatus, Wallet testWallet) {
+    public void verifyWalletStatus(WalletStatus expectedStatus, Wallet testWallet) {
         Wallet freshWallet = financeHelper.findWalletById(testWallet.getId());
         assertThat(freshWallet.getStatus()).isEqualTo(expectedStatus);
     }
 
-    protected void verifyWalletBalance(Long expectedBalance, Wallet testWallet) {
+    public void verifyWalletBalance(Long expectedBalance, Wallet testWallet) {
         Wallet freshWallet = financeHelper.findWalletById(testWallet.getId());
         assertThat(freshWallet.getBalance()).isEqualTo(expectedBalance);
     }
 
     // WithdrawalRequest
-    protected void verifyWithdrawalTransaction(Transaction transaction) {
+    public void verifyWithdrawalTransaction(Transaction transaction) {
         assertNotNull(transaction.getId());
         assertThat(transaction.getType()).isEqualTo(TransactionType.WITHDRAWAL);
         assertThat(transaction.getAmount()).isEqualTo(100L);
@@ -74,7 +74,7 @@ public class VerificationHelper {
         assertNotNull(transaction.getCreatedAt());
     }
 
-    protected void verifyWithdrawal(Withdrawal withdrawal, User testUser) {
+    public void verifyWithdrawal(Withdrawal withdrawal, User testUser) {
         assertNotNull(withdrawal.getId());
         assertThat(withdrawal.getAmount()).isEqualTo(100L);
         assertThat(withdrawal.getCurrencyCode()).isEqualTo(CurrencyCode.KRW);
@@ -84,34 +84,34 @@ public class VerificationHelper {
         assertThat(withdrawal.getRequester()).isEqualTo(testUser);
     }
 
-    protected void verifyWithdrawalStatus(WithdrawalStatus expectedStatus, Withdrawal testWithdrawal) {
+    public void verifyWithdrawalStatus(WithdrawalStatus expectedStatus, Withdrawal testWithdrawal) {
         Withdrawal freshWithdrawal = withdrawalRepository.findById(testWithdrawal.getId()).orElseThrow();
         assertThat(freshWithdrawal.getStatus()).isEqualTo(expectedStatus);
     }
 
-    protected void verifyRequester(Long withdrawalId, User testUser) {
+    public void verifyRequester(Long withdrawalId, User testUser) {
         Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
         assertThat(withdrawal.getRequester()).isEqualTo(testUser);
     }
 
-    protected void verifyReview(Long withdrawalId, User testAdmin) {
+    public void verifyReview(Long withdrawalId, User testAdmin) {
         Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
         assertThat(withdrawal.getReviewer()).isEqualTo(testAdmin);
         assertThat(withdrawal.getReviewedAt()).isNotNull();
     }
 
-    protected void verifyNoReview(Long withdrawalId) {
+    public void verifyNoReview(Long withdrawalId) {
         Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
         assertThat(withdrawal.getReviewedAt()).isNull();
         assertThat(withdrawal.getReviewer()).isNull();
     }
 
-    protected void verifyCorrectRejection(Long withdrawalId) {
+    public void verifyCorrectRejection(Long withdrawalId) {
         Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
         assertThat(withdrawal.getRejectionReason()).isEqualTo("Suspicious Transaction");
     }
 
-    protected void verifyWithdrawalIsPaid(Long withdrawalId) {
+    public void verifyWithdrawalIsPaid(Long withdrawalId) {
         Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
         assertNotNull(withdrawal.getPaidAt());
     }

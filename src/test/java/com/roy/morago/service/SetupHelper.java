@@ -1,4 +1,4 @@
-package com.roy.morago.service.finance;
+package com.roy.morago.service;
 
 import com.roy.morago.dto.finance.TransactionRequest;
 import com.roy.morago.dto.finance.TransactionResponse;
@@ -12,6 +12,9 @@ import com.roy.morago.repository.finance.BankRepository;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.repository.finance.WalletRepository;
 import com.roy.morago.repository.user.UserRepository;
+import com.roy.morago.service.finance.FinanceHelper;
+import com.roy.morago.service.finance.TransactionService;
+import com.roy.morago.service.finance.WalletService;
 import com.roy.morago.service.user.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -54,6 +57,20 @@ public class SetupHelper {
         return userRepository.save(testUser);
     }
 
+    public User createTestTranslator() {
+        User testUser = new User();
+        testUser.setFirstName("Sara");
+        testUser.setLastName("Brown");
+        testUser.setEmail("translator@test.com");
+        testUser.setPasswordHash("Sara");
+        testUser.setPhone("010-9999-1111");
+        testUser.setAvailability(Availability.ONLINE);
+        testUser.setStatus(UserStatus.VERIFIED);
+        testUser.getRoles().add(roleService.getTranslatorRole());
+        testUser.setBankAccount(createTestBankAccount2(testUser));
+        return userRepository.save(testUser);
+    }
+
     public User createTestAdmin() {
         User testAdmin = new User();
         testAdmin.setFirstName("Best");
@@ -79,6 +96,14 @@ public class SetupHelper {
         bankAccount.setBankName("Hana Bank");
         bankAccount.setAccountNumber("0000111122223333");
         bankAccount.setUser(testUser);
+        return bankRepository.save(bankAccount);
+    }
+
+    public BankAccount createTestBankAccount2(User testTranslator) {
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setBankName("Kookmin Bank");
+        bankAccount.setAccountNumber("8888777766665555");
+        bankAccount.setUser(testTranslator);
         return bankRepository.save(bankAccount);
     }
 

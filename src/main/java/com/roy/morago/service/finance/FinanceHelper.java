@@ -29,17 +29,17 @@ public class FinanceHelper {
     private final BankRepository bankRepository;
 
     // Find Helpers
-    protected Transaction findTransactionById(Long id) {
+    public Transaction findTransactionById(Long id) {
         return transactionRepository.findById(id)
                 .orElseThrow(() -> new TransactionNotFoundException("Transaction not found"));
     }
 
-    protected Withdrawal findWithdrawalById(Long id) {
+    public Withdrawal findWithdrawalById(Long id) {
         return withdrawalRepository.findById(id)
                 .orElseThrow(() -> new WithdrawalNotFoundException("Withdrawal not found"));
     }
 
-    protected Wallet findWalletById(Long id) {
+    public Wallet findWalletById(Long id) {
         return walletRepository.findById(id)
                 .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
     }
@@ -126,12 +126,12 @@ public class FinanceHelper {
     }
 
     // Generation Helpers
-    protected String generateTransactionReference(TransactionType type) {
+    public String generateTransactionReference(TransactionType type) {
         String random = UUID.randomUUID().toString();
         return type + "-" + random;
     }
 
-    protected String generateTransactionDescription(TransactionType type, Long amount) {
+    public String generateTransactionDescription(TransactionType type, Long amount) {
         return type + " transaction of " + amount;
     }
 }

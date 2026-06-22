@@ -31,9 +31,13 @@ public class Call extends BaseEntity {
     private Topic topic;
 
     @Column(nullable = false)
-    private Integer cost;
+    private Long cost;
+    @Column(nullable = false)
+    private Long maxCallTime;
     @Column(nullable = false)
     private CallStatus status;
+    @Column(nullable = false)
+    private Boolean isClientInitiator;
     @Column
     private Integer rating;
     @Column
@@ -43,5 +47,5 @@ public class Call extends BaseEntity {
     @Column
     private LocalDateTime endedAt;
     @Column
-    private LocalDateTime cancelledAt;
+    private LocalDateTime canceledAt;
 }

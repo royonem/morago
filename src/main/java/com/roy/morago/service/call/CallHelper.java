@@ -1,0 +1,144 @@
+package com.roy.morago.service.call;
+
+import com.roy.morago.dto.call.CallRequest;
+import com.roy.morago.entity.call.Call;
+import com.roy.morago.entity.user.User;
+import com.roy.morago.enums.CallStatus;
+import com.roy.morago.exception.call.*;
+import com.roy.morago.exception.finance.DeficientFundsException;
+import com.roy.morago.mapper.CallMapper;
+import com.roy.morago.repository.call.CallRepository;
+import com.roy.morago.service.finance.TransactionService;
+import com.roy.morago.service.topic.TopicHelper;
+import com.roy.morago.service.user.UserHelper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+
+@Component
+@RequiredArgsConstructor
+public class CallHelper {
+    private final CallMapper callMapper;
+    private final CallRepository callRepository;
+    private final UserHelper userHelper;
+    private final TransactionService transactionService;
+    private final TopicHelper topicHelper;
+
+    protected Call createCall(CallRequest callRequest) {
+        Call call = callMapper.createEntityFromRequest(callRequest);
+        call.setClient(userHelper.findUserById(callRequest.clientId()));
+        call.setTranslator(userHelper.findUserById(callRequest.translatorId()));
+        call.setTopic(topicHelper.findTopicById(callRequest.topicId()));
+        call.setCost(0L);
+        return call;
+    }
+
+    protected void createCallTransactions(Call call) {
+        transactionService.createCallChargeTransaction(call, call.getClient());
+        transactionService.createCallEarningTransaction(call, call.getTranslator());
+    }
+
+    protected Call findCallById(Long callId) {
+        return callRepository.findById(callId)
+                .orElseThrow(() -> new CallNotFoundException("Call not found"));
+    }
+
+    protected void setCallInitiator(Call call, User caller) {
+        call.setIsClientInitiator(caller == call.getClient());
+    }
+
+    protected void resolveCancelDecline(Call call, User user) {
+        boolean isClientInitiator = call.getIsClientInitiator();
+        boolean userIsClient = user.getId().equals(call.getClient().getId());
+
+        if ((isClientInitiator && userIsClient) || (!isClientInitiator && !userIsClient)) {
+            call.setStatus(CallStatus.CANCELED);
+        } else {
+            call.setStatus(CallStatus.DECLINED);
+        }
+    }
+
+    protected void setMaxDuration(Call call, CallRequest request) {
+        validateCallIsRequested(call);
+        User client = userHelper.findUserById(request.clientId());
+        long maxDuration = client.getWallet().getBalance() / 1000;
+        validateCallFundsAreSufficient(maxDuration);
+        call.setMaxCallTime(maxDuration);
+    }
+
+    protected Long calculateCallCost(Call call) {
+        long callSeconds = calculateCallSeconds(call);
+        long minutes = (long) Math.ceil(callSeconds / 60.0);
+        return minutes * 1000;
+    }
+
+    private long calculateCallSeconds(Call call) {
+        LocalDateTime endedAt = call.getEndedAt();
+        LocalDateTime startedAt = call.getStartedAt();
+        return Duration.between(startedAt, endedAt).toSeconds();
+    }
+
+    protected void validateRecipient(Call call, User user, String message) {
+        Long initiatorId = call.getIsClientInitiator()
+                ? call.getClient().getId()
+                : call.getTranslator().getId();
+
+        if (user.getId().equals(initiatorId)) {
+            throw new InvalidCallRecipientException(message);
+        }
+    }
+
+    protected void validateCaller(Call call, User user) {
+        Long initiatorId = call.getIsClientInitiator()
+                ? call.getClient().getId()
+                : call.getTranslator().getId();
+
+        if (!user.getId().equals(initiatorId)) {
+            throw new InvalidCallerException("Cannot cancel this call");
+        }
+    }
+
+    private void validateCallIsRequested(Call call) {
+        if (call.getStatus() != CallStatus.REQUESTED) {
+            throw new InvalidCallStateException("Cannot set a max duration for this call");
+        }
+    }
+
+    protected void validateCallIsAccepted(Call call) {
+        if (call.getStatus() != CallStatus.ACCEPTED) {
+            throw new InvalidCallStateException("Cannot start this call");
+        }
+    }
+
+    protected void validateCallIsRinging(Call call) {
+        if (call.getStatus() != CallStatus.RINGING) {
+            throw new InvalidCallStateException("Cannot access this call");
+        }
+    }
+
+    protected void validateCallIsInProgress(Call call) {
+        if (call.getStatus() != CallStatus.IN_PROGRESS) {
+            throw new InvalidCallStateException("Cannot end this call");
+        }
+    }
+
+    protected void validateCallIsEnded(Call call) {
+        if (call.getStatus() != CallStatus.ENDED) {
+            throw new InvalidCallStateException("Cannot rate this call");
+        }
+    }
+
+    private void validateCallFundsAreSufficient(Long maxDuration) {
+        if (maxDuration <= 0) {
+            throw new DeficientFundsException("Client does not have enough funds for a call");
+        }
+    }
+
+    protected void validateCallRating(Integer rating) {
+        if (rating == null || rating < 1 || rating > 5) {
+            throw new InvalidCallRatingException("Rating must be 1-5");
+        }
+    }
+}

@@ -1,6 +1,7 @@
 package com.roy.morago.exception;
 
 import com.roy.morago.exception.auth.*;
+import com.roy.morago.exception.call.*;
 import com.roy.morago.exception.file.FileNotFoundException;
 import com.roy.morago.exception.file.FileStorageException;
 import com.roy.morago.exception.file.FileValidationException;
@@ -215,5 +216,40 @@ public class RestExceptionHandler {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(CallNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCallNotFound(CallNotFoundException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(InvalidCallStateException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCallState(InvalidCallStateException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(InvalidCallRecipientException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCallRecipient(InvalidCallRecipientException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(InvalidCallerException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCaller(InvalidCallerException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(InvalidCallRatingException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCallRating(InvalidCallRatingException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }
