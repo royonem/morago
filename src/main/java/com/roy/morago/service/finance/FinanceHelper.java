@@ -158,7 +158,7 @@ public class FinanceHelper {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(
                     cb.or(
-                            cb.equal(root.join("user").get("id"), userId)
+                            cb.equal(root.join("wallet").get("user").get("id"), userId)
                     )
             );
             predicates.addAll(buildPredicates(request, root, cb));
