@@ -1,10 +1,12 @@
 package com.roy.morago.service.notification;
 
+import com.roy.morago.constants.SocketEvents;
 import com.roy.morago.dto.notification.NotificationRequest;
 import com.roy.morago.dto.notification.NotificationResponse;
 import com.roy.morago.entity.notification.Notification;
 import com.roy.morago.mapper.NotificationMapper;
 import com.roy.morago.repository.notification.NotificationRepository;
+import com.roy.morago.service.SocketService;
 import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,12 +24,21 @@ public class NotificationService {
     private final NotificationHelper helper;
     private final NotificationMapper mapper;
     private final UserHelper userHelper;
+    private final SocketService socketService;
+
 
     @Transactional
     public NotificationResponse createNotification(NotificationRequest request) {
         Notification notification = mapper.toEntity(request);
         notification.setUser(userHelper.findUserById(request.userId()));
         repository.save(notification);
+
+        socketService.sendToUser(
+                request.userId(),
+                SocketEvents.NOTIFICATION,
+                mapper.toResponse(notification)
+        );
+
         return mapper.toResponse(notification);
     }
 
