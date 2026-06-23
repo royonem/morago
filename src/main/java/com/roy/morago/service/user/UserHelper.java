@@ -44,7 +44,6 @@ public class UserHelper {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
-}
 
     @SuppressWarnings("DataFlowIssue")
     protected Specification<User> buildSpecification(UserSearchRequest request) {
