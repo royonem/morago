@@ -2,6 +2,7 @@ package com.roy.morago.service.call;
 
 import com.roy.morago.dto.call.CallRequest;
 import com.roy.morago.dto.call.CallResponse;
+import com.roy.morago.dto.call.CallSearchRequest;
 import com.roy.morago.entity.call.Call;
 import com.roy.morago.entity.finance.Wallet;
 import com.roy.morago.entity.user.User;
@@ -14,6 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -23,6 +28,7 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
@@ -52,26 +58,18 @@ public class CallServiceIT {
     private CallRequest testCallRequest;
     private CallResponse testCallResponse;
 
-    public CallRequest createTestCallRequest() {
-        return new CallRequest(
-                testClient.getId(),
-                testTranslator.getId(),
-                1L
-        );
-    }
-
     @BeforeEach
     public void setUp() {
         testClient = setupHelper.createTestClient();
         testWalletClient = setupHelper.createTestWallet(testClient);
         testTranslator = setupHelper.createTestTranslator();
         testWalletTranslator = setupHelper.createTestWallet(testTranslator);
-        testCallRequest = createTestCallRequest();
+        testCallRequest = setupHelper.createTestCallRequest(testClient, testTranslator);
     }
 
     @Test
     void testRequestCallAsClient() {
-        testCallResponse = callService.requestCall(testCallRequest, testClient);
+        testCallResponse = setupHelper.createTestRequestCall(testCallRequest);
         testCall = callHelper.findCallById(testCallResponse.id());
         assertThat(testCall.getClient().getId()).isEqualTo(testClient.getId());
         assertThat(testCall.getTranslator().getId()).isEqualTo(testTranslator.getId());
@@ -81,8 +79,7 @@ public class CallServiceIT {
 
     @Test
     void testAcceptCallAsTranslator() {
-        testCallResponse = callService.requestCall(testCallRequest, testClient);
-        testCallResponse = callService.acceptCall(testCallResponse.id(), testTranslator);
+        testCallResponse = setupHelper.createTestAcceptCall(testCallRequest);
         testCall = callHelper.findCallById(testCallResponse.id());
 
         assertThat(testCall.getClient().getId()).isEqualTo(testClient.getId());
@@ -94,9 +91,7 @@ public class CallServiceIT {
 
     @Test
     void testStartCall() {
-        testCallResponse = callService.requestCall(testCallRequest, testClient);
-        testCallResponse = callService.acceptCall(testCallResponse.id(), testTranslator);
-        testCallResponse = callService.startCall(testCallResponse.id());
+        testCallResponse = setupHelper.createTestStartCall(testCallRequest);
         testCall = callHelper.findCallById(testCallResponse.id());
 
         assertThat(testCall.getStatus()).isEqualTo(CallStatus.IN_PROGRESS);
@@ -105,14 +100,7 @@ public class CallServiceIT {
 
     @Test
     void testEndCall_clientIsCaller() {
-        testCallResponse = callService.requestCall(testCallRequest, testClient);
-        testCallResponse = callService.acceptCall(testCallResponse.id(), testTranslator);
-        testCallResponse = callService.startCall(testCallResponse.id());
-        testCall = callHelper.findCallById(testCallResponse.id());
-
-        testCall.setStartedAt(LocalDateTime.now().minusSeconds(59));
-
-        testCallResponse = callService.endCall(testCallResponse.id());
+        testCallResponse = setupHelper.createTestEndCall(testCallRequest, 59L);
         testCall = callHelper.findCallById(testCallResponse.id());
 
         assertThat(testCall.getStatus()).isEqualTo(CallStatus.ENDED);
@@ -145,7 +133,7 @@ public class CallServiceIT {
 
     @Test
     void testGetCall() {
-        testCallResponse = callService.requestCall(testCallRequest, testClient);
+        testCallResponse = setupHelper.createTestRequestCall(testCallRequest);
         testCall = callHelper.findCallById(testCallResponse.id());
 
         CallResponse callResponse = callService.getCall(testCall.getId());
@@ -156,9 +144,7 @@ public class CallServiceIT {
 
     @Test
     void testCancelCall() {
-        testCallResponse = callService.requestCall(testCallRequest, testClient);
-        testCall = callHelper.findCallById(testCallResponse.id());
-        testCallResponse = callService.cancelCall(testCall.getId(), testClient);
+        testCallResponse = setupHelper.createTestCancelCall(testCallRequest);
         testCall = callHelper.findCallById(testCallResponse.id());
 
         assertThat(testCall.getStatus()).isEqualTo(CallStatus.CANCELED);
@@ -167,9 +153,8 @@ public class CallServiceIT {
 
     @Test
     void testDeclineCall() {
-        testCallResponse = callService.requestCall(testCallRequest, testClient);
+        testCallResponse = setupHelper.createTestDeclineCall(testCallRequest);
         testCall = callHelper.findCallById(testCallResponse.id());
-        testCallResponse = callService.declineCall(testCall.getId(), testTranslator);
 
         assertThat(testCall.getStatus()).isEqualTo(CallStatus.DECLINED);
         assertNotNull(testCall.getCanceledAt());
@@ -177,17 +162,62 @@ public class CallServiceIT {
 
     @Test
     void testRateCall() {
-        testCallResponse = callService.requestCall(testCallRequest, testClient);
-        testCallResponse = callService.acceptCall(testCallResponse.id(), testTranslator);
-        testCallResponse = callService.startCall(testCallResponse.id());
+        testCallResponse = setupHelper.createTestRateCall(testCallRequest, 59L, 4);
         testCall = callHelper.findCallById(testCallResponse.id());
-        testCall.setStartedAt(LocalDateTime.now().minusSeconds(59));
-        testCallResponse = callService.endCall(testCallResponse.id());
-        testCall = callHelper.findCallById(testCallResponse.id());
-        callService.rateCall(testCall.getId(), 4);
         assertThat(testCall.getRating()).isEqualTo(4);
     }
 
+    @Test
+    void testGetAllCalls() {
+        setupHelper.createMassCallLog(testClient, testTranslator);
+        Pageable firstPage = PageRequest.of(0, 20, Sort.by("id").descending());
+        Page<CallResponse> page1 = callService.getAllCalls(firstPage);
+
+        assertEquals(70, page1.getTotalElements());
+        assertEquals(4, page1.getTotalPages());
+        assertEquals(20, page1.getContent().size());
+        assertEquals(0, page1.getNumber());
+    }
+
+    @Test
+    void testGetCallsByUserId() {
+        setupHelper.createMassCallLog(testClient, testTranslator);
+        Pageable firstPage = PageRequest.of(0, 20, Sort.by("id").descending());
+        Page<CallResponse> page1 = callService.getCallsByUserId(testClient.getId(), firstPage);
+
+        assertEquals(50, page1.getTotalElements());
+        assertEquals(3, page1.getTotalPages());
+        assertEquals(20, page1.getContent().size());
+        assertEquals(0, page1.getNumber());
+    }
+
+    @Test
+    void testSearchCalls() {
+        setupHelper.createMassCallLog(testClient, testTranslator);
+        CallSearchRequest searchRequest = setupHelper.createTestCallSearchRequest
+                (testClient, testTranslator, CallStatus.ENDED, 3, 5);
+        Page<CallResponse> page1 = callService.searchCalls(searchRequest);
+
+        assertEquals(30, page1.getTotalElements());
+        assertEquals(2, page1.getTotalPages());
+        assertEquals(20, page1.getContent().size());
+        assertEquals(0, page1.getNumber());
+    }
+
+    @Test
+    void testSearchCallsByUserId() {
+        setupHelper.createMassCallLog(testClient, testTranslator);
+        CallSearchRequest searchRequest = setupHelper.createTestCallSearchRequest
+                (testClient, testTranslator, CallStatus.ENDED, 1, 5);
+        Page<CallResponse> page1 = callService.searchCallsByUserId(testClient.getId(), searchRequest);
+
+        assertEquals(40, page1.getTotalElements());
+        assertEquals(2, page1.getTotalPages());
+        assertEquals(20, page1.getContent().size());
+        assertEquals(0, page1.getNumber());
+    }
+
+    // Failed Tests
     @Test
     void testRequestCall_deficientWalletBalance_throwsException() {
         testWalletClient.setBalance(400L);

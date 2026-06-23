@@ -9,8 +9,6 @@ import com.roy.morago.repository.notification.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 public class NotificationHelper {
@@ -19,14 +17,6 @@ public class NotificationHelper {
     protected Notification findNotificationById(Long notificationId) {
         return notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new NotificationNotFoundException("Notification not found"));
-    }
-
-    protected List<Notification> findByUserId(Long userId) {
-        return notificationRepository.findByUserId(userId);
-    }
-
-    protected List<Notification> findUnreadByUserId(Long userId) {
-        return notificationRepository.findByUserIdAndIsReadFalse(userId);
     }
 
     protected NotificationResponse createNotificationResponse(Notification notification) {
