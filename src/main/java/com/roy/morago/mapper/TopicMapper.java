@@ -8,6 +8,6 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TopicMapper {
-    TopicResponse createResponseFromEntity(Topic topic);
-    Topic createEntityFromRequest(TopicRequest request);
+    TopicResponse toResponse(Topic topic);
+    Topic toEntity(TopicRequest request);
 }

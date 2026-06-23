@@ -1,8 +1,8 @@
 package com.roy.morago.service.user;
 
-import com.roy.morago.dto.user.UserUpdateRequest;
 import com.roy.morago.dto.user.UserResponse;
 import com.roy.morago.dto.user.UserSearchRequest;
+import com.roy.morago.dto.user.UserUpdateRequest;
 import com.roy.morago.entity.user.Language;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.UserStatus;
@@ -28,17 +28,17 @@ public class UserService {
     private final UserHelper helper;
 
     public UserResponse getUser(Long userId) {
-        return userMapper.createResponseFromEntity(helper.findUserById(userId));
+        return userMapper.toResponse(helper.findUserById(userId));
     }
 
     public Page<UserResponse> getAllUsers(Pageable pageable) {
-        return userRepository.findAll(pageable).map(userMapper::createResponseFromEntity);
+        return userRepository.findAll(pageable).map(userMapper::toResponse);
     }
 
     public Page<UserResponse> searchUsers(UserSearchRequest request) {
         Specification<User> spec = helper.buildSpecification(request);
         return userRepository.findAll(spec, request.toPageable())
-                .map(userMapper::createResponseFromEntity);
+                .map(userMapper::toResponse);
     }
 
     @Transactional
@@ -49,7 +49,7 @@ public class UserService {
             Set<Language> languages = languageRepository.findAllByNameIn(userUpdateRequest.languages());
             user.setLanguages(languages);
         }
-        userMapper.updateEntityFromRequest(userUpdateRequest, user);
+        userMapper.toEntity(userUpdateRequest, user);
     }
 
     @Transactional
