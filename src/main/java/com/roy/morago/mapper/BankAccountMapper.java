@@ -8,6 +8,6 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface BankAccountMapper {
-    BankAccountResponse createResponseFromEntity(BankAccount bankAccount);
-    BankAccount createEntityFromRequest(BankAccountRequest request);
+    BankAccountResponse toResponse(BankAccount bankAccount);
+    BankAccount toEntity(BankAccountRequest request);
 }

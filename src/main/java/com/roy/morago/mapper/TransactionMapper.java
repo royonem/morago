@@ -8,6 +8,6 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TransactionMapper {
-    Transaction createTransactionFromDto(TransactionRequest dto);
-    TransactionResponse createTransactionResponse(Transaction transaction);
+    Transaction toEntity(TransactionRequest request);
+    TransactionResponse toResponse(Transaction transaction);
 }

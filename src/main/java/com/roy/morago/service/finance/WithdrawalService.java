@@ -37,7 +37,7 @@ public class WithdrawalService {
 
         financeHelper.validateSufficientWalletBalance(request.amount(), wallet);
 
-        Withdrawal withdrawal = mapper.createEntityFromRequest(request);
+        Withdrawal withdrawal = mapper.toEntity(request);
         withdrawal.setStatus(WithdrawalStatus.PENDING);
         withdrawal.setWallet(wallet);
         withdrawal.setRequester(user);
@@ -47,12 +47,12 @@ public class WithdrawalService {
         transactionRepository.save(transaction);
         withdrawalRepository.save(withdrawal);
 
-        return mapper.createResponseFromEntity(withdrawal);
+        return mapper.toResponse(withdrawal);
     }
 
     public WithdrawalResponse getWithdrawal(Long withdrawalId) {
         Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
-        return mapper.createResponseFromEntity(withdrawal);
+        return mapper.toResponse(withdrawal);
     }
 
     @Transactional

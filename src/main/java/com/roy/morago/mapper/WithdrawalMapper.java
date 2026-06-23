@@ -8,6 +8,6 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface WithdrawalMapper {
-    Withdrawal createEntityFromRequest(WithdrawalRequest request);
-    WithdrawalResponse createResponseFromEntity(Withdrawal withdrawal);
+    Withdrawal toEntity(WithdrawalRequest request);
+    WithdrawalResponse toResponse(Withdrawal withdrawal);
 }

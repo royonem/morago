@@ -7,5 +7,5 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CategoryMapper {
-    CategoryResponse createResponseFromEntity(Category category);
+    CategoryResponse toResponse(Category category);
 }

@@ -32,7 +32,7 @@ public class FileHelper {
         String tempPath = fileStorageService.storeTempFile(file);
         File fileEntity = buildFileEntity(file, tempPath, filePurpose);
         fileRepository.save(fileEntity);
-        return fileMapper.createResponseFromEntity(fileEntity);
+        return fileMapper.toResponse(fileEntity);
     }
 
     protected File buildFileEntity(MultipartFile file, String tempPath, FilePurpose filePurpose) {

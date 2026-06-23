@@ -39,32 +39,32 @@ public class CallService {
 
         IncomingCallEvent event = IncomingCallEvent.from(call, caller);
         eventPublisher.publishEvent(event);
-        return mapper.createResponseFromEntity(call);
+        return mapper.toResponse(call);
     }
 
     public CallResponse getCall(Long callId) {
         Call call = helper.findCallById(callId);
-        return mapper.createResponseFromEntity(call);
+        return mapper.toResponse(call);
     }
 
     public Page<CallResponse> getAllCalls(Pageable pageable) {
-        return repo.findAll(pageable).map(mapper::createResponseFromEntity);
+        return repo.findAll(pageable).map(mapper::toResponse);
     }
 
     public Page<CallResponse> getCallsByUserId(Long userId, Pageable pageable) {
-        return repo.findByClientIdOrTranslatorId(userId, pageable).map(mapper::createResponseFromEntity);
+        return repo.findByClientIdOrTranslatorId(userId, pageable).map(mapper::toResponse);
     }
 
     public Page<CallResponse> searchCalls(CallSearchRequest request) {
         Specification<Call> spec = helper.buildSpecification(request);
         return repo.findAll(spec, request.toPageable())
-                .map(mapper::createResponseFromEntity);
+                .map(mapper::toResponse);
     }
 
     public Page<CallResponse> searchCallsByUserId(Long userId, CallSearchRequest request) {
         Specification<Call> spec = helper.buildSpecificationForUser(userId, request);
         return repo.findAll(spec, request.toPageable())
-                .map(mapper::createResponseFromEntity);
+                .map(mapper::toResponse);
     }
 
     @Transactional
@@ -74,7 +74,7 @@ public class CallService {
         helper.validateCallIsRinging(call);
         call.setStatus(CallStatus.ACCEPTED);
         call.setAcceptedAt(LocalDateTime.now());
-        return mapper.createResponseFromEntity(call);
+        return mapper.toResponse(call);
     }
 
     @Transactional
@@ -83,7 +83,7 @@ public class CallService {
         helper.validateCallIsAccepted(call);
         call.setStatus(CallStatus.IN_PROGRESS);
         call.setStartedAt(LocalDateTime.now());
-        return mapper.createResponseFromEntity(call);
+        return mapper.toResponse(call);
     }
 
     @Transactional
@@ -96,7 +96,7 @@ public class CallService {
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
-        return mapper.createResponseFromEntity(call);
+        return mapper.toResponse(call);
     }
 
     @Transactional
@@ -109,7 +109,7 @@ public class CallService {
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
-        return mapper.createResponseFromEntity(call);
+        return mapper.toResponse(call);
     }
 
     @Transactional
@@ -123,7 +123,7 @@ public class CallService {
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
-        return mapper.createResponseFromEntity(call);
+        return mapper.toResponse(call);
     }
 
     @Transactional
@@ -132,6 +132,6 @@ public class CallService {
         helper.validateCallRating(rating);
         helper.validateCallIsEnded(call);
         call.setRating(rating);
-        return mapper.createResponseFromEntity(call);
+        return mapper.toResponse(call);
     }
 }

@@ -26,21 +26,21 @@ public class CategoryService {
         category.setName(request.name());
         category.setActive(true);
         categoryRepository.save(category);
-        return categoryMapper.createResponseFromEntity(category);
+        return categoryMapper.toResponse(category);
     }
 
     public List<CategoryResponse> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
         List<CategoryResponse> categoriesList = new ArrayList<>();
         for (Category category : categories) {
-            categoriesList.add(categoryMapper.createResponseFromEntity(category));
+            categoriesList.add(categoryMapper.toResponse(category));
         }
         return categoriesList;
     }
 
     public CategoryResponse getCategory(Long id) {
         Category category = topicHelper.findCategoryById(id);
-        return categoryMapper.createResponseFromEntity(category);
+        return categoryMapper.toResponse(category);
     }
 
     @Transactional
@@ -49,7 +49,7 @@ public class CategoryService {
         topicHelper.checkDuplicateCategoriesForUpdate(category, request.name());
         category.setName(request.name());
         category.setActive(request.active());
-        return categoryMapper.createResponseFromEntity(category);
+        return categoryMapper.toResponse(category);
     }
 
     @Transactional

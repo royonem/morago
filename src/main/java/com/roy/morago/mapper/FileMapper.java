@@ -7,5 +7,5 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface FileMapper {
-    FileResponse createResponseFromEntity(File file);
+    FileResponse toResponse(File file);
 }

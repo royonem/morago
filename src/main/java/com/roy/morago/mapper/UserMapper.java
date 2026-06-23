@@ -2,8 +2,8 @@ package com.roy.morago.mapper;
 
 import com.roy.morago.dto.auth.ClientRegisterRequest;
 import com.roy.morago.dto.auth.TranslatorRegisterRequest;
-import com.roy.morago.dto.user.UserUpdateRequest;
 import com.roy.morago.dto.user.UserResponse;
+import com.roy.morago.dto.user.UserUpdateRequest;
 import com.roy.morago.entity.user.Language;
 import com.roy.morago.entity.user.Role;
 import com.roy.morago.entity.user.User;
@@ -16,16 +16,16 @@ import java.util.stream.Collectors;
 public interface UserMapper {
 
     // CREATE
-    User createEntityFromRequest(ClientRegisterRequest request);
-    User createEntityFromRequest(TranslatorRegisterRequest request);
+    User toEntity(ClientRegisterRequest request);
+    User toEntity(TranslatorRegisterRequest request);
 
     @Mapping(target = "roles", source = "roles")
     @Mapping(target = "languages", source = "languages")
-    UserResponse createResponseFromEntity(User user);
+    UserResponse toResponse(User user);
     // UPDATE
     @Mapping(target = "languages", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromRequest(UserUpdateRequest dto, @MappingTarget User user);
+    void toEntity(UserUpdateRequest request, @MappingTarget User user);
 
     default Set<String> mapRoles(Set<Role> roles) {
         return roles == null ? Set.of() :
@@ -40,5 +40,4 @@ public interface UserMapper {
                         .map(Language::getName)
                         .collect(Collectors.toSet());
     }
-
 }

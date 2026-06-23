@@ -40,7 +40,7 @@ public class FileService {
 
     @Transactional(readOnly = true)
     public FileResponse viewFile(Long fileId) {
-        return fileMapper.createResponseFromEntity(fileHelper.findFileById(fileId));
+        return fileMapper.toResponse(fileHelper.findFileById(fileId));
     }
 
     @Transactional
