@@ -1,6 +1,8 @@
 package com.roy.morago.service.user;
 
 import com.roy.morago.dto.user.UserUpdateRequest;
+import com.roy.morago.constants.SocketEvents;
+import com.roy.morago.dto.socket.AdminActionEvent;
 import com.roy.morago.dto.user.UserResponse;
 import com.roy.morago.dto.user.UserSearchRequest;
 import com.roy.morago.entity.user.Language;
@@ -10,6 +12,7 @@ import com.roy.morago.exception.user.MissingRoleException;
 import com.roy.morago.mapper.UserMapper;
 import com.roy.morago.repository.user.LanguageRepository;
 import com.roy.morago.repository.user.UserRepository;
+import com.roy.morago.service.SocketService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -26,6 +30,7 @@ public class UserService {
     private final LanguageRepository languageRepository;
     private final UserMapper userMapper;
     private final UserHelper helper;
+    private final SocketService socketService;
 
     public UserResponse getUser(Long userId) {
         return userMapper.createResponseFromEntity(helper.findUserById(userId));
@@ -60,17 +65,13 @@ public class UserService {
         if (!isTranslator) {
             throw new MissingRoleException("User with ID " + userId + " is not a translator");
         }
-        user.setStatus(UserStatus.VERIFIED);
-    }
+        AdminActionEvent event = new AdminActionEvent();
+        event.setUserId(userId);
+        event.setEmail(user.getEmail());
+        event.setAction("Verification");
+        event.setSentAt(LocalDateTime.now());
+        socketService.sendToUser(userId, SocketEvents.ADMIN_ACTION, event);
 
-    @Transactional
-    public void verifyTranslator(Long userId) {
-        User user = helper.findUserById(userId);
-        boolean isTranslator = user.getRoles().stream()
-                .anyMatch(role -> "ROLE_TRANSLATOR".equals(role.getName()));
-        if (!isTranslator) {
-            throw new MissingRoleException("User with ID " + userId + " is not a translator");
-        }
         user.setStatus(UserStatus.VERIFIED);
     }
 
