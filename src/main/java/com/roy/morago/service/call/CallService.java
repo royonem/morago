@@ -1,21 +1,27 @@
 package com.roy.morago.service.call;
 
+import com.roy.morago.constants.SocketEvents;
 import com.roy.morago.dto.call.CallRequest;
 import com.roy.morago.dto.call.CallResponse;
 import com.roy.morago.dto.call.CallSearchRequest;
+import com.roy.morago.dto.socket.IncomingCallEvent;
 import com.roy.morago.entity.call.Call;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CallStatus;
 import com.roy.morago.mapper.CallMapper;
 import com.roy.morago.repository.call.CallRepository;
+import com.roy.morago.service.SocketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -23,6 +29,8 @@ public class CallService {
     private final CallRepository repo;
     private final CallMapper mapper;
     private final CallHelper helper;
+    private final SocketService socketService;
+    private final CallService self;
 
     @Transactional
     public CallResponse requestCall(CallRequest callRequest, User caller) {
@@ -32,6 +40,18 @@ public class CallService {
         helper.setMaxDuration(call, callRequest);
         call.setStatus(CallStatus.RINGING);
         repo.save(call);
+
+        IncomingCallEvent event = new IncomingCallEvent();
+        event.setCallId(call.getId());
+        event.setCallerId(caller.getId());
+        event.setCallerName(caller.getFullName());
+
+        User receiver = call.getReceiver();
+        event.setReceiverId(receiver.getId());
+        event.setReceiverName(receiver.getFullName());
+        event.setSentAt(LocalDateTime.now());
+
+        socketService.sendToUser(receiver.getId(), SocketEvents.INCOMING_CALL, event);
 
         return mapper.createResponseFromEntity(call);
     }
@@ -87,6 +107,7 @@ public class CallService {
         helper.validateCallIsRinging(call);
         helper.resolveCancelDecline(call, caller);
         call.setCanceledAt(LocalDateTime.now());
+        helper.resolveCall(call);
         return mapper.createResponseFromEntity(call);
     }
 
@@ -97,18 +118,18 @@ public class CallService {
         helper.validateCallIsRinging(call);
         helper.resolveCancelDecline(call, recipient);
         call.setCanceledAt(LocalDateTime.now());
+        helper.resolveCall(call);
         return mapper.createResponseFromEntity(call);
     }
 
-    @Transactional
-    public CallResponse autoEndCall(Long callId) {
-        Call call = helper.findCallById(callId);
-        call.setStatus(CallStatus.ENDED);
-        call.setEndedAt(LocalDateTime.now());
-        call.setCost(helper.calculateCallCost(call));
-        // some scheduling logic
-        helper.createCallTransactions(call);
-        return mapper.createResponseFromEntity(call);
+    @Scheduled(fixedDelay = 5000)
+    public void autoEndCalls() {
+        List<Call> activeCalls = repo.findActiveCalls();
+        for (Call call : activeCalls) {
+            if (call.getDurationSeconds() >= call.getMaxCallTime()) {
+                self.endCall(call.getId());
+            }
+        }
     }
 
     @Transactional
@@ -119,6 +140,7 @@ public class CallService {
         call.setEndedAt(LocalDateTime.now());
         call.setCost(helper.calculateCallCost(call));
         helper.createCallTransactions(call);
+        helper.resolveCall(call);
         return mapper.createResponseFromEntity(call);
     }
 
