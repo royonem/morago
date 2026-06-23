@@ -9,4 +9,6 @@ public class SocketEvents {
     public static final String NOTIFICATION = "notification";
 
     public static final String TRANSACTION_PROCESSED = "transaction_processed";
+
+    public static final String ADMIN_ACTION = "admin_action";
 }
