@@ -1,0 +1,6 @@
+ALTER TABLE transactions DROP FOREIGN KEY FK_TRANSACTIONS_ON_CALL;
+
+ALTER TABLE transactions DROP KEY uc_transactions_call;
+
+ALTER TABLE transactions
+    ADD CONSTRAINT FK_TRANSACTIONS_ON_CALL FOREIGN KEY (call_id) REFERENCES calls (id);
