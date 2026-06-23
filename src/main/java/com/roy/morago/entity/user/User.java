@@ -82,4 +82,9 @@ public class User extends BaseEntity {
     private TopikLevel topikLevel;
     @Column
     private LocalDate birthdate;
+
+    public String getFullName() {
+        return (firstName != null ? firstName : "") +
+                (lastName != null ? " " + lastName : "");
+    }
 }
