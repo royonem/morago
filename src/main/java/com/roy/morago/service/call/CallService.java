@@ -15,13 +15,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -30,7 +27,6 @@ public class CallService {
     private final CallMapper mapper;
     private final CallHelper helper;
     private final SocketService socketService;
-    private final CallService self;
 
     @Transactional
     public CallResponse requestCall(CallRequest callRequest, User caller) {
@@ -107,7 +103,7 @@ public class CallService {
         helper.validateCallIsRinging(call);
         helper.resolveCancelDecline(call, caller);
         call.setCanceledAt(LocalDateTime.now());
-        helper.resolveCall(call);
+        helper.resolveCallEvent(call);
         return mapper.createResponseFromEntity(call);
     }
 
@@ -118,18 +114,8 @@ public class CallService {
         helper.validateCallIsRinging(call);
         helper.resolveCancelDecline(call, recipient);
         call.setCanceledAt(LocalDateTime.now());
-        helper.resolveCall(call);
+        helper.resolveCallEvent(call);
         return mapper.createResponseFromEntity(call);
-    }
-
-    @Scheduled(fixedDelay = 5000)
-    public void autoEndCalls() {
-        List<Call> activeCalls = repo.findActiveCalls();
-        for (Call call : activeCalls) {
-            if (call.getDurationSeconds() >= call.getMaxCallTime()) {
-                self.endCall(call.getId());
-            }
-        }
     }
 
     @Transactional
@@ -140,7 +126,7 @@ public class CallService {
         call.setEndedAt(LocalDateTime.now());
         call.setCost(helper.calculateCallCost(call));
         helper.createCallTransactions(call);
-        helper.resolveCall(call);
+        helper.resolveCallEvent(call);
         return mapper.createResponseFromEntity(call);
     }
 
