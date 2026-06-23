@@ -46,9 +46,7 @@ public class CallHelper {
         return call;
     }
 
-    protected void resolveCall(Call call) {
-        callRepository.save(call);
-
+    protected void resolveCallEvent(Call call) {
         CallEndedEvent event = new CallEndedEvent();
         CallStatus status = call.getStatus();
         event.setCallId(call.getId());
