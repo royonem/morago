@@ -7,4 +7,6 @@ public class SocketEvents {
     public static final String CALL_ENDED = "call_ended";
 
     public static final String NOTIFICATION = "notification";
+
+    public static final String TRANSACTION_PROCESSED = "transaction_processed";
 }
