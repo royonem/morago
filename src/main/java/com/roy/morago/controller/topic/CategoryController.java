@@ -1,6 +1,7 @@
 package com.roy.morago.controller.topic;
 
-import com.roy.morago.dto.topic.CategoryDTO;
+import com.roy.morago.dto.topic.CategoryRequest;
+import com.roy.morago.dto.topic.CategoryResponse;
 import com.roy.morago.service.topic.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,31 +17,31 @@ import java.util.List;
 public class CategoryController {
     private final CategoryService categoryService;
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDTO createCategory(@Valid @RequestBody CategoryDTO dto) {
+    public CategoryResponse createCategory(@Valid @RequestBody CategoryRequest dto) {
         return categoryService.createCategory(dto);
     }
 
     @GetMapping("/")
-    public List<CategoryDTO> categoryList() {
+    public List<CategoryResponse> categoryList() {
         return categoryService.getAllCategories();
     }
 
     @GetMapping("/{id}")
-    public CategoryDTO getCategory(@PathVariable Long id) {
+    public CategoryResponse getCategory(@PathVariable Long id) {
         return categoryService.getCategory(id);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public CategoryDTO updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDTO dto) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public CategoryResponse updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest dto) {
         return categoryService.updateCategory(id, dto);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);

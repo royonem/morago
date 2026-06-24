@@ -3,6 +3,7 @@ package com.roy.morago.service.topic;
 import com.roy.morago.dto.topic.TopicRequest;
 import com.roy.morago.dto.topic.TopicResponse;
 import com.roy.morago.entity.topic.Topic;
+import com.roy.morago.mapper.TopicMapper;
 import com.roy.morago.repository.topic.TopicRepository;
 import com.roy.morago.service.file.FileService;
 import jakarta.transaction.Transactional;
@@ -18,50 +19,49 @@ public class TopicService {
     private final TopicRepository topicRepository;
     private final TopicHelper topicHelper;
     private final FileService fileService;
+    private final TopicMapper topicMapper;
 
     @Transactional
-    public TopicResponse createTopic(TopicRequest dto) {
-        Topic topic = new Topic();
-        topicHelper.checkDuplicateTopics(dto.getName());
-        topic.setName(dto.getName());
-        topic.setActive(dto.getActive());
-        if (dto.getCategoryId() != null) {
-            topic.setCategory(topicHelper.findCategoryById(dto.getCategoryId()));
+    public TopicResponse createTopic(TopicRequest request) {
+        topicHelper.checkDuplicateTopics(request.name());
+
+        Topic topic = topicMapper.createEntityFromRequest(request);
+        if (request.categoryId() != null) {
+            topic.setCategory(topicHelper.findCategoryById(request.categoryId()));
         }
         topicRepository.save(topic);
-        if (dto.getIconId() != null) {
-            fileService.saveTopicIcon(topic.getId(), dto.getIconId());
+        if (request.iconId() != null) {
+            fileService.saveTopicIcon(topic.getId(), request.iconId());
         }
-
-        return topicHelper.createTopicResponse(topic);
+        return topicMapper.createResponseFromEntity(topic);
     }
 
     public List<TopicResponse> getAllTopics() {
         List<Topic> topics = topicRepository.findAll();
         List<TopicResponse> topicsList = new ArrayList<>();
         for (Topic topic : topics) {
-            topicsList.add(topicHelper.createTopicResponse(topic));
+            topicsList.add(topicMapper.createResponseFromEntity(topic));
         }
         return topicsList;
     }
 
     public TopicResponse getTopic(Long id) {
         Topic topic = topicHelper.findTopicById(id);
-        return topicHelper.createTopicResponse(topic);
+        return topicMapper.createResponseFromEntity(topic);
     }
 
     @Transactional
     public TopicResponse updateTopic(Long id, TopicRequest dto) {
         Topic topic = topicHelper.findTopicById(id);
-        topicHelper.checkDuplicateTopicsForUpdate(topic, dto.getName());
-        topic.setName(dto.getName());
-        if (dto.getCategoryId() != null) {
-            topic.setCategory(topicHelper.findCategoryById(dto.getCategoryId()));
-        }        topic.setActive(dto.getActive());
-        if (dto.getIconId() != null) {
-            fileService.saveTopicIcon(topic.getId(), dto.getIconId());
+        topicHelper.checkDuplicateTopicsForUpdate(topic, dto.name());
+        topic.setName(dto.name());
+        if (dto.categoryId() != null) {
+            topic.setCategory(topicHelper.findCategoryById(dto.categoryId()));
+        }        topic.setActive(dto.active());
+        if (dto.iconId() != null) {
+            fileService.saveTopicIcon(topic.getId(), dto.iconId());
         }
-        return topicHelper.createTopicResponse(topic);
+        return topicMapper.createResponseFromEntity(topic);
     }
 
     @Transactional

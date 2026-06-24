@@ -1,6 +1,6 @@
 package com.roy.morago.service.user;
 
-import com.roy.morago.dto.user.UpdateUserRequest;
+import com.roy.morago.dto.user.UserUpdateRequest;
 import com.roy.morago.dto.user.UserResponse;
 import com.roy.morago.dto.user.UserSearchRequest;
 import com.roy.morago.entity.user.Language;
@@ -42,14 +42,25 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(Long id, UpdateUserRequest updateUserRequest) {
+    public void updateUser(Long id, UserUpdateRequest userUpdateRequest) {
         User user = helper.findUserById(id);
 
-        if (updateUserRequest.languages() != null) {
-            Set<Language> languages = languageRepository.findAllByNameIn(updateUserRequest.languages());
+        if (userUpdateRequest.languages() != null) {
+            Set<Language> languages = languageRepository.findAllByNameIn(userUpdateRequest.languages());
             user.setLanguages(languages);
         }
-        userMapper.updateEntityFromRequest(updateUserRequest, user);
+        userMapper.updateEntityFromRequest(userUpdateRequest, user);
+    }
+
+    @Transactional
+    public void verifyTranslator(Long userId) {
+        User user = helper.findUserById(userId);
+        boolean isTranslator = user.getRoles().stream()
+                .anyMatch(role -> "ROLE_TRANSLATOR".equals(role.getName()));
+        if (!isTranslator) {
+            throw new MissingRoleException("User with ID " + userId + " is not a translator");
+        }
+        user.setStatus(UserStatus.VERIFIED);
     }
 
     @Transactional

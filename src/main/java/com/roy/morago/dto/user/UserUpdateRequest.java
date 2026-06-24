@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Pattern;
 
 import java.util.Set;
 
-public record UpdateUserRequest(
+public record UserUpdateRequest(
         Set<String> languages,
         @NotBlank String firstName,
         @NotBlank String lastName,

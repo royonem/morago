@@ -3,6 +3,7 @@ package com.roy.morago.service.auth;
 import com.roy.morago.dto.auth.*;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.Availability;
+import com.roy.morago.enums.TopikLevel;
 import com.roy.morago.enums.UserStatus;
 import com.roy.morago.exception.auth.InvalidRefreshTokenException;
 import com.roy.morago.service.user.UserHelper;
@@ -13,11 +14,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.time.LocalDate;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -41,8 +43,8 @@ public class AuthServiceIT {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
-    private RegisterClientRequest testClientRequest;
-    private RegisterTranslatorRequest testTranslatorRequest;
+    private ClientRegisterRequest testClientRequest;
+    private TranslatorRegisterRequest testTranslatorRequest;
     private LoginRequest testLoginRequest;
     private LogoutRequest testLogoutRequest;
     private String testRefreshToken;
@@ -50,23 +52,27 @@ public class AuthServiceIT {
     private User testTranslator;
 
     public void createTestRegisterClientRequest() {
-        testClientRequest = new RegisterClientRequest();
-        testClientRequest.setFirstName("John");
-        testClientRequest.setLastName("Doe");
-        testClientRequest.setPassword("password");
-        testClientRequest.setConfirmPassword("password");
-        testClientRequest.setEmail("johndoe@email.com");
-        testClientRequest.setPhone("010-4444-4444");
+        testClientRequest = new ClientRegisterRequest(
+                "John",
+                "Doe",
+                "password",
+                "password",
+                "johndoe@email.com",
+                "010-4444-4444"
+        );
     }
 
     public void createTestRegisterTranslatorRequest() {
-        testTranslatorRequest = new RegisterTranslatorRequest();
-        testTranslatorRequest.setFirstName("Sara");
-        testTranslatorRequest.setLastName("Park");
-        testTranslatorRequest.setPassword("password");
-        testTranslatorRequest.setConfirmPassword("password");
-        testTranslatorRequest.setEmail("sara@translator.com");
-        testTranslatorRequest.setPhone("010-5555-6666");
+        testTranslatorRequest = new TranslatorRegisterRequest(
+                "Sara",
+                "Park",
+                "password123",
+                "password123",
+                "sara@translator.com",
+                "010-5555-6666",
+                TopikLevel.LEVEL_3,
+                LocalDate.of(1990, 5, 15)
+        );
     }
 
     public void createTestLoginRequest() {
@@ -93,7 +99,7 @@ public class AuthServiceIT {
     @Test
     public void testRegisterClient() {
         authService.registerClient(testClientRequest);
-        testClient = userHelper.findUserByEmail(testClientRequest.getEmail());
+        testClient = userHelper.findUserByEmail(testClientRequest.email());
         assertThat(testClient.getAvailability()).isEqualTo(Availability.OFFLINE);
         assertTrue(testClient.getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ROLE_CLIENT")));
@@ -104,12 +110,13 @@ public class AuthServiceIT {
     @Test
     public void testRegisterTranslator() {
         authService.registerTranslator(testTranslatorRequest);
-        testTranslator = userHelper.findUserByEmail(testTranslatorRequest.getEmail());
+        testTranslator = userHelper.findUserByEmail(testTranslatorRequest.email());
         assertThat(testTranslator.getAvailability()).isEqualTo(Availability.OFFLINE);
         assertTrue(testTranslator.getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ROLE_TRANSLATOR")));
         assertThat(testTranslator.getStatus()).isEqualTo(UserStatus.UNVERIFIED);
-        assertThat(testTranslator.getBankAccount()).isNull();    }
+        assertThat(testTranslator.getBankAccount()).isNull();
+    }
 
     @Test
     public void testLogin() {
@@ -130,5 +137,6 @@ public class AuthServiceIT {
         authService.logout(testLogoutRequest, authentication);
         assertThatThrownBy(() -> refreshTokenService.validateRefreshToken(testRefreshToken))
                 .isInstanceOf(InvalidRefreshTokenException.class)
-                .hasMessage("Refresh Token is revoked.");    }
+                .hasMessage("Refresh Token is revoked.");
+    }
 }

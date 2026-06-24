@@ -1,6 +1,7 @@
 package com.roy.morago.controller.finance;
 
-import com.roy.morago.dto.finance.BankAccountDTO;
+import com.roy.morago.dto.finance.BankAccountRequest;
+import com.roy.morago.dto.finance.BankAccountResponse;
 import com.roy.morago.service.finance.BankService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +18,13 @@ public class BankController {
 
     @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
-    public BankAccountDTO linkBankAccount(@Valid @RequestBody BankAccountDTO dto, Authentication authentication) {
-        return bankService.linkBankAccount(dto, authentication);
+    public BankAccountResponse linkBankAccount(@Valid @RequestBody BankAccountRequest request, Authentication authentication) {
+        return bankService.linkBankAccount(request, authentication);
     }
 
     @PreAuthorize("hasRole('ADMIN') or @securityService.isBankAccountOwner(#id, authentication)")
     @GetMapping("/{id}")
-    public BankAccountDTO getBankAccount(@PathVariable Long id) {
+    public BankAccountResponse getBankAccount(@PathVariable Long id) {
         return bankService.getBankAccount(id);
     }
 
