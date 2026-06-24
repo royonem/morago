@@ -12,6 +12,7 @@ import com.roy.morago.mapper.CallMapper;
 import com.roy.morago.repository.call.CallRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class CallService {
@@ -36,6 +38,7 @@ public class CallService {
         helper.setMaxDuration(call, callRequest);
         call.setStatus(CallStatus.RINGING);
         repo.save(call);
+        log.info("Call requested: client={}, translator={}", caller.getId(), callRequest.translatorId());
 
         IncomingCallEvent event = IncomingCallEvent.from(call, caller);
         eventPublisher.publishEvent(event);
@@ -74,6 +77,7 @@ public class CallService {
         helper.validateCallIsRinging(call);
         call.setStatus(CallStatus.ACCEPTED);
         call.setAcceptedAt(LocalDateTime.now());
+        log.info("Call accepted: callId={}, recipient={}", callId, recipient.getId());
         return mapper.toResponse(call);
     }
 
@@ -83,6 +87,7 @@ public class CallService {
         helper.validateCallIsAccepted(call);
         call.setStatus(CallStatus.IN_PROGRESS);
         call.setStartedAt(LocalDateTime.now());
+        log.info("Call started: callId={}", callId);
         return mapper.toResponse(call);
     }
 
@@ -96,10 +101,7 @@ public class CallService {
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
-        return mapper.toResponse(call);
-
-        CallEndedEvent event = CallEndedEvent.from(call);
-        eventPublisher.publishEvent(event);
+        log.info("Call cancelled: callId={}, caller={}", callId, caller.getId());
         return mapper.toResponse(call);
     }
 
@@ -113,6 +115,7 @@ public class CallService {
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
+        log.info("Call declined: callId={}, recipient={}", callId, recipient.getId());
         return mapper.toResponse(call);
     }
 
@@ -127,6 +130,7 @@ public class CallService {
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
+        log.info("Call ended: callId={}, cost={}, duration={}s", callId, call.getCost(), call.getDurationSeconds());
         return mapper.toResponse(call);
     }
 
@@ -136,6 +140,7 @@ public class CallService {
         helper.validateCallRating(rating);
         helper.validateCallIsEnded(call);
         call.setRating(rating);
+        log.info("Call {} was rated {}", callId, rating);
         return mapper.toResponse(call);
     }
 }

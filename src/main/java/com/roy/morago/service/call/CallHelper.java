@@ -16,6 +16,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CallHelper {
@@ -42,6 +44,8 @@ public class CallHelper {
     }
 
     protected void createCallTransactions(Call call) {
+        log.info("Creating transactions for call {}: client={}, translator={}",
+                call.getId(), call.getClient().getId(), call.getTranslator().getId());
         transactionService.createCallChargeTransaction(call, call.getClient());
         transactionService.createCallEarningTransaction(call, call.getTranslator());
     }

@@ -12,10 +12,12 @@ import com.roy.morago.repository.user.UserRepository;
 import com.roy.morago.service.topic.TopicHelper;
 import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class FileService {
@@ -53,6 +55,7 @@ public class FileService {
 
         user.setProfilePicture(file);
         userRepository.save(user);
+        log.info("Profile picture saved for user: {}", userId);
     }
 
     @Transactional
@@ -64,6 +67,7 @@ public class FileService {
         fileHelper.finalizeFile(icon, finalPath);
         topic.setIcon(icon);
         topicRepository.save(topic);
+        log.info("Topic icon saved for topic: {}", topicId);
     }
 
     @Transactional
@@ -73,6 +77,7 @@ public class FileService {
         user.setProfilePicture(null);
         fileRepository.deleteById(picture.getId());
         fileStorageService.deleteFromStorage(picture.getFilePath());
+        log.info("Profile picture deleted for user: {}", userId);
     }
 
     @Transactional
@@ -82,5 +87,6 @@ public class FileService {
         topic.setIcon(null);
         fileRepository.deleteById(icon.getId());
         fileStorageService.deleteFromStorage(icon.getFilePath());
+        log.info("Topic icon deleted for topic: {}", topicId);
     }
 }
