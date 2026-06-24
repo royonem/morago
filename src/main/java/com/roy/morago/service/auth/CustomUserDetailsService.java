@@ -5,10 +5,12 @@ import com.roy.morago.exception.user.UserNotFoundException;
 import com.roy.morago.repository.user.UserRepository;
 import com.roy.morago.security.UserPrincipal;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @AllArgsConstructor
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -17,8 +19,14 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) {
+        log.info("Loading user by email: {}", email);
+
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found."));
+                .orElseThrow(() -> {
+                    log.warn("User not found with email: {}", email);
+                    return new UserNotFoundException("User not found.");
+                });
+        log.info("User loaded successfully: {} (ID: {})", email, user.getId());
         return new UserPrincipal(user);
     }
 }

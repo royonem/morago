@@ -12,6 +12,7 @@ import com.roy.morago.mapper.CallMapper;
 import com.roy.morago.repository.call.CallRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class CallService {
@@ -36,35 +38,36 @@ public class CallService {
         helper.setMaxDuration(call, callRequest);
         call.setStatus(CallStatus.RINGING);
         repo.save(call);
+        log.info("Call requested: client={}, translator={}", caller.getId(), callRequest.translatorId());
 
         IncomingCallEvent event = IncomingCallEvent.from(call, caller);
         eventPublisher.publishEvent(event);
-        return mapper.toResponse(call);
+        return mapper.createResponseFromEntity(call);
     }
 
     public CallResponse getCall(Long callId) {
         Call call = helper.findCallById(callId);
-        return mapper.toResponse(call);
+        return mapper.createResponseFromEntity(call);
     }
 
     public Page<CallResponse> getAllCalls(Pageable pageable) {
-        return repo.findAll(pageable).map(mapper::toResponse);
+        return repo.findAll(pageable).map(mapper::createResponseFromEntity);
     }
 
     public Page<CallResponse> getCallsByUserId(Long userId, Pageable pageable) {
-        return repo.findByClientIdOrTranslatorId(userId, pageable).map(mapper::toResponse);
+        return repo.findByClientIdOrTranslatorId(userId, pageable).map(mapper::createResponseFromEntity);
     }
 
     public Page<CallResponse> searchCalls(CallSearchRequest request) {
         Specification<Call> spec = helper.buildSpecification(request);
         return repo.findAll(spec, request.toPageable())
-                .map(mapper::toResponse);
+                .map(mapper::createResponseFromEntity);
     }
 
     public Page<CallResponse> searchCallsByUserId(Long userId, CallSearchRequest request) {
         Specification<Call> spec = helper.buildSpecificationForUser(userId, request);
         return repo.findAll(spec, request.toPageable())
-                .map(mapper::toResponse);
+                .map(mapper::createResponseFromEntity);
     }
 
     @Transactional
@@ -74,7 +77,8 @@ public class CallService {
         helper.validateCallIsRinging(call);
         call.setStatus(CallStatus.ACCEPTED);
         call.setAcceptedAt(LocalDateTime.now());
-        return mapper.toResponse(call);
+        log.info("Call accepted: callId={}, recipient={}", callId, recipient.getId());
+        return mapper.createResponseFromEntity(call);
     }
 
     @Transactional
@@ -83,7 +87,8 @@ public class CallService {
         helper.validateCallIsAccepted(call);
         call.setStatus(CallStatus.IN_PROGRESS);
         call.setStartedAt(LocalDateTime.now());
-        return mapper.toResponse(call);
+        log.info("Call started: callId={}", callId);
+        return mapper.createResponseFromEntity(call);
     }
 
     @Transactional
@@ -93,11 +98,11 @@ public class CallService {
         helper.validateCallIsRinging(call);
         helper.resolveCancelDecline(call, caller);
         call.setCanceledAt(LocalDateTime.now());
-        return mapper.toResponse(call);
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
-        return mapper.toResponse(call);
+        log.info("Call cancelled: callId={}, caller={}", callId, caller.getId());
+        return mapper.createResponseFromEntity(call);
     }
 
     @Transactional
@@ -110,7 +115,8 @@ public class CallService {
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
-        return mapper.toResponse(call);
+        log.info("Call declined: callId={}, recipient={}", callId, recipient.getId());
+        return mapper.createResponseFromEntity(call);
     }
 
     @Transactional
@@ -124,7 +130,8 @@ public class CallService {
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
-        return mapper.toResponse(call);
+        log.info("Call ended: callId={}, cost={}, duration={}s", callId, call.getCost(), call.getDurationSeconds());
+        return mapper.createResponseFromEntity(call);
     }
 
     @Transactional
@@ -133,6 +140,7 @@ public class CallService {
         helper.validateCallRating(rating);
         helper.validateCallIsEnded(call);
         call.setRating(rating);
-        return mapper.toResponse(call);
+        log.info("Call {} was rated {}", callId, rating);
+        return mapper.createResponseFromEntity(call);
     }
 }
