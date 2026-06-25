@@ -1,5 +1,7 @@
 package com.roy.morago.service.user;
 
+import com.roy.morago.dto.user.UserUpdateRequest;
+import com.roy.morago.dto.socket.AdminActionEvent;
 import com.roy.morago.dto.user.UserResponse;
 import com.roy.morago.dto.user.UserSearchRequest;
 import com.roy.morago.dto.user.UserUpdateRequest;
@@ -26,6 +28,7 @@ public class UserService {
     private final LanguageRepository languageRepository;
     private final UserMapper userMapper;
     private final UserHelper helper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public UserResponse getUser(Long userId) {
         return userMapper.toResponse(helper.findUserById(userId));
@@ -60,6 +63,9 @@ public class UserService {
         if (!isTranslator) {
             throw new MissingRoleException("User with ID " + userId + " is not a translator");
         }
+        AdminActionEvent event = AdminActionEvent.from(user);
+        eventPublisher.publishEvent(event);
+
         user.setStatus(UserStatus.VERIFIED);
     }
 

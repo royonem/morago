@@ -1,14 +1,13 @@
 package com.roy.morago.service.notification;
 
-import com.roy.morago.constants.SocketEvents;
 import com.roy.morago.dto.notification.NotificationRequest;
 import com.roy.morago.dto.notification.NotificationResponse;
 import com.roy.morago.entity.notification.Notification;
 import com.roy.morago.mapper.NotificationMapper;
 import com.roy.morago.repository.notification.NotificationRepository;
-import com.roy.morago.service.SocketService;
 import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,8 +23,7 @@ public class NotificationService {
     private final NotificationHelper helper;
     private final NotificationMapper mapper;
     private final UserHelper userHelper;
-    private final SocketService socketService;
-
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public NotificationResponse createNotification(NotificationRequest request) {
@@ -33,13 +31,9 @@ public class NotificationService {
         notification.setUser(userHelper.findUserById(request.userId()));
         repository.save(notification);
 
-        socketService.sendToUser(
-                request.userId(),
-                SocketEvents.NOTIFICATION,
-                mapper.toResponse(notification)
-        );
-
-        return mapper.toResponse(notification);
+        NotificationResponse response = mapper.toResponse(notification);
+        eventPublisher.publishEvent(response);
+        return response;
     }
 
     public NotificationResponse getNotification(Long notificationId) {

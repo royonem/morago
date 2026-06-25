@@ -1,5 +1,6 @@
 package com.roy.morago.dto.socket;
 
+import com.roy.morago.entity.user.User;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -10,4 +11,13 @@ public class AdminActionEvent {
     private String email;
     private String action;
     private LocalDateTime sentAt;
+
+    public static AdminActionEvent from(User user) {
+        AdminActionEvent event = new AdminActionEvent();
+        event.setUserId(user.getId());
+        event.setEmail(user.getEmail());
+        event.setAction("Verification");
+        event.setSentAt(LocalDateTime.now());
+        return event;
+    }
 }
