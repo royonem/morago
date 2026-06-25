@@ -21,6 +21,7 @@ public class RefreshTokenService {
     private long refreshExpiration;
 
     public RefreshToken createRefreshToken(User user) {
+        log.info("Creating refresh token for user ID: {}", user.getId());
         RefreshToken refreshToken = new RefreshToken();
         String token = UUID.randomUUID().toString();
         refreshToken.setToken(token);
@@ -34,7 +35,6 @@ public class RefreshTokenService {
     public RefreshToken findByToken(String token) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token);
         if (refreshToken == null) {
-            log.warn("Refresh token not found: {}", token);
             throw new InvalidRefreshTokenException("Refresh Token not found.");
         }
         return refreshToken;
@@ -62,6 +62,7 @@ public class RefreshTokenService {
     }
 
     public void revokeRefreshToken(RefreshToken refreshToken) {
+        log.info("Revoking refresh token for user ID: {}", refreshToken.getUser().getId());
         refreshToken.setRevoked(true);
         refreshTokenRepository.save(refreshToken);
         log.info("Refresh token revoked for user ID: {}", refreshToken.getUser().getId());

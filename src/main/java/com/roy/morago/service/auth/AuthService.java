@@ -53,8 +53,9 @@ public class AuthService {
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
             User user = userHelper.findUserWithAuthentication(authentication);
+            LoginResponse response = createLoginResponse(user);
             log.info("Login successful for user ID: {}", user.getId());
-            return createLoginResponse(user);
+            return response;
         } catch (AuthenticationException e) {
             log.warn("Login FAILED for email: {} - Invalid credentials", loginRequest.email());
             throw new InvalidCredentialsException("Invalid username or password");
@@ -103,7 +104,6 @@ public class AuthService {
     }
 
     private void register(User user, String password, String confirmPassword, Role role) {
-        log.info("Registering user with email: {}", user.getEmail());
         if (userRepository.existsByEmail(user.getEmail())) {
             log.warn("Registration FAILED - Email already in use: {}", user.getEmail());
             throw new DuplicateEmailException("Email already in use.");
@@ -118,6 +118,6 @@ public class AuthService {
         user.setStatus(UserStatus.UNVERIFIED);
         User savedUser = userRepository.save(user);
         walletService.createWallet(savedUser, CurrencyCode.KRW);
-        log.info("User registered successfully with ID: {} and email: {}", savedUser.getId(), savedUser.getEmail());
+        log.info("User registered successfully: userId={}, role={}, email={}, walletId={}", savedUser.getId(), role.getName(), savedUser.getEmail(), savedUser.getWallet().getId());
     }
 }
