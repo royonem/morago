@@ -53,7 +53,7 @@ public class CallHelper {
         event.setStatus(status.name().toLowerCase());
         event.setSentAt(LocalDateTime.now());
         if (status == CallStatus.ENDED) {
-            event.setDuration(call.getDurationSeconds());
+            event.setDuration(call.getFullDurationSeconds());
         }
         socketService.sendToUser(call.getCaller().getId(), SocketEvents.CALL_ENDED, event);
         socketService.sendToUser(call.getReceiver().getId(), SocketEvents.CALL_ENDED, event);
@@ -155,12 +155,6 @@ public class CallHelper {
         long maxDurationMinutes = client.getWallet().getBalance() / 1000;
         validateCallFundsAreSufficient(maxDurationMinutes);
         call.setMaxCallTime(maxDurationMinutes * 60);
-    }
-
-    protected Long calculateCallCost(Call call) {
-        long callSeconds = call.getDurationSeconds();
-        long minutes = (long) Math.ceil(callSeconds / 60.0);
-        return minutes * 1000;
     }
 
     protected void validateRecipient(Call call, User user, String message) {

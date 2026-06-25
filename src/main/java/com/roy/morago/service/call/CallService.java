@@ -117,7 +117,7 @@ public class CallService {
         helper.validateCallIsInProgress(call);
         call.setStatus(CallStatus.ENDED);
         call.setEndedAt(LocalDateTime.now());
-        call.setCost(helper.calculateCallCost(call));
+        call.setCost(call.getExpectedCost());
         helper.createCallTransactions(call);
         return mapper.toResponse(call);
     }

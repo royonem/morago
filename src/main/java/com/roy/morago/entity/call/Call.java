@@ -72,4 +72,10 @@ public class Call extends BaseEntity {
         }
         return Duration.between(startedAt, endedAt).toSeconds();
     }
+
+    public long getExpectedCost() {
+        long callSeconds = getFullDurationSeconds();
+        long minutes = (long) Math.ceil(callSeconds / 60.0);
+        return minutes * 1000;
+    }
 }
