@@ -16,6 +16,7 @@ import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class TransactionService {
@@ -38,6 +40,7 @@ public class TransactionService {
     @Transactional
     public TransactionResponse createDepositTransaction(TransactionRequest dto, Authentication authentication) {
         User user = userHelper.findUserWithAuthentication(authentication);
+        log.info("Creating deposit transaction for user: {}", user.getId());
         helper.validateNoPendingTransactions(user);
         helper.validateDepositTransaction(dto);
         Transaction deposit = createTransactionEntity(user, dto);
@@ -48,6 +51,7 @@ public class TransactionService {
     }
 
     protected Transaction createWithdrawalTransaction(User user, Withdrawal request) {
+        log.info("Creating withdrawal transaction for user: {}", user.getId());
         Transaction transaction = new Transaction();
         transaction.setType(TransactionType.WITHDRAWAL);
         transaction.setWallet(user.getWallet());
@@ -66,6 +70,7 @@ public class TransactionService {
 
     @Transactional
     public void createCallChargeTransaction(Call call, User client) {
+        log.info("Creating call charge transaction for client: {}", client.getId());
         Transaction transaction = new Transaction();
         transaction.setType(TransactionType.CALL_CHARGE);
         transaction.setWallet(client.getWallet());
@@ -82,6 +87,7 @@ public class TransactionService {
 
     @Transactional
     public void createCallEarningTransaction(Call call, User translator) {
+        log.info("Creating call earning transaction for translator: {}", translator.getId());
         Transaction transaction = new Transaction();
         transaction.setType(TransactionType.CALL_EARNING);
         transaction.setWallet(translator.getWallet());
@@ -99,6 +105,7 @@ public class TransactionService {
     @Transactional
     public TransactionResponse createTransaction(TransactionRequest dto, Authentication authentication) {
         User user = userHelper.findUserWithAuthentication(authentication);
+        log.info("Creating transaction for user: {}", user.getId());
         helper.validateNoPendingTransactions(user);
         helper.validateNonWithdrawalTransaction(dto);
         Transaction transaction = createTransactionEntity(user, dto);
@@ -138,6 +145,7 @@ public class TransactionService {
         Transaction transaction = helper.findTransactionById(id);
         helper.validateTransactionIsPending(transaction, "Error cancelling non-pending transaction.");
         transaction.setStatus(TransactionStatus.CANCELED);
+        log.info("Canceled non-pending transaction: {}", transaction.getId());
     }
 
     // Transaction Helper Methods
@@ -156,6 +164,10 @@ public class TransactionService {
         setWalletBalance(transaction);
         transaction.setStatus(TransactionStatus.PAID);
         transaction.setProcessedAt(LocalDateTime.now());
+        Long userId = transaction.getWallet().getUser().getId();
+        log.info("Transaction processed: id={}, userId={}, type={}, amount={}, newBalance={}",
+                transaction.getId(), userId, transaction.getType(),
+                transaction.getAmount(), transaction.getWallet().getBalance());
 
         TransactionProcessedEvent event = TransactionProcessedEvent.from(transaction);
         eventPublisher.publishEvent(event);
