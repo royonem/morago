@@ -232,8 +232,8 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(InvalidCallRecipientException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidCallRecipient(InvalidCallRecipientException ex) {
+    @ExceptionHandler(InvalidCallReceiverException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCallReceiver(InvalidCallReceiverException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);

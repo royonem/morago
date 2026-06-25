@@ -229,11 +229,11 @@ public class CallServiceIT {
     void testAcceptCall_asCaller_throwsException() {
         testCallResponse = callService.requestCall(testCallRequest, testClient);
         assertThatThrownBy(() -> callService.acceptCall(testCallResponse.id(), testClient))
-                .isInstanceOf(InvalidCallRecipientException.class);
+                .isInstanceOf(InvalidCallReceiverException.class);
     }
 
     @Test
-    void testCancelCall_asRecipient_throwsException() {
+    void testCancelCall_asReceiver_throwsException() {
         testCallResponse = callService.requestCall(testCallRequest, testClient);
         assertThatThrownBy(() -> callService.cancelCall(testCallResponse.id(), testTranslator))
                 .isInstanceOf(InvalidCallerException.class);
@@ -243,7 +243,7 @@ public class CallServiceIT {
     void testDeclineCall_asCaller_throwsException() {
         testCallResponse = callService.requestCall(testCallRequest, testClient);
         assertThatThrownBy(() -> callService.declineCall(testCallResponse.id(), testClient))
-                .isInstanceOf(InvalidCallRecipientException.class);
+                .isInstanceOf(InvalidCallReceiverException.class);
     }
 
     @Test
