@@ -26,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     log.warn("User not found with email: {}", email);
                     return new UserNotFoundException("User not found.");
                 });
-        log.info("User loaded successfully: {} (ID: {})", email, user.getId());
+        log.info("User loaded successfully: email={}, userId={})", email, user.getId());
         return new UserPrincipal(user);
     }
 }
