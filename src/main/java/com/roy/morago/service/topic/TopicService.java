@@ -6,10 +6,10 @@ import com.roy.morago.entity.topic.Topic;
 import com.roy.morago.mapper.TopicMapper;
 import com.roy.morago.repository.topic.TopicRepository;
 import com.roy.morago.service.file.FileService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;

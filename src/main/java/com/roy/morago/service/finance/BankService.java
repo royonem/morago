@@ -7,11 +7,12 @@ import com.roy.morago.entity.user.User;
 import com.roy.morago.mapper.BankAccountMapper;
 import com.roy.morago.repository.finance.BankRepository;
 import com.roy.morago.service.user.UserHelper;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
