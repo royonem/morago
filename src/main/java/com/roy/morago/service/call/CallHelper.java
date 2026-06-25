@@ -1,9 +1,7 @@
 package com.roy.morago.service.call;
 
-import com.roy.morago.constants.SocketEvents;
 import com.roy.morago.dto.call.CallRequest;
 import com.roy.morago.dto.call.CallSearchRequest;
-import com.roy.morago.dto.socket.CallEndedEvent;
 import com.roy.morago.entity.call.Call;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CallStatus;
@@ -11,7 +9,6 @@ import com.roy.morago.exception.call.*;
 import com.roy.morago.exception.finance.DeficientFundsException;
 import com.roy.morago.mapper.CallMapper;
 import com.roy.morago.repository.call.CallRepository;
-import com.roy.morago.service.SocketService;
 import com.roy.morago.service.finance.TransactionService;
 import com.roy.morago.service.topic.TopicHelper;
 import com.roy.morago.service.user.UserHelper;
@@ -22,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +31,6 @@ public class CallHelper {
     private final UserHelper userHelper;
     private final TransactionService transactionService;
     private final TopicHelper topicHelper;
-    private final SocketService socketService;
 
     protected Call createCall(CallRequest callRequest) {
         Call call = callMapper.createEntityFromRequest(callRequest);
@@ -44,19 +39,6 @@ public class CallHelper {
         call.setTopic(topicHelper.findTopicById(callRequest.topicId()));
         call.setCost(0L);
         return call;
-    }
-
-    protected void resolveCallEvent(Call call) {
-        CallEndedEvent event = new CallEndedEvent();
-        CallStatus status = call.getStatus();
-        event.setCallId(call.getId());
-        event.setStatus(status.name().toLowerCase());
-        event.setSentAt(LocalDateTime.now());
-        if (status == CallStatus.ENDED) {
-            event.setDuration(call.getFullDurationSeconds());
-        }
-        socketService.sendToUser(call.getCaller().getId(), SocketEvents.CALL_ENDED, event);
-        socketService.sendToUser(call.getReceiver().getId(), SocketEvents.CALL_ENDED, event);
     }
 
     protected void createCallTransactions(Call call) {
