@@ -8,9 +8,11 @@ import com.roy.morago.repository.finance.BankRepository;
 import com.roy.morago.service.user.UserHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class BankService {
@@ -21,19 +23,21 @@ public class BankService {
 
     @Transactional
     public BankAccountResponse linkBankAccount(BankAccountRequest request, Authentication authentication) {
-        BankAccount bankAccount = bankAccountMapper.toEntity(request);
+        BankAccount bankAccount = bankAccountMapper.createEntityFromRequest(request);
         bankAccount.setUser(userHelper.findUserWithAuthentication(authentication));
         bankRepository.save(bankAccount);
-        return bankAccountMapper.toResponse(bankAccount);
+        log.info("Bank account linked: id={}", bankAccount.getId());
+        return bankAccountMapper.createResponseFromEntity(bankAccount);
     }
 
     @Transactional
     public void unlinkBankAccount(Long id) {
         BankAccount account = helper.findBankAccountById(id);
         bankRepository.delete(account);
+        log.info("Bank account unlinked: id={}", id);
     }
 
     public BankAccountResponse getBankAccount(Long id) {
-        return bankAccountMapper.toResponse(helper.findBankAccountById(id));
+        return bankAccountMapper.createResponseFromEntity(helper.findBankAccountById(id));
     }
 }

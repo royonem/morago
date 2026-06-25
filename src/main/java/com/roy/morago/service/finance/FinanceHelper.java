@@ -1,9 +1,7 @@
 package com.roy.morago.service.finance;
 
-import com.roy.morago.dto.call.CallSearchRequest;
 import com.roy.morago.dto.finance.TransactionRequest;
 import com.roy.morago.dto.finance.TransactionSearchRequest;
-import com.roy.morago.entity.call.Call;
 import com.roy.morago.entity.finance.BankAccount;
 import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
