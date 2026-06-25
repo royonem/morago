@@ -33,7 +33,7 @@ public class NotificationService {
         Notification notification = mapper.toEntity(request);
         notification.setUser(userHelper.findUserById(request.userId()));
         repository.save(notification);
-        log.info("Notification created: id={}, userId={}", notification.getId(), request.userId());
+        log.info("Notification created: notificationId={}, userId={}", notification.getId(), request.userId());
 
         NotificationResponse response = mapper.toResponse(notification);
         eventPublisher.publishEvent(response);
@@ -59,12 +59,12 @@ public class NotificationService {
 
     @Transactional
     public NotificationResponse readNotification(Long userId, Long notificationId) {
-        log.info("Reading notification: userId={}, notificationId={}", userId, notificationId);
+        log.info("Reading notification: notificationId={}, userId={}", notificationId, userId);
         Notification notification = helper.findNotificationById(notificationId);
         helper.verifyOwnNotification(userId, notification);
         notification.setReadAt(LocalDateTime.now());
         notification.setIsRead(true);
-        log.info("Notification was read: userId={}, notificationId={}", userId, notificationId);
+        log.info("Notification was read: notificationId={}, userId={}", notificationId, userId);
         return mapper.toResponse(notification);
     }
 
@@ -105,11 +105,11 @@ public class NotificationService {
 
     @Transactional
     public void deleteNotificationByUserId(Long id, Long notificationId) {
-        log.info("Deleting notification: userId={}, notificationId={}", id, notificationId);
+        log.info("Deleting notification: notificationId={}, userId={}", notificationId, id);
         Notification notification = helper.findNotificationById(notificationId);
         helper.verifyOwnNotification(id, notification);
         repository.delete(notification);
-        log.info("Notification deleted: userId={}, notificationId={}", id, notificationId);
+        log.info("Notification deleted: notificationId={}, userId={}", notificationId, id);
     }
 
     @Transactional
