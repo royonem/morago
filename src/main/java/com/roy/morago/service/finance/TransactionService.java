@@ -48,7 +48,7 @@ public class TransactionService {
         processTransaction(deposit);
         transactionRepository.save(deposit);
         log.info("Deposit transaction created: transactionId={}, userId={}", deposit.getId(), user.getId());
-        return transactionMapper.createTransactionResponse(deposit);
+        return transactionMapper.toResponse(deposit);
     }
 
     protected Transaction createWithdrawalTransaction(User user, Withdrawal request) {
@@ -117,32 +117,32 @@ public class TransactionService {
         processTransaction(transaction);
         transactionRepository.save(transaction);
         log.info("Transaction created: transactionId={}, userId={}", transaction.getId(), user.getId());
-        return transactionMapper.createTransactionResponse(transaction);
+        return transactionMapper.toResponse(transaction);
     }
 
     public TransactionResponse getTransaction(Long transactionId) {
-        return transactionMapper.createTransactionResponse(helper.findTransactionById(transactionId));
+        return transactionMapper.toResponse(helper.findTransactionById(transactionId));
     }
 
     public Page<TransactionResponse> getAllTransactions(Pageable pageable) {
-        return transactionRepository.findAll(pageable).map(transactionMapper::createTransactionResponse);
+        return transactionRepository.findAll(pageable).map(transactionMapper::toResponse);
     }
 
     public Page<TransactionResponse> getTransactionsByUserId(Long userId, Pageable pageable) {
         return transactionRepository.findByWalletUserId(userId, pageable)
-                .map(transactionMapper::createTransactionResponse);
+                .map(transactionMapper::toResponse);
     }
 
     public Page<TransactionResponse> searchTransactions(TransactionSearchRequest request) {
         Specification<Transaction> spec = helper.buildSpecification(request);
         return transactionRepository.findAll(spec, request.toPageable())
-                .map(transactionMapper::createTransactionResponse);
+                .map(transactionMapper::toResponse);
     }
 
     public Page<TransactionResponse> searchTransactionsByUserId(Long userId, TransactionSearchRequest request) {
         Specification<Transaction> spec = helper.buildSpecificationForUser(userId, request);
         return transactionRepository.findAll(spec, request.toPageable())
-                .map(transactionMapper::createTransactionResponse);
+                .map(transactionMapper::toResponse);
     }
 
     @Transactional
@@ -156,7 +156,7 @@ public class TransactionService {
 
     // Transaction Helper Methods
     private Transaction createTransactionEntity(User user, TransactionRequest request) {
-        Transaction transaction = transactionMapper.createTransactionFromDto(request);
+        Transaction transaction = transactionMapper.toEntity(request);
         transaction.setWallet(user.getWallet());
         transaction.setStatus(TransactionStatus.PENDING);
         transaction.setReference(helper.generateTransactionReference(request.type()));

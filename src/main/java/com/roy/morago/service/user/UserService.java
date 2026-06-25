@@ -1,6 +1,5 @@
 package com.roy.morago.service.user;
 
-import com.roy.morago.dto.user.UserUpdateRequest;
 import com.roy.morago.dto.socket.AdminActionEvent;
 import com.roy.morago.dto.user.UserResponse;
 import com.roy.morago.dto.user.UserSearchRequest;

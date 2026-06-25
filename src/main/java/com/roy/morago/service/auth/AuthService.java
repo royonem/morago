@@ -85,14 +85,14 @@ public class AuthService {
     @Transactional
     public void registerClient(ClientRegisterRequest dto) {
         log.info("Client registration attempt with email: {}", dto.email());
-        User client = userMapper.createEntityFromRequest(dto);
+        User client = userMapper.toEntity(dto);
         register(client, dto.password(), dto.confirmPassword(), roleService.getClientRole());
     }
 
     @Transactional
     public void registerTranslator(TranslatorRegisterRequest dto) {
         log.info("Translator registration attempt with email: {}", dto.email());
-        User translator = userMapper.createEntityFromRequest(dto);
+        User translator = userMapper.toEntity(dto);
         register(translator, dto.password(), dto.confirmPassword(), roleService.getTranslatorRole());
     }
 
