@@ -3,6 +3,7 @@ package com.roy.morago.service.finance;
 import com.roy.morago.dto.finance.BankAccountRequest;
 import com.roy.morago.dto.finance.BankAccountResponse;
 import com.roy.morago.entity.finance.BankAccount;
+import com.roy.morago.entity.user.User;
 import com.roy.morago.mapper.BankAccountMapper;
 import com.roy.morago.repository.finance.BankRepository;
 import com.roy.morago.service.user.UserHelper;
@@ -23,18 +24,21 @@ public class BankService {
 
     @Transactional
     public BankAccountResponse linkBankAccount(BankAccountRequest request, Authentication authentication) {
+        User user = userHelper.findUserWithAuthentication(authentication);
+        log.info("Linking bank account: userId={}", user.getId());
         BankAccount bankAccount = bankAccountMapper.createEntityFromRequest(request);
-        bankAccount.setUser(userHelper.findUserWithAuthentication(authentication));
+        bankAccount.setUser(user);
         bankRepository.save(bankAccount);
-        log.info("Bank account linked: id={}", bankAccount.getId());
+        log.info("Bank account linked: userId={}, bankId={}", user.getId(), bankAccount.getId());
         return bankAccountMapper.createResponseFromEntity(bankAccount);
     }
 
     @Transactional
     public void unlinkBankAccount(Long id) {
+        log.info("Unlinking bank account: bankId={}", id);
         BankAccount account = helper.findBankAccountById(id);
         bankRepository.delete(account);
-        log.info("Bank account unlinked: id={}", id);
+        log.info("Bank account unlinked: bankId={}, userId={}", id, account.getUser().getId());
     }
 
     public BankAccountResponse getBankAccount(Long id) {
