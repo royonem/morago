@@ -13,13 +13,11 @@ import com.roy.morago.repository.file.FileRepository;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class FileHelper {
@@ -34,7 +32,6 @@ public class FileHelper {
         String tempPath = fileStorageService.storeTempFile(file);
         File fileEntity = buildFileEntity(file, tempPath, filePurpose);
         fileRepository.save(fileEntity);
-        log.info("File uploaded: id={}, purpose={}, size={} bytes", fileEntity.getId(), filePurpose, file.getSize());
         return fileMapper.createResponseFromEntity(fileEntity);
     }
 
@@ -70,7 +67,6 @@ public class FileHelper {
         file.setFilePath(finalPath);
         file.activate();
         fileRepository.save(file);
-        log.info("File finalized: id={}, path={}", file.getId(), finalPath);
     }
 
     protected File findFileById(Long fileId) {

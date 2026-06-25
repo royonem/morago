@@ -26,7 +26,6 @@ public class FileStorageService {
             Files.createDirectories(uploadDir);
             Path filePath = uploadDir.resolve(fileName);
             Files.copy(file.getInputStream(), filePath);
-            log.info("Temp file stored: {}", filePath);
             return filePath.toString();
         } catch (IOException e) {
             log.error("Failed to store temp file: {}", file.getOriginalFilename(), e);
@@ -49,10 +48,9 @@ public class FileStorageService {
             Files.createDirectories(newDir);
             Path newPath = newDir.resolve(fileName);
             Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING);
-            log.info("File moved to final storage: {} -> {}", oldPath, newPath);
             return newPath.toString();
         } catch (IOException e) {
-            log.error("Failed to move file: {}", file.getFilePath(), e);
+            log.error("Failed to move file: oldPath={}", file.getFilePath(), e);
             throw new FileStorageException("Failed to move file", e);
         }
     }
@@ -60,14 +58,11 @@ public class FileStorageService {
     public void deleteFromStorage(String path) {
         try {
             Path filePath = Paths.get(path);
-            boolean deleted = Files.deleteIfExists(filePath);
-            if (deleted) {
-                log.info("File deleted from storage: {}", path);
-            } else {
-                log.warn("File not found for deletion: {}", path);
+            if (!Files.deleteIfExists(filePath)) {
+                log.warn("File not found for deletion: path={}", path);
             }
         } catch (IOException e) {
-            log.error("Failed to delete file: {}", path, e);
+            log.error("Failed to delete file: path={}", path, e);
             throw new FileStorageException("Failed to delete file from storage", e);
         }
     }
