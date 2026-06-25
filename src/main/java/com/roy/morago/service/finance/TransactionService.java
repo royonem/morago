@@ -168,9 +168,9 @@ public class TransactionService {
         log.info("Processing transaction: transactionId={}", transaction.getId());
         helper.validateTransactionIsPending(transaction, "Error processing non-pending transaction.");
         setTransactionBalance(transaction);
-        setWalletBalance(transaction);
         transaction.setStatus(TransactionStatus.PAID);
         transaction.setProcessedAt(LocalDateTime.now());
+        setWalletBalance(transaction);
         Long userId = transaction.getWallet().getUser().getId();
         log.info("Transaction processed: transactionId={}, userId={}, type={}, amount={}, newBalance={}",
                 transaction.getId(), userId, transaction.getType(),
