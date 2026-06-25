@@ -8,6 +8,7 @@ import com.roy.morago.repository.notification.NotificationRepository;
 import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class NotificationService {
@@ -27,9 +29,11 @@ public class NotificationService {
 
     @Transactional
     public NotificationResponse createNotification(NotificationRequest request) {
+        log.info("Creating notification: userId={}", request.userId());
         Notification notification = mapper.toEntity(request);
         notification.setUser(userHelper.findUserById(request.userId()));
         repository.save(notification);
+        log.info("Notification created: id={}, userId={}", notification.getId(), request.userId());
 
         NotificationResponse response = mapper.toResponse(notification);
         eventPublisher.publishEvent(response);
@@ -55,16 +59,19 @@ public class NotificationService {
 
     @Transactional
     public NotificationResponse readNotification(Long userId, Long notificationId) {
+        log.info("Reading notification: userId={}, notificationId={}", userId, notificationId);
         Notification notification = helper.findNotificationById(notificationId);
         helper.verifyOwnNotification(userId, notification);
         notification.setReadAt(LocalDateTime.now());
         notification.setIsRead(true);
+        log.info("Notification was read: userId={}, notificationId={}", userId, notificationId);
         return mapper.toResponse(notification);
     }
 
     @Transactional
     public void toggleNotificationRead(Long userId, Long notificationId) {
         Notification notification = helper.findNotificationById(notificationId);
+        log.info("Toggling notification read status: userId={}, notificationId={}, isRead={}", userId, notificationId, notification.getIsRead());
         helper.verifyOwnNotification(userId, notification);
         if (!notification.getIsRead()) {
             notification.setReadAt(LocalDateTime.now());
@@ -72,37 +79,50 @@ public class NotificationService {
             notification.setReadAt(null);
         }
         notification.setIsRead(!notification.getIsRead());
+        log.info("Notification read status toggled: userId={}, notificationId={}, isRead={}", userId, notificationId, notification.getIsRead());
     }
 
     @Transactional
     public void toggleNotificationsRead(Long userId, List<Long> notificationIds) {
+        log.info("Toggling notifications read status: userId={}, listSize={}", userId, notificationIds.size());
         repository.toggleReadByIdInAndUserId(notificationIds, userId);
+        log.info("Notifications read status was toggled: userId={}, toggled={}", userId, notificationIds.size());
     }
 
     @Transactional
     public void markAsRead(Long userId, List<Long> notificationIds) {
+        log.info("Marking notifications as read: userId={}, listSize={}", userId, notificationIds.size());
         repository.markAsReadByIdInAndUserId(notificationIds, userId);
+        log.info("Notifications marked as read: userId={}, markedAsRead={}", userId, notificationIds.size());
     }
 
     @Transactional
     public void markAllAsRead(Long userId) {
+        log.info("Marking all notifications as read: userId={}", userId);
         repository.markAsReadByUserId(userId);
+        log.info("All notifications marked as read: userId={}", userId);
     }
 
     @Transactional
     public void deleteNotificationByUserId(Long id, Long notificationId) {
+        log.info("Deleting notification: userId={}, notificationId={}", id, notificationId);
         Notification notification = helper.findNotificationById(notificationId);
         helper.verifyOwnNotification(id, notification);
         repository.delete(notification);
+        log.info("Notification deleted: userId={}, notificationId={}", id, notificationId);
     }
 
     @Transactional
     public void deleteNotificationsByUserId(Long userId, List<Long> notificationIds) {
+        log.info("Deleting notifications: userId={}, listSize={}", userId, notificationIds.size());
         repository.deleteByIdInAndUserId(notificationIds, userId);
+        log.info("Notifications deleted: userId={}, deleted={}", userId, notificationIds.size());
     }
 
     @Transactional
     public void deleteAllReadNotificationsByUserId(Long userId) {
+        log.info("Deleting all read notifications: userId={}", userId);
         repository.deleteByUserIdAndIsReadTrue(userId);
+        log.info("All read notifications deleted: userId={}", userId);
     }
 }
