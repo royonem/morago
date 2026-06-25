@@ -104,10 +104,10 @@ public class CallService {
         helper.validateCallIsRinging(call);
         helper.resolveCancelDecline(call, caller);
         call.setCanceledAt(LocalDateTime.now());
+        log.info("Call cancelled: callId={}, caller={}", callId, caller.getId());
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
-        log.info("Call cancelled: callId={}, caller={}", callId, caller.getId());
         return mapper.createResponseFromEntity(call);
     }
 
@@ -119,11 +119,11 @@ public class CallService {
         helper.validateCallIsRinging(call);
         helper.resolveCancelDecline(call, receiver);
         call.setCanceledAt(LocalDateTime.now());
+        log.info("Call declined: callId={}, callerId={}, receiverId={}",
+                callId, call.getCaller().getId(), call.getReceiver().getId());
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
-        log.info("Call declined: callId={}, callerId={}, receiverId={}",
-                callId, call.getCaller().getId(), call.getReceiver().getId());
         return mapper.createResponseFromEntity(call);
     }
 
