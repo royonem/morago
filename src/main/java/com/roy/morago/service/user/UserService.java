@@ -12,6 +12,7 @@ import com.roy.morago.mapper.UserMapper;
 import com.roy.morago.repository.user.LanguageRepository;
 import com.roy.morago.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -46,6 +48,7 @@ public class UserService {
 
     @Transactional
     public void updateUser(Long id, UserUpdateRequest userUpdateRequest) {
+        log.info("Updating user: userId={}", id);
         User user = helper.findUserById(id);
 
         if (userUpdateRequest.languages() != null) {
@@ -53,25 +56,30 @@ public class UserService {
             user.setLanguages(languages);
         }
         userMapper.toEntity(userUpdateRequest, user);
+        log.info("User updated: userId={}", id);
     }
 
     @Transactional
     public void verifyTranslator(Long userId) {
+        log.info("Verifying translator: userId={}", userId);
         User user = helper.findUserById(userId);
         boolean isTranslator = user.getRoles().stream()
                 .anyMatch(role -> "ROLE_TRANSLATOR".equals(role.getName()));
         if (!isTranslator) {
             throw new MissingRoleException("User with ID " + userId + " is not a translator");
         }
+        user.setStatus(UserStatus.VERIFIED);
+        log.info("Translator verified: userId={}", userId);
+
         AdminActionEvent event = AdminActionEvent.from(user);
         eventPublisher.publishEvent(event);
-
-        user.setStatus(UserStatus.VERIFIED);
     }
 
     @Transactional
     public void deleteUser(Long id) {
+        log.info("Deleting user: userId={}", id);
         User user = helper.findUserById(id);
         userRepository.delete(user);
+        log.info("User deleted: userId={}, userName={}, email={}", id, user.getFullName(), user.getEmail());
     }
 }
