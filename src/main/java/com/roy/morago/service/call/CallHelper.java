@@ -44,8 +44,6 @@ public class CallHelper {
     }
 
     protected void createCallTransactions(Call call) {
-        log.info("Creating transactions for call {}: client={}, translator={}",
-                call.getId(), call.getClient().getId(), call.getTranslator().getId());
         transactionService.createCallChargeTransaction(call, call.getClient());
         transactionService.createCallEarningTransaction(call, call.getTranslator());
     }
