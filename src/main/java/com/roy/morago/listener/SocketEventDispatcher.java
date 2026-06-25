@@ -6,7 +6,6 @@ import com.roy.morago.dto.socket.AdminActionEvent;
 import com.roy.morago.dto.socket.CallEndedEvent;
 import com.roy.morago.dto.socket.IncomingCallEvent;
 import com.roy.morago.dto.socket.TransactionProcessedEvent;
-import com.roy.morago.mapper.NotificationMapper;
 import com.roy.morago.service.SocketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

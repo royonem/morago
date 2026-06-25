@@ -97,6 +97,10 @@ public class CallService {
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
         return mapper.toResponse(call);
+
+        CallEndedEvent event = CallEndedEvent.from(call);
+        eventPublisher.publishEvent(event);
+        return mapper.toResponse(call);
     }
 
     @Transactional
