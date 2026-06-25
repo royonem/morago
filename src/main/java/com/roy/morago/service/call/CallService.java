@@ -136,10 +136,10 @@ public class CallService {
         call.setEndedAt(LocalDateTime.now());
         call.setCost(call.getExpectedCost());
         helper.createCallTransactions(call);
+        log.info("Call ended: callId={}, cost={}, duration={}s", callId, call.getCost(), call.getFullDurationSeconds());
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
-        log.info("Call ended: callId={}, cost={}, duration={}s", callId, call.getCost(), call.getDurationSeconds());
         return mapper.toResponse(call);
     }
 
