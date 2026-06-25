@@ -143,13 +143,13 @@ public class CallHelper {
         call.setMaxCallTime(maxDurationMinutes * 60);
     }
 
-    protected void validateRecipient(Call call, User user, String message) {
+    protected void validateReceiver(Call call, User user, String message) {
         Long initiatorId = call.getIsClientInitiator()
                 ? call.getClient().getId()
                 : call.getTranslator().getId();
 
         if (user.getId().equals(initiatorId)) {
-            throw new InvalidCallRecipientException(message);
+            throw new InvalidCallReceiverException(message);
         }
     }
 
