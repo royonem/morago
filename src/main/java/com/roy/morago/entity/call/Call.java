@@ -4,7 +4,6 @@ import com.roy.morago.entity.BaseEntity;
 import com.roy.morago.entity.topic.Topic;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CallStatus;
-import com.roy.morago.exception.call.InvalidCallStateException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -60,7 +59,14 @@ public class Call extends BaseEntity {
         return isClientInitiator ? getTranslator() : getClient();
     }
 
-    public long getDurationSeconds() {
+    public long getOngoingDurationSeconds() {
+        if (startedAt == null) {
+            return 0L;
+        }
+        return Duration.between(startedAt, LocalDateTime.now()).toSeconds();
+    }
+
+    public long getFullDurationSeconds() {
         if (startedAt == null || endedAt == null) {
             return 0L;
         }

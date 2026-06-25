@@ -23,7 +23,7 @@ public class CallScheduler {
     public void autoEndCalls() {
         List<Call> activeCalls = callRepository.findActiveCalls(CallStatus.IN_PROGRESS);
         for (Call call : activeCalls) {
-            if (call.getDurationSeconds() >= call.getMaxCallTime()) {
+            if (call.getOngoingDurationSeconds() >= call.getMaxCallTime()) {
                 callService.endCall(call.getId());
             }
         }
