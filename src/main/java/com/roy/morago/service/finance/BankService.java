@@ -26,11 +26,11 @@ public class BankService {
     public BankAccountResponse linkBankAccount(BankAccountRequest request, Authentication authentication) {
         User user = userHelper.findUserWithAuthentication(authentication);
         log.info("Linking bank account: userId={}", user.getId());
-        BankAccount bankAccount = bankAccountMapper.createEntityFromRequest(request);
+        BankAccount bankAccount = bankAccountMapper.toEntity(request);
         bankAccount.setUser(user);
         bankRepository.save(bankAccount);
         log.info("Bank account linked: userId={}, bankId={}", user.getId(), bankAccount.getId());
-        return bankAccountMapper.createResponseFromEntity(bankAccount);
+        return bankAccountMapper.toResponse(bankAccount);
     }
 
     @Transactional
@@ -42,6 +42,6 @@ public class BankService {
     }
 
     public BankAccountResponse getBankAccount(Long id) {
-        return bankAccountMapper.createResponseFromEntity(helper.findBankAccountById(id));
+        return bankAccountMapper.toResponse(helper.findBankAccountById(id));
     }
 }

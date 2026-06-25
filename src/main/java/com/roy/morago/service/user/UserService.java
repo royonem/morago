@@ -1,6 +1,5 @@
 package com.roy.morago.service.user;
 
-import com.roy.morago.dto.user.UserUpdateRequest;
 import com.roy.morago.dto.socket.AdminActionEvent;
 import com.roy.morago.dto.user.UserResponse;
 import com.roy.morago.dto.user.UserSearchRequest;
@@ -14,6 +13,7 @@ import com.roy.morago.repository.user.LanguageRepository;
 import com.roy.morago.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
