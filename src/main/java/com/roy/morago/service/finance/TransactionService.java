@@ -1,6 +1,5 @@
 package com.roy.morago.service.finance;
 
-import com.roy.morago.constants.SocketEvents;
 import com.roy.morago.dto.finance.TransactionRequest;
 import com.roy.morago.dto.finance.TransactionResponse;
 import com.roy.morago.dto.finance.TransactionSearchRequest;
@@ -14,9 +13,9 @@ import com.roy.morago.enums.TransactionStatus;
 import com.roy.morago.enums.TransactionType;
 import com.roy.morago.mapper.TransactionMapper;
 import com.roy.morago.repository.finance.TransactionRepository;
-import com.roy.morago.service.SocketService;
 import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,7 +33,7 @@ public class TransactionService {
     private final TransactionMapper transactionMapper;
     private final FinanceHelper helper;
     private final UserHelper userHelper;
-    private final SocketService socketService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public TransactionResponse createDepositTransaction(TransactionRequest dto, Authentication authentication) {
@@ -158,17 +157,8 @@ public class TransactionService {
         transaction.setStatus(TransactionStatus.PAID);
         transaction.setProcessedAt(LocalDateTime.now());
 
-        Long userId = transaction.getWallet().getUser().getId();
-
-        TransactionProcessedEvent event = new TransactionProcessedEvent();
-        event.setTransactionId(transaction.getId());
-        event.setUserId(userId);
-        event.setType(transaction.getType());
-        event.setStatus(TransactionStatus.PAID);
-        event.setAmount(transaction.getAmount());
-        event.setNewWalletBalance(transaction.getWallet().getBalance());
-        event.setSentAt(LocalDateTime.now());
-        socketService.sendToUser(userId, SocketEvents.TRANSACTION_PROCESSED, event);
+        TransactionProcessedEvent event = TransactionProcessedEvent.from(transaction);
+        eventPublisher.publishEvent(event);
     }
 
     private void setTransactionBalance(Transaction transaction) {
