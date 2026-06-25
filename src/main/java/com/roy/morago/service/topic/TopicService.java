@@ -8,11 +8,13 @@ import com.roy.morago.repository.topic.TopicRepository;
 import com.roy.morago.service.file.FileService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class TopicService {
@@ -23,6 +25,7 @@ public class TopicService {
 
     @Transactional
     public TopicResponse createTopic(TopicRequest request) {
+        log.info("Creating topic: name={}", request.name());
         topicHelper.checkDuplicateTopics(request.name());
 
         Topic topic = topicMapper.toEntity(request);
@@ -33,6 +36,7 @@ public class TopicService {
         if (request.iconId() != null) {
             fileService.saveTopicIcon(topic.getId(), request.iconId());
         }
+        log.info("Topic created: topicId={}, name={}", topic.getId(), topic.getName());
         return topicMapper.toResponse(topic);
     }
 
@@ -51,22 +55,26 @@ public class TopicService {
     }
 
     @Transactional
-    public TopicResponse updateTopic(Long id, TopicRequest dto) {
+    public TopicResponse updateTopic(Long id, TopicRequest request) {
+        log.info("Updating topic: topicId={}", id);
         Topic topic = topicHelper.findTopicById(id);
-        topicHelper.checkDuplicateTopicsForUpdate(topic, dto.name());
-        topic.setName(dto.name());
-        if (dto.categoryId() != null) {
-            topic.setCategory(topicHelper.findCategoryById(dto.categoryId()));
-        }        topic.setActive(dto.active());
-        if (dto.iconId() != null) {
-            fileService.saveTopicIcon(topic.getId(), dto.iconId());
+        topicHelper.checkDuplicateTopicsForUpdate(topic, request.name());
+        topic.setName(request.name());
+        if (request.categoryId() != null) {
+            topic.setCategory(topicHelper.findCategoryById(request.categoryId()));
+        }        topic.setActive(request.active());
+        if (request.iconId() != null) {
+            fileService.saveTopicIcon(topic.getId(), request.iconId());
         }
+        log.info("Topic updated: topicId={}, name={}", topic.getId(), topic.getName());
         return topicMapper.toResponse(topic);
     }
 
     @Transactional
     public void deleteTopic(Long id) {
+        log.info("Deleting topic: topicId={}", id);
         Topic topic  = topicHelper.findTopicById(id);
         topicRepository.delete(topic);
+        log.info("Topic deleted: topicId={}, name={}", topic.getId(), topic.getName());
     }
 }
