@@ -38,20 +38,21 @@ public class TransactionService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public TransactionResponse createDepositTransaction(TransactionRequest dto, Authentication authentication) {
+    public TransactionResponse createDepositTransaction(TransactionRequest request, Authentication authentication) {
         User user = userHelper.findUserWithAuthentication(authentication);
-        log.info("Creating deposit transaction for user: {}", user.getId());
+        log.info("Creating deposit transaction: userId={}", user.getId());
         helper.validateNoPendingTransactions(user);
-        helper.validateDepositTransaction(dto);
-        Transaction deposit = createTransactionEntity(user, dto);
+        helper.validateDepositTransaction(request);
+        Transaction deposit = createTransactionEntity(user, request);
 
         processTransaction(deposit);
         transactionRepository.save(deposit);
-        return transactionMapper.toResponse(deposit);
+        log.info("Deposit transaction created: transactionId={}, userId={}", deposit.getId(), user.getId());
+        return transactionMapper.createTransactionResponse(deposit);
     }
 
     protected Transaction createWithdrawalTransaction(User user, Withdrawal request) {
-        log.info("Creating withdrawal transaction for user: {}", user.getId());
+        log.info("Creating withdrawal transaction: userId={}", user.getId());
         Transaction transaction = new Transaction();
         transaction.setType(TransactionType.WITHDRAWAL);
         transaction.setWallet(user.getWallet());
@@ -65,12 +66,13 @@ public class TransactionService {
 
         transaction.setWithdrawal(request);
         request.setTransaction(transaction);
+        log.info("Withdrawal transaction created: transactionId={}, userId={}", transaction.getId(), user.getId());
         return transaction;
     }
 
     @Transactional
     public void createCallChargeTransaction(Call call, User client) {
-        log.info("Creating call charge transaction for client: {}", client.getId());
+        log.info("Creating call charge transaction: clientId={}", client.getId());
         Transaction transaction = new Transaction();
         transaction.setType(TransactionType.CALL_CHARGE);
         transaction.setWallet(client.getWallet());
@@ -83,11 +85,12 @@ public class TransactionService {
         transaction.setDescription(helper.generateTransactionDescription(TransactionType.CALL_CHARGE, call.getCost()));
         processTransaction(transaction);
         transactionRepository.save(transaction);
+        log.info("Call charge transaction created: transactionId={}, clientId={}", transaction.getId(), client.getId());
     }
 
     @Transactional
     public void createCallEarningTransaction(Call call, User translator) {
-        log.info("Creating call earning transaction for translator: {}", translator.getId());
+        log.info("Creating call earning transaction: translatorId={}", translator.getId());
         Transaction transaction = new Transaction();
         transaction.setType(TransactionType.CALL_EARNING);
         transaction.setWallet(translator.getWallet());
@@ -100,72 +103,76 @@ public class TransactionService {
         transaction.setDescription(helper.generateTransactionDescription(TransactionType.CALL_EARNING, call.getCost()));
         processTransaction(transaction);
         transactionRepository.save(transaction);
+        log.info("Call earning transaction created: transactionId={}, translatorId={}", transaction.getId(), transaction.getId());
     }
 
     @Transactional
-    public TransactionResponse createTransaction(TransactionRequest dto, Authentication authentication) {
+    public TransactionResponse createTransaction(TransactionRequest request, Authentication authentication) {
         User user = userHelper.findUserWithAuthentication(authentication);
-        log.info("Creating transaction for user: {}", user.getId());
+        log.info("Creating transaction: userId={}", user.getId());
         helper.validateNoPendingTransactions(user);
-        helper.validateNonWithdrawalTransaction(dto);
-        Transaction transaction = createTransactionEntity(user, dto);
+        helper.validateNonWithdrawalTransaction(request);
+        Transaction transaction = createTransactionEntity(user, request);
 
         processTransaction(transaction);
         transactionRepository.save(transaction);
-        return transactionMapper.toResponse(transaction);
+        log.info("Transaction created: transactionId={}, userId={}", transaction.getId(), user.getId());
+        return transactionMapper.createTransactionResponse(transaction);
     }
 
     public TransactionResponse getTransaction(Long transactionId) {
-        return transactionMapper.toResponse(helper.findTransactionById(transactionId));
+        return transactionMapper.createTransactionResponse(helper.findTransactionById(transactionId));
     }
 
     public Page<TransactionResponse> getAllTransactions(Pageable pageable) {
-        return transactionRepository.findAll(pageable).map(transactionMapper::toResponse);
+        return transactionRepository.findAll(pageable).map(transactionMapper::createTransactionResponse);
     }
 
     public Page<TransactionResponse> getTransactionsByUserId(Long userId, Pageable pageable) {
         return transactionRepository.findByWalletUserId(userId, pageable)
-                .map(transactionMapper::toResponse);
+                .map(transactionMapper::createTransactionResponse);
     }
 
     public Page<TransactionResponse> searchTransactions(TransactionSearchRequest request) {
         Specification<Transaction> spec = helper.buildSpecification(request);
         return transactionRepository.findAll(spec, request.toPageable())
-                .map(transactionMapper::toResponse);
+                .map(transactionMapper::createTransactionResponse);
     }
 
     public Page<TransactionResponse> searchTransactionsByUserId(Long userId, TransactionSearchRequest request) {
         Specification<Transaction> spec = helper.buildSpecificationForUser(userId, request);
         return transactionRepository.findAll(spec, request.toPageable())
-                .map(transactionMapper::toResponse);
+                .map(transactionMapper::createTransactionResponse);
     }
 
     @Transactional
     public void cancelTransaction(Long id) {
+        log.info("Canceling transaction: transactionId={}", id);
         Transaction transaction = helper.findTransactionById(id);
         helper.validateTransactionIsPending(transaction, "Error cancelling non-pending transaction.");
         transaction.setStatus(TransactionStatus.CANCELED);
-        log.info("Canceled non-pending transaction: {}", transaction.getId());
+        log.info("Transaction canceled: transactionId={}, userId={}", id,  transaction.getWallet().getUser().getId());
     }
 
     // Transaction Helper Methods
-    private Transaction createTransactionEntity(User user, TransactionRequest dto) {
-        Transaction transaction = transactionMapper.toEntity(dto);
+    private Transaction createTransactionEntity(User user, TransactionRequest request) {
+        Transaction transaction = transactionMapper.createTransactionFromDto(request);
         transaction.setWallet(user.getWallet());
         transaction.setStatus(TransactionStatus.PENDING);
-        transaction.setReference(helper.generateTransactionReference(dto.type()));
-        transaction.setDescription(helper.generateTransactionDescription(dto.type(), dto.amount()));
+        transaction.setReference(helper.generateTransactionReference(request.type()));
+        transaction.setDescription(helper.generateTransactionDescription(request.type(), request.amount()));
         return transaction;
     }
 
     protected void processTransaction(Transaction transaction) {
+        log.info("Processing transaction: transactionId={}", transaction.getId());
         helper.validateTransactionIsPending(transaction, "Error processing non-pending transaction.");
         setTransactionBalance(transaction);
         setWalletBalance(transaction);
         transaction.setStatus(TransactionStatus.PAID);
         transaction.setProcessedAt(LocalDateTime.now());
         Long userId = transaction.getWallet().getUser().getId();
-        log.info("Transaction processed: id={}, userId={}, type={}, amount={}, newBalance={}",
+        log.info("Transaction processed: transactionId={}, userId={}, type={}, amount={}, newBalance={}",
                 transaction.getId(), userId, transaction.getType(),
                 transaction.getAmount(), transaction.getWallet().getBalance());
 

@@ -48,7 +48,7 @@ public class WithdrawalService {
         Transaction transaction = transactionService.createWithdrawalTransaction(user, withdrawal);
         transactionRepository.save(transaction);
         withdrawalRepository.save(withdrawal);
-        log.info("Withdrawal created: id={}, userId={}, amount={}, status={}", withdrawal.getId(), user.getId(), withdrawal.getAmount(), withdrawal.getStatus());
+        log.info("Withdrawal created: withdrawalId={}, userId={}, amount={}, status={}", withdrawal.getId(), user.getId(), withdrawal.getAmount(), withdrawal.getStatus());
         return mapper.createResponseFromEntity(withdrawal);
     }
 
@@ -59,37 +59,34 @@ public class WithdrawalService {
 
     @Transactional
     public void cancelWithdrawal(Long withdrawalId) {
+        log.info("Canceling withdrawal: withdrawalId={}", withdrawalId);
         Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
-        log.info("Canceling withdrawal: id={}, userId={}, amount={}, status={}", withdrawalId, withdrawal.getRequester().getId(), withdrawal.getAmount(), withdrawal.getStatus());
         financeHelper.validateWithdrawalIsPending(withdrawal);
         withdrawal.setStatus(WithdrawalStatus.CANCELED);
         transactionService.cancelTransaction(withdrawal.getTransaction().getId());
-        log.info("Withdrawal canceled: id={}, userId={}, amount={}, status={}",
+        log.info("Withdrawal canceled: withdrawalId={}, userId={}, amount={}, status={}",
                 withdrawal.getId(), withdrawal.getRequester().getId(), withdrawal.getAmount(), withdrawal.getStatus());
     }
 
     @Transactional
     public void rejectWithdrawal(Long withdrawalId, Authentication adminAuth, WithdrawalRejection rejection) {
+        log.info("Rejecting withdrawal: withdrawalId={}", withdrawalId);
         Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
         User admin =  userHelper.findUserWithAuthentication(adminAuth);
-        log.info("Rejecting withdrawal: id={}, userId={}, amount={}, status={}, adminId={}, reason={}",
-                withdrawalId, withdrawal.getRequester().getId(), withdrawal.getAmount(), withdrawal.getStatus(),
-                admin.getId(), rejection.rejectionReason());
         financeHelper.validateWithdrawalIsPending(withdrawal);
         logReview(withdrawal, admin);
         withdrawal.setRejectionReason(rejection.rejectionReason());
         withdrawal.setStatus(WithdrawalStatus.REJECTED);
         withdrawal.getTransaction().setStatus(TransactionStatus.FAILED);
-        log.info("Withdrawal rejected: id={}, userId={}, amount={}, status={}, adminId={}, reason={}",
+        log.info("Withdrawal rejected: withdrawalId={}, userId={}, amount={}, status={}, adminId={}, reason={}",
                 withdrawal.getId(), withdrawal.getRequester().getId(), withdrawal.getAmount(), withdrawal.getStatus(), admin.getId(), withdrawal.getRejectionReason());
     }
 
     @Transactional
     public void approveWithdrawal(Long withdrawalId, Authentication adminAuth) {
+        log.info("Approving withdrawal: withdrawalId={}", withdrawalId);
         Withdrawal withdrawal = financeHelper.findWithdrawalById(withdrawalId);
         User admin =  userHelper.findUserWithAuthentication(adminAuth);
-        log.info("Approving withdrawal: id={}, userId={}, amount={}, status={}, adminId={}",
-                withdrawalId, withdrawal.getRequester().getId(), withdrawal.getAmount(), withdrawal.getStatus(), admin.getId());
         financeHelper.validateWithdrawalIsPending(withdrawal);
         financeHelper.validateSufficientWalletBalance(withdrawal.getAmount(), withdrawal.getWallet());
         logReview(withdrawal, admin);
@@ -97,7 +94,7 @@ public class WithdrawalService {
         transactionService.processTransaction(withdrawal.getTransaction());
         financeHelper.validateTransactionIsPaid(withdrawal.getTransaction());
         withdrawal.setPaidAt(LocalDateTime.now());
-        log.info("Withdrawal approved and processed: id={}, userId={}, amount={}, status={} adminId={}",
+        log.info("Withdrawal approved and processed: withdrawalId={}, userId={}, amount={}, status={} adminId={}",
                 withdrawalId, withdrawal.getRequester().getId(), withdrawal.getAmount(), withdrawal.getStatus(), admin.getId());
     }
 
