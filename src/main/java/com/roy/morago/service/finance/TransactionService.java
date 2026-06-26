@@ -3,6 +3,7 @@ package com.roy.morago.service.finance;
 import com.roy.morago.dto.finance.TransactionRequest;
 import com.roy.morago.dto.finance.TransactionResponse;
 import com.roy.morago.dto.finance.TransactionSearchRequest;
+import com.roy.morago.dto.socket.TransactionProcessedEvent;
 import com.roy.morago.entity.call.Call;
 import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
@@ -14,6 +15,7 @@ import com.roy.morago.mapper.TransactionMapper;
 import com.roy.morago.repository.finance.TransactionRepository;
 import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,6 +33,7 @@ public class TransactionService {
     private final TransactionMapper transactionMapper;
     private final FinanceHelper helper;
     private final UserHelper userHelper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public TransactionResponse createDepositTransaction(TransactionRequest dto, Authentication authentication) {
@@ -153,6 +156,9 @@ public class TransactionService {
         setWalletBalance(transaction);
         transaction.setStatus(TransactionStatus.PAID);
         transaction.setProcessedAt(LocalDateTime.now());
+
+        TransactionProcessedEvent event = TransactionProcessedEvent.from(transaction);
+        eventPublisher.publishEvent(event);
     }
 
     private void setTransactionBalance(Transaction transaction) {

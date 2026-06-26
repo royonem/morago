@@ -6,7 +6,6 @@ import com.roy.morago.exception.file.FileNotFoundException;
 import com.roy.morago.exception.file.FileStorageException;
 import com.roy.morago.exception.file.FileValidationException;
 import com.roy.morago.exception.finance.*;
-import com.roy.morago.exception.notification.AlreadySentNotificationException;
 import com.roy.morago.exception.notification.NotificationNotFoundException;
 import com.roy.morago.exception.notification.UnauthorizedNotificationException;
 import com.roy.morago.exception.topic.*;
@@ -203,13 +202,6 @@ public class RestExceptionHandler {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
-
-    @ExceptionHandler(AlreadySentNotificationException.class)
-    public ResponseEntity<Map<String, String>> handleAlreadySentNotification(AlreadySentNotificationException ex) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler(UnauthorizedNotificationException.class)

@@ -3,12 +3,15 @@ package com.roy.morago.service.call;
 import com.roy.morago.dto.call.CallRequest;
 import com.roy.morago.dto.call.CallResponse;
 import com.roy.morago.dto.call.CallSearchRequest;
+import com.roy.morago.dto.socket.CallEndedEvent;
+import com.roy.morago.dto.socket.IncomingCallEvent;
 import com.roy.morago.entity.call.Call;
 import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.CallStatus;
 import com.roy.morago.mapper.CallMapper;
 import com.roy.morago.repository.call.CallRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,6 +26,7 @@ public class CallService {
     private final CallRepository repo;
     private final CallMapper mapper;
     private final CallHelper helper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public CallResponse requestCall(CallRequest callRequest, User caller) {
@@ -33,6 +37,8 @@ public class CallService {
         call.setStatus(CallStatus.RINGING);
         repo.save(call);
 
+        IncomingCallEvent event = IncomingCallEvent.from(call, caller);
+        eventPublisher.publishEvent(event);
         return mapper.createResponseFromEntity(call);
     }
 
@@ -87,6 +93,9 @@ public class CallService {
         helper.validateCallIsRinging(call);
         helper.resolveCancelDecline(call, caller);
         call.setCanceledAt(LocalDateTime.now());
+
+        CallEndedEvent event = CallEndedEvent.from(call);
+        eventPublisher.publishEvent(event);
         return mapper.createResponseFromEntity(call);
     }
 
@@ -97,17 +106,9 @@ public class CallService {
         helper.validateCallIsRinging(call);
         helper.resolveCancelDecline(call, recipient);
         call.setCanceledAt(LocalDateTime.now());
-        return mapper.createResponseFromEntity(call);
-    }
 
-    @Transactional
-    public CallResponse autoEndCall(Long callId) {
-        Call call = helper.findCallById(callId);
-        call.setStatus(CallStatus.ENDED);
-        call.setEndedAt(LocalDateTime.now());
-        call.setCost(helper.calculateCallCost(call));
-        // some scheduling logic
-        helper.createCallTransactions(call);
+        CallEndedEvent event = CallEndedEvent.from(call);
+        eventPublisher.publishEvent(event);
         return mapper.createResponseFromEntity(call);
     }
 
@@ -117,8 +118,11 @@ public class CallService {
         helper.validateCallIsInProgress(call);
         call.setStatus(CallStatus.ENDED);
         call.setEndedAt(LocalDateTime.now());
-        call.setCost(helper.calculateCallCost(call));
+        call.setCost(call.getExpectedCost());
         helper.createCallTransactions(call);
+
+        CallEndedEvent event = CallEndedEvent.from(call);
+        eventPublisher.publishEvent(event);
         return mapper.createResponseFromEntity(call);
     }
 

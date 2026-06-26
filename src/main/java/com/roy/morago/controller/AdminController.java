@@ -113,25 +113,5 @@ public class AdminController {
     public NotificationResponse getNotification(@PathVariable Long id) {
         return notificationService.getNotification(id);
     }
-
-    @PatchMapping("/notifications/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public void sendNotification(@RequestParam Long userId, @PathVariable Long id) {
-        notificationService.sendNotification(userId, id);
-    }
-
-    @DeleteMapping("/notifications/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUnsentNotification(@PathVariable Long id) {
-        notificationService.deleteUnsentNotification(id);
-    }
-
-    @DeleteMapping("/notifications")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUnsentNotifications(@RequestParam List<Long> ids) {
-        notificationService.deleteUnsentNotifications(ids);
-    }
 }
 

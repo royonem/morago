@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Getter
@@ -48,4 +50,32 @@ public class Call extends BaseEntity {
     private LocalDateTime endedAt;
     @Column
     private LocalDateTime canceledAt;
+
+    public User getCaller() {
+        return isClientInitiator ? getClient() : getTranslator();
+    }
+
+    public User getReceiver() {
+        return isClientInitiator ? getTranslator() : getClient();
+    }
+
+    public long getOngoingDurationSeconds() {
+        if (startedAt == null) {
+            return 0L;
+        }
+        return Duration.between(startedAt, LocalDateTime.now()).toSeconds();
+    }
+
+    public long getFullDurationSeconds() {
+        if (startedAt == null || endedAt == null) {
+            return 0L;
+        }
+        return Duration.between(startedAt, endedAt).toSeconds();
+    }
+
+    public long getExpectedCost() {
+        long callSeconds = getFullDurationSeconds();
+        long minutes = (long) Math.ceil(callSeconds / 60.0);
+        return minutes * 1000;
+    }
 }

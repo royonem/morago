@@ -19,8 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -136,21 +134,9 @@ public class CallHelper {
     protected void setMaxDuration(Call call, CallRequest request) {
         validateCallIsRequested(call);
         User client = userHelper.findUserById(request.clientId());
-        long maxDuration = client.getWallet().getBalance() / 1000;
-        validateCallFundsAreSufficient(maxDuration);
-        call.setMaxCallTime(maxDuration);
-    }
-
-    protected Long calculateCallCost(Call call) {
-        long callSeconds = calculateCallSeconds(call);
-        long minutes = (long) Math.ceil(callSeconds / 60.0);
-        return minutes * 1000;
-    }
-
-    private long calculateCallSeconds(Call call) {
-        LocalDateTime endedAt = call.getEndedAt();
-        LocalDateTime startedAt = call.getStartedAt();
-        return Duration.between(startedAt, endedAt).toSeconds();
+        long maxDurationMinutes = client.getWallet().getBalance() / 1000;
+        validateCallFundsAreSufficient(maxDurationMinutes);
+        call.setMaxCallTime(maxDurationMinutes * 60);
     }
 
     protected void validateRecipient(Call call, User user, String message) {

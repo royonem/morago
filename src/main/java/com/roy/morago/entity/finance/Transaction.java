@@ -20,7 +20,7 @@ public class Transaction extends BaseEntity {
     @JoinColumn(name = "wallet_id")
     private Wallet wallet;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "call_id")
     private Call call;
 
