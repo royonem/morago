@@ -3,6 +3,7 @@ package com.roy.morago.controller.call;
 import com.roy.morago.dto.call.CallRequest;
 import com.roy.morago.dto.call.CallResponse;
 import com.roy.morago.dto.call.CallSearchRequest;
+import com.roy.morago.entity.user.User;
 import com.roy.morago.security.UserPrincipal;
 import com.roy.morago.service.call.CallService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,8 +42,8 @@ public class CallController {
     })
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/")
-    public CallResponse requestCall(@Valid @RequestBody CallRequest callRequest, @AuthenticationPrincipal UserPrincipal principal) {
-        return callService.requestCall(callRequest, principal.getUser());
+    public CallResponse requestCall(@Valid @RequestBody CallRequest callRequest, @AuthenticationPrincipal User user) {
+        return callService.requestCall(callRequest, user);
     }
 
     @Operation(
@@ -136,8 +137,8 @@ public class CallController {
     })
     @PreAuthorize("@securityService.isCallParticipant(#id, authentication)")
     @PatchMapping("/{id}/accept")
-    public CallResponse acceptCall(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
-        return callService.acceptCall(id, principal.getUser());
+    public CallResponse acceptCall(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        return callService.acceptCall(id, user);
     }
 
     @Operation(
@@ -170,8 +171,8 @@ public class CallController {
     })
     @PreAuthorize("@securityService.isCallParticipant(#id, authentication)")
     @PatchMapping("/{id}/decline")
-    public CallResponse declineCall(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
-        return callService.declineCall(id, principal.getUser());
+    public CallResponse declineCall(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        return callService.declineCall(id, user);
     }
 
     @Operation(
@@ -187,8 +188,8 @@ public class CallController {
     })
     @PreAuthorize("hasRole('ADMIN') or @securityService.isCallParticipant(#id, authentication)")
     @PatchMapping("/{id}/cancel")
-    public CallResponse cancelCall(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
-        return callService.cancelCall(id, principal.getUser());
+    public CallResponse cancelCall(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        return callService.cancelCall(id, user);
     }
 
     @Operation(
