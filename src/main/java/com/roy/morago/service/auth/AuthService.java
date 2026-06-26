@@ -52,7 +52,7 @@ public class AuthService {
                     )
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            User user = userHelper.findUserWithAuthentication(authentication);
+            User user = userHelper.findUserByEmail(loginRequest.email());
             LoginResponse response = createLoginResponse(user);
             log.info("Login successful for user ID: {}", user.getId());
             return response;

@@ -31,8 +31,7 @@ public class UserHelper {
     }
 
     public User findUserWithAuthentication(Authentication authentication) {
-        return userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        return (User) authentication.getPrincipal();
     }
 
     protected Language findLanguageById(Long languageId) {
