@@ -2,9 +2,11 @@ package com.roy.morago.controller;
 
 import com.roy.morago.dto.file.FileResponse;
 import com.roy.morago.dto.notification.NotificationResponse;
+import com.roy.morago.dto.user.UserResponse;
 import com.roy.morago.service.file.FileService;
 import com.roy.morago.service.notification.NotificationService;
 import com.roy.morago.service.user.LanguageService;
+import com.roy.morago.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,9 +23,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
+    private final UserService userService;
     private final FileService fileService;
     private final NotificationService notificationService;
     private final LanguageService languageService;
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isCurrentUser(#id, authentication)")
+    public UserResponse getUser(@PathVariable Long id) {
+        return userService.getUser(id);
+    }
 
     @PostMapping("/{id}/profile-picture")
     @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")

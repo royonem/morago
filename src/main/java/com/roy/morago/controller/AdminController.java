@@ -42,12 +42,6 @@ public class AdminController {
         return userService.searchUsers(request);
     }
 
-    @GetMapping("/users/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public UserResponse getUser(@PathVariable Long id) {
-        return userService.getUser(id);
-    }
-
     @PatchMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public void updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateRequest dto) {
