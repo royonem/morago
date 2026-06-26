@@ -21,10 +21,10 @@ public class BankService {
 
     @Transactional
     public BankAccountResponse linkBankAccount(BankAccountRequest request, Authentication authentication) {
-        BankAccount bankAccount = bankAccountMapper.createEntityFromRequest(request);
+        BankAccount bankAccount = bankAccountMapper.toEntity(request);
         bankAccount.setUser(userHelper.findUserWithAuthentication(authentication));
         bankRepository.save(bankAccount);
-        return bankAccountMapper.createResponseFromEntity(bankAccount);
+        return bankAccountMapper.toResponse(bankAccount);
     }
 
     @Transactional
@@ -34,6 +34,6 @@ public class BankService {
     }
 
     public BankAccountResponse getBankAccount(Long id) {
-        return bankAccountMapper.createResponseFromEntity(helper.findBankAccountById(id));
+        return bankAccountMapper.toResponse(helper.findBankAccountById(id));
     }
 }

@@ -25,7 +25,7 @@ public class TopicService {
     public TopicResponse createTopic(TopicRequest request) {
         topicHelper.checkDuplicateTopics(request.name());
 
-        Topic topic = topicMapper.createEntityFromRequest(request);
+        Topic topic = topicMapper.toEntity(request);
         if (request.categoryId() != null) {
             topic.setCategory(topicHelper.findCategoryById(request.categoryId()));
         }
@@ -33,21 +33,21 @@ public class TopicService {
         if (request.iconId() != null) {
             fileService.saveTopicIcon(topic.getId(), request.iconId());
         }
-        return topicMapper.createResponseFromEntity(topic);
+        return topicMapper.toResponse(topic);
     }
 
     public List<TopicResponse> getAllTopics() {
         List<Topic> topics = topicRepository.findAll();
         List<TopicResponse> topicsList = new ArrayList<>();
         for (Topic topic : topics) {
-            topicsList.add(topicMapper.createResponseFromEntity(topic));
+            topicsList.add(topicMapper.toResponse(topic));
         }
         return topicsList;
     }
 
     public TopicResponse getTopic(Long id) {
         Topic topic = topicHelper.findTopicById(id);
-        return topicMapper.createResponseFromEntity(topic);
+        return topicMapper.toResponse(topic);
     }
 
     @Transactional
@@ -61,7 +61,7 @@ public class TopicService {
         if (dto.iconId() != null) {
             fileService.saveTopicIcon(topic.getId(), dto.iconId());
         }
-        return topicMapper.createResponseFromEntity(topic);
+        return topicMapper.toResponse(topic);
     }
 
     @Transactional

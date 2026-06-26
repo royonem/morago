@@ -33,7 +33,7 @@ public class CallHelper {
     private final TopicHelper topicHelper;
 
     protected Call createCall(CallRequest callRequest) {
-        Call call = callMapper.createEntityFromRequest(callRequest);
+        Call call = callMapper.toEntity(callRequest);
         call.setClient(userHelper.findUserById(callRequest.clientId()));
         call.setTranslator(userHelper.findUserById(callRequest.translatorId()));
         call.setTopic(topicHelper.findTopicById(callRequest.topicId()));

@@ -21,13 +21,13 @@ public class LanguageService {
 
     @Transactional
     public LanguageResponse createLanguage(LanguageRequest languageRequest) {
-        Language language = languageMapper.toLanguageEntity(languageRequest);
-        return languageMapper.toLanguageResponse(languageRepository.save(language));
+        Language language = languageMapper.toEntity(languageRequest);
+        return languageMapper.toResponse(languageRepository.save(language));
     }
 
     public List<LanguageResponse> getAllLanguages() {
         List<Language> allLanguages = languageRepository.findAll();
-        return languageMapper.toLanguageResponseList(allLanguages);
+        return languageMapper.toResponse(allLanguages);
     }
 
     @Transactional

@@ -11,6 +11,6 @@ import org.mapstruct.ReportingPolicy;
 public interface TopicMapper {
     @Mapping(target = "categoryId", source = "category.id")
     @Mapping(target = "iconId", source = "icon.id")
-    TopicResponse createResponseFromEntity(Topic topic);
-    Topic createEntityFromRequest(TopicRequest request);
+    TopicResponse toResponse(Topic topic);
+    Topic toEntity(TopicRequest request);
 }

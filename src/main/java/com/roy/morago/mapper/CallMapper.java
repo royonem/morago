@@ -12,7 +12,7 @@ public interface CallMapper {
     @Mapping(target = "clientId", source = "client.id")
     @Mapping(target = "translatorId", source = "translator.id")
     @Mapping(target = "topicId", source = "topic.id")
-    CallResponse createResponseFromEntity(Call call);
+    CallResponse toResponse(Call call);
 
-    Call createEntityFromRequest(CallRequest callRequest);
+    Call toEntity(CallRequest request);
 }
