@@ -30,7 +30,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/user/**").hasAnyRole("CLIENT", "TRANSLATOR", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(
                                 "/swagger-ui/**",
@@ -53,11 +53,6 @@ public class WebSecurityConfig {
     public SecretKey jwtSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
         return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    @Bean
-    public JwtAuthFilter jwtAuthFilter(JwtProvider jwtProvider) {
-        return new JwtAuthFilter(jwtProvider);
     }
 
     @Bean
