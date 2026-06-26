@@ -39,7 +39,7 @@ public class AuthController {
             description = "Revokes the current refresh token. User must be authenticated."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Logged out successfully"),
+            @ApiResponse(responseCode = "204", description = "Logged out successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid token")
     })
     @SecurityRequirement(name = "bearerAuth")
@@ -70,7 +70,7 @@ public class AuthController {
             description = "Creates a new client account. Email must be unique and password must match confirmation."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Client registered successfully"),
+            @ApiResponse(responseCode = "201", description = "Client registered successfully"),
             @ApiResponse(responseCode = "409", description = "Conflict - Email already in use"),
             @ApiResponse(responseCode = "400", description = "Bad request - Password mismatch or invalid data")
     })
@@ -85,7 +85,7 @@ public class AuthController {
             description = "Creates a new translator account. Email must be unique and password must match confirmation."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Translator registered successfully"),
+            @ApiResponse(responseCode = "201", description = "Translator registered successfully"),
             @ApiResponse(responseCode = "409", description = "Conflict - Email already in use"),
             @ApiResponse(responseCode = "400", description = "Bad request - Password mismatch or invalid data")
     })
