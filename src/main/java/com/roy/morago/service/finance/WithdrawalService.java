@@ -36,6 +36,7 @@ public class WithdrawalService {
         User user = userHelper.findUserWithAuthentication(authentication);
         log.info("Creating withdrawal: userId={}, amount={}", user.getId(), request.amount());
         Wallet wallet = user.getWallet();
+        financeHelper.validateBankIsLinked(user);
         financeHelper.validateNoPendingWithdrawals(user);
         financeHelper.validateSufficientWalletBalance(request.amount(), wallet);
 
