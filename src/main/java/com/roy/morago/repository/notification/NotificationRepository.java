@@ -16,7 +16,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     Page<Notification> findByUserIdAndIsReadFalse(Long userId, Pageable pageable);
     void deleteByIdInAndUserId(List<Long> ids, Long userId);
     void deleteByUserIdAndIsReadTrue(Long userId);
-    void deleteByIdInAndSentAtIsNull(List<Long> ids);
     Long countByUserIdAndIsReadFalse(Long userId);
 
     @Modifying
@@ -27,7 +26,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     @Modifying
     @Query("UPDATE Notification n SET n.isRead = true, n.readAt = CURRENT_TIMESTAMP WHERE n.id IN :ids AND n.user.id = :userId")
-    void markAsReadByIdInAndUserId(List<Long> notificationIds, Long userId);
+    void markAsReadByIdInAndUserId(List<Long> ids, Long userId);
 
     @Modifying
     @Query("UPDATE Notification n SET n.isRead = true, n.readAt = CURRENT_TIMESTAMP WHERE n.user.id = :userId")
