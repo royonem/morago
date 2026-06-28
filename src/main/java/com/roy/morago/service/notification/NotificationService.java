@@ -32,6 +32,7 @@ public class NotificationService {
         log.info("Creating notification: userId={}", request.userId());
         Notification notification = mapper.toEntity(request);
         notification.setUser(userHelper.findUserById(request.userId()));
+        notification.setSentAt(LocalDateTime.now());
         repository.save(notification);
         log.info("Notification created: notificationId={}, userId={}", notification.getId(), request.userId());
 
