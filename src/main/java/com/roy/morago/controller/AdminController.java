@@ -1,11 +1,9 @@
 package com.roy.morago.controller;
 
-import com.roy.morago.dto.file.FileResponse;
 import com.roy.morago.dto.notification.NotificationRequest;
 import com.roy.morago.dto.notification.NotificationResponse;
 import com.roy.morago.dto.user.*;
 import com.roy.morago.service.notification.NotificationService;
-import com.roy.morago.service.file.FileService;
 import com.roy.morago.service.user.LanguageService;
 import com.roy.morago.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,16 +20,14 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "03 - Admin", description = "Administrative endpoints for managing users, topics, languages, and notifications")
+@Tag(name = "03 - Admin", description = "Administrative endpoints for managing users, languages, and notifications")
 @SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
     private final UserService userService;
-    private final FileService fileService;
     private final LanguageService languageService;
     private final NotificationService notificationService;
 
@@ -114,56 +110,6 @@ public class AdminController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-    }
-
-    @Operation(
-            summary = "Upload topic icon",
-            description = "Uploads a temporary topic icon. **Role: ADMIN only.**"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Icon uploaded successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid file type or size"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Requires ADMIN role")
-    })
-    @PostMapping("/topics/icon")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.CREATED)
-    public FileResponse uploadIcon(@RequestParam MultipartFile icon) {
-        return fileService.uploadTopicIcon(icon);
-    }
-
-    @Operation(
-            summary = "Save topic icon",
-            description = "Saves a previously uploaded image as the topic's icon. **Role: ADMIN only.**"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Icon saved successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Requires ADMIN role"),
-            @ApiResponse(responseCode = "404", description = "File or topic not found")
-    })
-    @PutMapping("/topics/{id}/icon")
-    @PreAuthorize("hasRole('ADMIN')")
-    public void saveIcon(@PathVariable Long id, @RequestParam Long iconId) {
-        fileService.saveTopicIcon(id, iconId);
-    }
-
-    @Operation(
-            summary = "Delete topic icon",
-            description = "Deletes the topic's icon. **Role: ADMIN only.**"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Icon deleted successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Requires ADMIN role"),
-            @ApiResponse(responseCode = "404", description = "Topic or icon not found")
-    })
-    @DeleteMapping("/topics/{id}/icon")
-    @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteIcon(@PathVariable Long id) {
-        fileService.deleteTopicIcon(id);
     }
 
     @Operation(
