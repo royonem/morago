@@ -7,6 +7,7 @@ import com.roy.morago.entity.user.User;
 import com.roy.morago.enums.Availability;
 import com.roy.morago.enums.CurrencyCode;
 import com.roy.morago.enums.UserStatus;
+import com.roy.morago.exception.auth.DuplicatePhoneException;
 import com.roy.morago.exception.auth.InvalidCredentialsException;
 import com.roy.morago.exception.auth.DuplicateEmailException;
 import com.roy.morago.exception.auth.PasswordMismatchException;
@@ -85,15 +86,17 @@ public class AuthService {
     @Transactional
     public void registerClient(ClientRegisterRequest dto) {
         log.info("Client registration attempt with email: {}", dto.email());
+        validateRegistration(dto);
         User client = userMapper.toEntity(dto);
-        register(client, dto.password(), dto.confirmPassword(), roleService.getClientRole());
+        register(client, dto, roleService.getClientRole());
     }
 
     @Transactional
     public void registerTranslator(TranslatorRegisterRequest dto) {
         log.info("Translator registration attempt with email: {}", dto.email());
+        validateRegistration(dto);
         User translator = userMapper.toEntity(dto);
-        register(translator, dto.password(), dto.confirmPassword(), roleService.getTranslatorRole());
+        register(translator, dto, roleService.getTranslatorRole());
     }
 
     // Helper Methods
@@ -103,21 +106,28 @@ public class AuthService {
         return new LoginResponse(accessToken, refreshToken);
     }
 
-    private void register(User user, String password, String confirmPassword, Role role) {
-        if (userRepository.existsByEmail(user.getEmail())) {
-            log.warn("Registration FAILED - Email already in use: {}", user.getEmail());
-            throw new DuplicateEmailException("Email already in use.");
-        }
-        if (!password.equals(confirmPassword)) {
-            log.warn("Registration FAILED - Password mismatch for email: {}", user.getEmail());
-            throw new PasswordMismatchException("Passwords do not match.");
-        }
+    private void register(User user, RegisterRequest dto, Role role) {
         user.getRoles().add(role);
-        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setPasswordHash(passwordEncoder.encode(dto.password()));
         user.setAvailability(Availability.OFFLINE);
         user.setStatus(UserStatus.UNVERIFIED);
         User savedUser = userRepository.save(user);
         walletService.createWallet(savedUser, CurrencyCode.KRW);
-        log.info("User registered successfully: userId={}, role={}, email={}, walletId={}", savedUser.getId(), role.getName(), savedUser.getEmail(), savedUser.getWallet().getId());
+        log.info("User registered successfully: userId={}, userName={}, role={}, email={}, walletId={}", savedUser.getId(), savedUser.getFullName(), role.getName(), savedUser.getEmail(), savedUser.getWallet().getId());
+    }
+
+    private void validateRegistration(RegisterRequest dto) {
+        if (userRepository.existsByEmail(dto.email())) {
+            log.warn("Registration FAILED - Email already in use: {}", dto.email());
+            throw new DuplicateEmailException("Email already in use.");
+        }
+        if (!dto.password().equals(dto.confirmPassword())) {
+            log.warn("Registration FAILED - Password mismatch for email: {}", dto.email());
+            throw new PasswordMismatchException("Passwords do not match.");
+        }
+        if (userRepository.existsByPhone(dto.phone())) {
+            log.warn("Registration FAILED - Phone number already in use: {}", dto.phone());
+            throw new DuplicatePhoneException("Phone number already in use.");
+        }
     }
 }

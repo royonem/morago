@@ -71,8 +71,8 @@ public class AuthController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Client registered successfully"),
-            @ApiResponse(responseCode = "409", description = "Conflict - Email already in use"),
-            @ApiResponse(responseCode = "400", description = "Bad request - Password mismatch or invalid data")
+            @ApiResponse(responseCode = "400", description = "Bad request - Password mismatch or invalid data"),
+            @ApiResponse(responseCode = "409", description = "Conflict - Email or phone number already in use")
     })
     @PostMapping("/register/client")
     @ResponseStatus(HttpStatus.CREATED)
@@ -86,8 +86,8 @@ public class AuthController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Translator registered successfully"),
-            @ApiResponse(responseCode = "409", description = "Conflict - Email already in use"),
-            @ApiResponse(responseCode = "400", description = "Bad request - Password mismatch or invalid data")
+            @ApiResponse(responseCode = "400", description = "Bad request - Password mismatch or invalid data"),
+            @ApiResponse(responseCode = "409", description = "Conflict - Email or phone number already in use")
     })
     @PostMapping("/register/translator")
     @ResponseStatus(HttpStatus.CREATED)
