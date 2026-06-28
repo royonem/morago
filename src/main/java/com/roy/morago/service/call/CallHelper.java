@@ -34,6 +34,11 @@ public class CallHelper {
     private final TransactionService transactionService;
     private final TopicHelper topicHelper;
 
+    public Call findCallById(Long callId) {
+        return callRepository.findById(callId)
+                .orElseThrow(() -> new CallNotFoundException("Call not found"));
+    }
+
     protected Call createCall(CallRequest callRequest) {
         Call call = callMapper.toEntity(callRequest);
         call.setClient(userHelper.findUserById(callRequest.clientId()));
@@ -46,11 +51,6 @@ public class CallHelper {
     protected void createCallTransactions(Call call) {
         transactionService.createCallChargeTransaction(call, call.getClient());
         transactionService.createCallEarningTransaction(call, call.getTranslator());
-    }
-
-    public Call findCallById(Long callId) {
-        return callRepository.findById(callId)
-                .orElseThrow(() -> new CallNotFoundException("Call not found"));
     }
 
     protected Specification<Call> buildSpecification(CallSearchRequest request) {
@@ -118,10 +118,6 @@ public class CallHelper {
         return predicates;
     }
 
-    protected void setCallInitiator(Call call, User caller) {
-        call.setIsClientInitiator(caller == call.getClient());
-    }
-
     protected void resolveCancelDecline(Call call, User user) {
         boolean isClientInitiator = call.getIsClientInitiator();
         boolean userIsClient = user.getId().equals(call.getClient().getId());
@@ -142,26 +138,18 @@ public class CallHelper {
     }
 
     protected void validateReceiver(Call call, User user, String message) {
-        Long initiatorId = call.getIsClientInitiator()
-                ? call.getClient().getId()
-                : call.getTranslator().getId();
-
-        if (user.getId().equals(initiatorId)) {
+        if (call.getCaller().getId().equals(user.getId())) {
             throw new InvalidCallReceiverException(message);
         }
     }
 
     protected void validateCaller(Call call, User user) {
-        Long initiatorId = call.getIsClientInitiator()
-                ? call.getClient().getId()
-                : call.getTranslator().getId();
-
-        if (!user.getId().equals(initiatorId)) {
+        if (call.getReceiver().getId().equals(user.getId())) {
             throw new InvalidCallerException("Cannot cancel this call");
         }
     }
 
-    private void validateCallIsRequested(Call call) {
+    protected void validateCallIsRequested(Call call) {
         if (call.getStatus() != CallStatus.REQUESTED) {
             throw new InvalidCallStateException("Cannot set a max duration for this call");
         }
@@ -191,7 +179,7 @@ public class CallHelper {
         }
     }
 
-    private void validateCallFundsAreSufficient(Long maxDuration) {
+    protected void validateCallFundsAreSufficient(Long maxDuration) {
         if (maxDuration <= 0) {
             throw new DeficientFundsException("Client does not have enough funds for a call");
         }
