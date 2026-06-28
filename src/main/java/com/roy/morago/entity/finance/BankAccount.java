@@ -15,7 +15,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "bank_accounts")
 public class BankAccount extends BaseEntity {
-    @OneToOne(optional = false, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToOne(optional = false, cascade = {CascadeType.MERGE})
     @JoinColumn(name = "user_id")
     private User user;
 
