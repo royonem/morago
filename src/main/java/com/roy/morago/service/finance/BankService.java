@@ -38,6 +38,8 @@ public class BankService {
     public void unlinkBankAccount(Long id) {
         log.info("Unlinking bank account: bankId={}", id);
         BankAccount account = helper.findBankAccountById(id);
+        User user = account.getUser();
+        user.setBankAccount(null);
         bankRepository.delete(account);
         log.info("Bank account unlinked: bankId={}, userId={}", id, account.getUser().getId());
     }
