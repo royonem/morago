@@ -12,6 +12,7 @@ import com.roy.morago.mapper.CallMapper;
 import com.roy.morago.repository.call.CallRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class CallService {
@@ -30,12 +32,14 @@ public class CallService {
 
     @Transactional
     public CallResponse requestCall(CallRequest callRequest, User caller) {
+        log.info("Requesting call: callerId={}", caller.getId());
         Call call = helper.createCall(callRequest);
         call.setStatus(CallStatus.REQUESTED);
         helper.setCallInitiator(call, caller);
         helper.setMaxDuration(call, callRequest);
         call.setStatus(CallStatus.RINGING);
         repo.save(call);
+        log.info("Call requested: callId={}, callerId={}, receiverId={}", call.getId(), call.getCaller().getId(), call.getReceiver().getId());
 
         IncomingCallEvent event = IncomingCallEvent.from(call, caller);
         eventPublisher.publishEvent(event);
@@ -68,31 +72,39 @@ public class CallService {
     }
 
     @Transactional
-    public CallResponse acceptCall(Long callId, User recipient) {
+    public CallResponse acceptCall(Long callId, User receiver) {
+        log.info("Accepting call: callId={}, receiverId={}", callId, receiver.getId());
         Call call = helper.findCallById(callId);
-        helper.validateRecipient(call, recipient, "Cannot accept own call");
+        helper.validateReceiver(call, receiver, "Cannot accept own call");
         helper.validateCallIsRinging(call);
         call.setStatus(CallStatus.ACCEPTED);
         call.setAcceptedAt(LocalDateTime.now());
+        log.info("Call accepted: callId={}, callerId={}, receiverId={}",
+                callId, call.getCaller().getId(), call.getReceiver().getId());
         return mapper.toResponse(call);
     }
 
     @Transactional
     public CallResponse startCall(Long callId) {
+        log.info("Starting call: callId={}", callId);
         Call call = helper.findCallById(callId);
         helper.validateCallIsAccepted(call);
         call.setStatus(CallStatus.IN_PROGRESS);
         call.setStartedAt(LocalDateTime.now());
+        log.info("Call started: callId={}, callerId={}, receiverId={}",
+                callId, call.getCaller().getId(), call.getReceiver().getId());
         return mapper.toResponse(call);
     }
 
     @Transactional
     public CallResponse cancelCall(Long callId, User caller) {
+        log.info("Canceling call: callId={}, callerId={}", callId, caller.getId());
         Call call = helper.findCallById(callId);
         helper.validateCaller(call, caller);
         helper.validateCallIsRinging(call);
         helper.resolveCancelDecline(call, caller);
         call.setCanceledAt(LocalDateTime.now());
+        log.info("Call cancelled: callId={}, caller={}", callId, caller.getId());
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
@@ -100,12 +112,15 @@ public class CallService {
     }
 
     @Transactional
-    public CallResponse declineCall(Long callId, User recipient) {
+    public CallResponse declineCall(Long callId, User receiver) {
+        log.info("Declining call: callId={}, receiverId={}", callId, receiver.getId());
         Call call = helper.findCallById(callId);
-        helper.validateRecipient(call, recipient, "Cannot decline own call");
+        helper.validateReceiver(call, receiver, "Cannot decline own call");
         helper.validateCallIsRinging(call);
-        helper.resolveCancelDecline(call, recipient);
+        helper.resolveCancelDecline(call, receiver);
         call.setCanceledAt(LocalDateTime.now());
+        log.info("Call declined: callId={}, callerId={}, receiverId={}",
+                callId, call.getCaller().getId(), call.getReceiver().getId());
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
@@ -114,12 +129,14 @@ public class CallService {
 
     @Transactional
     public CallResponse endCall(Long callId) {
+        log.info("Ending call: callId={}", callId);
         Call call = helper.findCallById(callId);
         helper.validateCallIsInProgress(call);
         call.setStatus(CallStatus.ENDED);
         call.setEndedAt(LocalDateTime.now());
         call.setCost(call.getExpectedCost());
         helper.createCallTransactions(call);
+        log.info("Call ended: callId={}, cost={}, duration={}s", callId, call.getCost(), call.getFullDurationSeconds());
 
         CallEndedEvent event = CallEndedEvent.from(call);
         eventPublisher.publishEvent(event);
@@ -128,10 +145,12 @@ public class CallService {
 
     @Transactional
     public CallResponse rateCall(Long callId, Integer rating) {
+        log.info("Rating call: callId={}, rating={}", callId, rating);
         Call call = helper.findCallById(callId);
         helper.validateCallRating(rating);
         helper.validateCallIsEnded(call);
         call.setRating(rating);
+        log.info("Call rated: callId={}, clientId={}, rating={}", callId, call.getClient().getId(), rating);
         return mapper.toResponse(call);
     }
 }

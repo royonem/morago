@@ -1,6 +1,5 @@
 package com.roy.morago.service.topic;
 
-import com.roy.morago.dto.topic.TopicResponse;
 import com.roy.morago.entity.topic.Category;
 import com.roy.morago.entity.topic.Topic;
 import com.roy.morago.exception.topic.CategoryNotFoundException;

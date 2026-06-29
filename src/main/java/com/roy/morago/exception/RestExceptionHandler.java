@@ -12,6 +12,7 @@ import com.roy.morago.exception.topic.*;
 import com.roy.morago.exception.user.LanguageNotFoundException;
 import com.roy.morago.exception.user.MissingRoleException;
 import com.roy.morago.exception.user.UserNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class RestExceptionHandler {
 
@@ -232,8 +234,8 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(InvalidCallRecipientException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidCallRecipient(InvalidCallRecipientException ex) {
+    @ExceptionHandler(InvalidCallReceiverException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCallReceiver(InvalidCallReceiverException ex) {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
@@ -251,5 +253,13 @@ public class RestExceptionHandler {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleAllExceptions(Exception ex) {
+        log.error("Unhandled exception: {}", ex.getMessage(), ex);
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "An unexpected error occurred");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

@@ -16,6 +16,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CallHelper {
@@ -139,13 +141,13 @@ public class CallHelper {
         call.setMaxCallTime(maxDurationMinutes * 60);
     }
 
-    protected void validateRecipient(Call call, User user, String message) {
+    protected void validateReceiver(Call call, User user, String message) {
         Long initiatorId = call.getIsClientInitiator()
                 ? call.getClient().getId()
                 : call.getTranslator().getId();
 
         if (user.getId().equals(initiatorId)) {
-            throw new InvalidCallRecipientException(message);
+            throw new InvalidCallReceiverException(message);
         }
     }
 

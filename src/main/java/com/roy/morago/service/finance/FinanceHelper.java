@@ -1,9 +1,7 @@
 package com.roy.morago.service.finance;
 
-import com.roy.morago.dto.call.CallSearchRequest;
 import com.roy.morago.dto.finance.TransactionRequest;
 import com.roy.morago.dto.finance.TransactionSearchRequest;
-import com.roy.morago.entity.call.Call;
 import com.roy.morago.entity.finance.BankAccount;
 import com.roy.morago.entity.finance.Transaction;
 import com.roy.morago.entity.finance.Wallet;
@@ -81,7 +79,7 @@ public class FinanceHelper {
     protected void validateNoOtherPendingTransactions(User user, Long transactionId) {
         if (transactionRepository.existsByWalletUserIdAndStatusAndIdNot
                 (user.getId(), TransactionStatus.PENDING, transactionId)) {
-            throw new ExistingTransactionException("ending transaction already exists.");
+            throw new ExistingTransactionException("Pending transaction already exists.");
         }
     }
 

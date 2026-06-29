@@ -17,6 +17,7 @@ import com.roy.morago.service.finance.WalletService;
 import com.roy.morago.service.user.RoleService;
 import com.roy.morago.service.user.UserHelper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class AuthService {
@@ -41,6 +43,7 @@ public class AuthService {
 
     @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
+        log.info("Login attempt for email: {}", loginRequest.email());
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -49,35 +52,46 @@ public class AuthService {
                     )
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            return createLoginResponse(userHelper.findUserWithAuthentication(authentication));
+            User user = userHelper.findUserWithAuthentication(authentication);
+            LoginResponse response = createLoginResponse(user);
+            log.info("Login successful for user ID: {}", user.getId());
+            return response;
         } catch (AuthenticationException e) {
+            log.warn("Login FAILED for email: {} - Invalid credentials", loginRequest.email());
             throw new InvalidCredentialsException("Invalid username or password");
         }
     }
 
     @Transactional
     public LoginResponse refresh(RefreshRequest refreshRequest) {
+        log.info("Refresh token attempt received");
         String tokenString = refreshRequest.refreshToken();
         RefreshToken refreshToken = refreshTokenService.validateRefreshToken(tokenString);
         refreshTokenService.revokeRefreshToken(refreshToken);
+        log.info("Refresh token successful for user ID: {}", refreshToken.getUser().getId());
         return createLoginResponse(refreshToken.getUser());
     }
 
     @Transactional
     public void logout(LogoutRequest logoutRequest, Authentication authentication) {
+        User user = userHelper.findUserWithAuthentication(authentication);
+        log.info("Logout attempt for user ID: {}", user.getId());
         RefreshToken refreshToken = refreshTokenService.validateRefreshToken(logoutRequest.refreshToken());
-        refreshTokenService.validateRefreshTokenOwner(refreshToken, userHelper.findUserWithAuthentication(authentication));
+        refreshTokenService.validateRefreshTokenOwner(refreshToken, user);
         refreshTokenService.revokeRefreshToken(refreshToken);
+        log.info("Logout successful for user ID: {}", user.getId());
     }
 
     @Transactional
     public void registerClient(ClientRegisterRequest dto) {
+        log.info("Client registration attempt with email: {}", dto.email());
         User client = userMapper.toEntity(dto);
         register(client, dto.password(), dto.confirmPassword(), roleService.getClientRole());
     }
 
     @Transactional
     public void registerTranslator(TranslatorRegisterRequest dto) {
+        log.info("Translator registration attempt with email: {}", dto.email());
         User translator = userMapper.toEntity(dto);
         register(translator, dto.password(), dto.confirmPassword(), roleService.getTranslatorRole());
     }
@@ -91,9 +105,11 @@ public class AuthService {
 
     private void register(User user, String password, String confirmPassword, Role role) {
         if (userRepository.existsByEmail(user.getEmail())) {
+            log.warn("Registration FAILED - Email already in use: {}", user.getEmail());
             throw new DuplicateEmailException("Email already in use.");
         }
         if (!password.equals(confirmPassword)) {
+            log.warn("Registration FAILED - Password mismatch for email: {}", user.getEmail());
             throw new PasswordMismatchException("Passwords do not match.");
         }
         user.getRoles().add(role);
@@ -102,5 +118,6 @@ public class AuthService {
         user.setStatus(UserStatus.UNVERIFIED);
         User savedUser = userRepository.save(user);
         walletService.createWallet(savedUser, CurrencyCode.KRW);
+        log.info("User registered successfully: userId={}, role={}, email={}, walletId={}", savedUser.getId(), role.getName(), savedUser.getEmail(), savedUser.getWallet().getId());
     }
 }
