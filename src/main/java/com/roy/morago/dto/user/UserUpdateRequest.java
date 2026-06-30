@@ -18,7 +18,7 @@ public record UserUpdateRequest(
         String firstName,
 
         @NotBlank
-        @Size(max = 30, message = "First name cannot exceed 30 characters")
+        @Size(max = 30, message = "Last name cannot exceed 30 characters")
         String lastName,
 
         @Pattern(
