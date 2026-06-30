@@ -29,9 +29,15 @@ public class WebSecurityConfig {
                 .securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/meta/**").permitAll()
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/api/user/**").hasAnyRole("CLIENT", "TRANSLATOR", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/webjars/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -47,11 +53,6 @@ public class WebSecurityConfig {
     public SecretKey jwtSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
         return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    @Bean
-    public JwtAuthFilter jwtAuthFilter(JwtProvider jwtProvider) {
-        return new JwtAuthFilter(jwtProvider);
     }
 
     @Bean

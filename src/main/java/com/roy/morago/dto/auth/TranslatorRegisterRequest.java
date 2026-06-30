@@ -2,14 +2,17 @@ package com.roy.morago.dto.auth;
 
 import com.roy.morago.enums.TopikLevel;
 import jakarta.validation.constraints.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
 public record TranslatorRegisterRequest(
         @NotBlank(message = "First name is required")
+        @Size(max = 30, message = "First name cannot exceed 30 characters")
         String firstName,
 
         @NotBlank(message = "Last name is required")
+        @Size(max = 30, message = "Last name cannot exceed 30 characters")
         String lastName,
 
         @NotBlank(message = "Password is required")
@@ -28,12 +31,17 @@ public record TranslatorRegisterRequest(
         String email,
 
         @NotBlank(message = "Phone number is required")
+        @Pattern(
+                regexp = "^(\\d{3}-\\d{4}-\\d{4})$",
+                message = "Phone number must be in format: 000-0000-0000"
+        )
         String phone,
 
         @NotNull(message = "TOPIK level is required")
         TopikLevel topikLevel,
 
         @NotNull(message = "Birthdate is required")
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
         LocalDate birthdate
-) {
+) implements RegisterRequest {
 }

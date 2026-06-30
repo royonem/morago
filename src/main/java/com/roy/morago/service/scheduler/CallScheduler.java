@@ -19,7 +19,7 @@ public class CallScheduler {
     private final CallRepository callRepository;
 
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 10000)
     public void autoEndCalls() {
         List<Call> activeCalls = callRepository.findActiveCalls(CallStatus.IN_PROGRESS);
         for (Call call : activeCalls) {

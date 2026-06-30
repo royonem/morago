@@ -30,3 +30,7 @@ file:
     temp-dir: uploads/temp
     picture-dir: uploads/pictures
     icon-dir: uploads/icons
+
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha

@@ -31,8 +31,7 @@ public class UserHelper {
     }
 
     public User findUserWithAuthentication(Authentication authentication) {
-        return userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        return (User) authentication.getPrincipal();
     }
 
     protected Language findLanguageById(Long languageId) {
@@ -57,11 +56,11 @@ public class UserHelper {
     private List<Predicate> buildPredicates(UserSearchRequest request, Root<User> root, CriteriaBuilder cb) {
         List<Predicate> predicates = new ArrayList<>();
         Optional.ofNullable(request.roleId()).ifPresent(id ->
-                predicates.add(cb.equal(root.join("role").get("id"), id)));
+                predicates.add(cb.equal(root.join("roles").get("id"), id)));
         Optional.ofNullable(request.topicId()).ifPresent(id ->
-                predicates.add(cb.equal(root.join("topic").get("id"), id)));
+                predicates.add(cb.equal(root.join("topics").get("id"), id)));
         Optional.ofNullable(request.languageId()).ifPresent(id ->
-                predicates.add(cb.equal(root.join("language").get("id"), id)));
+                predicates.add(cb.equal(root.join("languages").get("id"), id)));
 
 
         Optional.ofNullable(request.firstName()).ifPresent(name ->
@@ -85,9 +84,9 @@ public class UserHelper {
 
         // Birthdate range
         Optional.ofNullable(request.birthdateFrom()).ifPresent(date ->
-                predicates.add(cb.greaterThanOrEqualTo(root.get("birthDate"), date)));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("birthdate"), date)));
         Optional.ofNullable(request.birthdateTo()).ifPresent(date ->
-                predicates.add(cb.lessThanOrEqualTo(root.get("birthDate"), date)));
+                predicates.add(cb.lessThanOrEqualTo(root.get("birthdate"), date)));
 
         // Created date range
         Optional.ofNullable(request.createdFrom()).ifPresent(date ->

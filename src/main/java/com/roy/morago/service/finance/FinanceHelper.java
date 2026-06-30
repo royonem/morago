@@ -58,6 +58,12 @@ public class FinanceHelper {
     }
 
     // Validation Helpers
+    protected void validateBankIsLinked(User user) {
+        if (user.getBankAccount() == null) {
+            throw new BankNotFoundException("Must link bank account before withdrawal");
+        }
+    }
+
     protected void validateDepositTransaction(TransactionRequest dto) {
         if (dto.type() !=  TransactionType.DEPOSIT) {
             throw new InvalidTransactionStateException("Transaction type is invalid.");

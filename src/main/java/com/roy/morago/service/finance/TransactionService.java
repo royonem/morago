@@ -165,7 +165,7 @@ public class TransactionService {
     }
 
     protected void processTransaction(Transaction transaction) {
-        log.info("Processing transaction: transactionId={}", transaction.getId());
+        log.info("Processing transaction");
         helper.validateTransactionIsPending(transaction, "Error processing non-pending transaction.");
         setTransactionBalance(transaction);
         transaction.setStatus(TransactionStatus.PAID);

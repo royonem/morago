@@ -75,7 +75,7 @@ public class Call extends BaseEntity {
 
     public long getExpectedCost() {
         long callSeconds = getFullDurationSeconds();
-        long minutes = (long) Math.ceil(callSeconds / 60.0);
+        long minutes = (long) Math.ceil((callSeconds - 10) / 60.0);
         return minutes * 1000;
     }
 }

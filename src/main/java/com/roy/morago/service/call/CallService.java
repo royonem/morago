@@ -35,7 +35,7 @@ public class CallService {
         log.info("Requesting call: callerId={}", caller.getId());
         Call call = helper.createCall(callRequest);
         call.setStatus(CallStatus.REQUESTED);
-        helper.setCallInitiator(call, caller);
+        call.setIsClientInitiator(caller.getId().equals(callRequest.clientId()));
         helper.setMaxDuration(call, callRequest);
         call.setStatus(CallStatus.RINGING);
         repo.save(call);

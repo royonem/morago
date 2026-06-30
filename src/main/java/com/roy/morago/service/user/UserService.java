@@ -32,14 +32,17 @@ public class UserService {
     private final UserHelper helper;
     private final ApplicationEventPublisher eventPublisher;
 
+    @Transactional(readOnly = true)
     public UserResponse getUser(Long userId) {
         return userMapper.toResponse(helper.findUserById(userId));
     }
 
+    @Transactional(readOnly = true)
     public Page<UserResponse> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable).map(userMapper::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public Page<UserResponse> searchUsers(UserSearchRequest request) {
         Specification<User> spec = helper.buildSpecification(request);
         return userRepository.findAll(spec, request.toPageable())
