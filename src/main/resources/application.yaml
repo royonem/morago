@@ -1,3 +1,8 @@
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /
+
 spring:
   application:
     name: morago
@@ -33,4 +38,10 @@ file:
 
 springdoc:
   swagger-ui:
+    path: /swagger-ui.html
+    try-it-out-enabled: true
+    operations-sorter: method
     tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
