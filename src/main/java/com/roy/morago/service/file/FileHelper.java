@@ -21,9 +21,9 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class FileHelper {
-    FileRepository fileRepository;
-    FileStorageService fileStorageService;
-    FileMapper fileMapper;
+    private final FileRepository fileRepository;
+    private final FileStorageService fileStorageService;
+    private final FileMapper fileMapper;
     private static final List<String> ALLOWED_TYPES =
             List.of("image/png", "image/jpeg");
 
