@@ -8,6 +8,9 @@ import com.roy.morago.service.notification.NotificationService;
 import com.roy.morago.service.user.LanguageService;
 import com.roy.morago.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -64,25 +68,14 @@ public class UserController {
     @PostMapping("/{id}/profile-picture")
     @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @ResponseStatus(HttpStatus.CREATED)
-    public FileResponse uploadProfilePicture(@PathVariable Long id, @RequestPart MultipartFile picture) {
+    public FileResponse uploadProfilePicture(@PathVariable Long id,
+                                             @Parameter(
+                                                     content = @Content(mediaType = "multipart/form-data"),
+                                                     schema = @Schema(type = "string", format = "binary")
+                                             ) @RequestPart MultipartFile picture) {
         return fileService.uploadProfilePicture(picture);
     }
 
-    @Operation(
-            summary = "Save profile picture",
-            description = "Saves a previously uploaded picture as the user's profile picture. **Role: The user themselves.**"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Profile picture saved"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "404", description = "File not found")
-    })
-    @PutMapping("/{id}/profile-picture")
-    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
-    public void saveProfilePicture(@PathVariable Long id, @RequestParam Long pictureId) {
-        fileService.saveProfilePicture(id, pictureId);
-    }
 
     @Operation(
             summary = "Delete profile picture",

@@ -6,6 +6,9 @@ import com.roy.morago.dto.topic.TopicResponse;
 import com.roy.morago.service.file.FileService;
 import com.roy.morago.service.topic.TopicService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -122,7 +125,9 @@ public class TopicController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/icon")
     @ResponseStatus(HttpStatus.CREATED)
-    public FileResponse uploadIcon(@RequestPart MultipartFile icon) {
+    public FileResponse uploadIcon(@Parameter(
+            content = @Content(mediaType = "multipart/form-data"),
+            schema = @Schema(type = "string", format = "binary")) @RequestPart MultipartFile icon) {
         return fileService.uploadTopicIcon(icon);
     }
 
