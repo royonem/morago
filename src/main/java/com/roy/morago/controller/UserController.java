@@ -76,6 +76,21 @@ public class UserController {
         return fileService.uploadProfilePicture(picture);
     }
 
+    @Operation(
+            summary = "Save profile picture",
+            description = "Saves a previously uploaded picture as the user's profile picture. **Role: The user themselves.**"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Profile picture saved"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "File not found")
+    })
+    @PutMapping("/{id}/profile-picture")
+    @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
+    public void saveProfilePicture(@PathVariable Long id, @RequestParam Long pictureId) {
+        fileService.saveProfilePicture(id, pictureId);
+    }
 
     @Operation(
             summary = "Delete profile picture",
