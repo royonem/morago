@@ -65,7 +65,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
-    @PostMapping("/{id}/profile-picture")
+    @PostMapping(value = "/{id}/profile-picture", consumes = "multipart/form-data")
     @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @ResponseStatus(HttpStatus.CREATED)
     public FileResponse uploadProfilePicture(@PathVariable Long id,

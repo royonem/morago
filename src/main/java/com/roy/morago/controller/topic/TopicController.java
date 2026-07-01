@@ -123,7 +123,7 @@ public class TopicController {
     })
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/icon")
+    @PostMapping(value = "/icon", consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     public FileResponse uploadIcon(@Parameter(
             content = @Content(mediaType = "multipart/form-data"),
