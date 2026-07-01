@@ -122,7 +122,7 @@ public class TopicController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/icon")
     @ResponseStatus(HttpStatus.CREATED)
-    public FileResponse uploadIcon(@RequestParam MultipartFile icon) {
+    public FileResponse uploadIcon(@RequestPart MultipartFile icon) {
         return fileService.uploadTopicIcon(icon);
     }
 

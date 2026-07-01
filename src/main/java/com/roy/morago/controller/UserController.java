@@ -64,7 +64,7 @@ public class UserController {
     @PostMapping("/{id}/profile-picture")
     @PreAuthorize("@securityService.isCurrentUser(#id, authentication)")
     @ResponseStatus(HttpStatus.CREATED)
-    public FileResponse uploadProfilePicture(@PathVariable Long id, @RequestParam MultipartFile picture) {
+    public FileResponse uploadProfilePicture(@PathVariable Long id, @RequestPart MultipartFile picture) {
         return fileService.uploadProfilePicture(picture);
     }
 
