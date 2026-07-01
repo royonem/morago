@@ -17,7 +17,10 @@ public class OpenAPIConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .servers(List.of(new Server().url("https://morago-royonem.up.railway.app")))
+                .servers(List.of(
+                        new Server().url("https://morago-royonem.up.railway.app").description("Production"),
+                        new Server().url("http://localhost:8080").description("Local")
+                ))
                 .info(new Info()
                         .title("Morago API")
                         .version("1.0")
