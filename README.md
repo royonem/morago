@@ -20,7 +20,7 @@ Morago is an application that caters to clients needing quality translations and
 
 ## 🌱 ERD
 
-<img width="1356" height="1424" alt="MoragoERD_071726" src="https://github.com/user-attachments/assets/78d15ba1-3a0b-41ad-bc23-6543d6c84061" />
+<img width="1661" height="914" alt="Morago_ERD_260717" src="https://github.com/user-attachments/assets/a865803b-7708-40ab-9487-0f62f8d33d73" />
 
 * **Users**: Core user accounts — covers clients, translators, and admins (role distinguished via `Users_Roles`), including auth credentials, contact info, and availability status
 * **Roles**: Defines the permission levels (ADMIN, TRANSLATOR, CLIENT) assignable to users
