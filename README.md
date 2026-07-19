@@ -6,7 +6,7 @@
 Morago is a solo project application that caters to clients needing quality translations and translators looking for work.
 
 ## ⏱️ Development Period
-- 2025.3.27 ~ 2025.06.30
+- 2026.3.27 ~ 2026.06.30
 
 ## ⚙️ Tech Stack
 
