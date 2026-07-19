@@ -2,7 +2,7 @@
 🌐 Translator Marketplace | Spring Boot
 
 ## 🧑‍💻 Project Description
-Morago is an application that caters to clients needing quality translations and translators looking for work.
+Morago is a solo project application that caters to clients needing quality translations and translators looking for work.
 
 ## ⏱️ Development Period
 - 2025.3.27 ~ 2025.06.30
@@ -14,7 +14,6 @@ Morago is an application that caters to clients needing quality translations and
 **Testing:** JUnit 5, AssertJ, Testcontainers  
 **Database:** MySQL  
 **Build Tool:** Maven  
-**IDE:** IntelliJ  
 **Deployment:** Railway
 
 
@@ -40,12 +39,23 @@ Morago is an application that caters to clients needing quality translations and
 
 ## 💡 Main Features
 
-> #### :roller_coaster: Flow Chart
+### 1. Authentication
+<img width="2400" height="1350" alt="1_Secure-Access-with-JWT-and-Refresh-Tokens" src="https://github.com/user-attachments/assets/55676398-81ad-408a-bfff-902bdbfe8358" />
 
----
+### 2. User Management
+<img width="2400" height="1350" alt="7_User-Management-and-Localization" src="https://github.com/user-attachments/assets/e287b1b5-1da8-4877-9875-7ed0163711ae" />
 
-> #### 🔧 Feature Breakdown
+### 3. Topics
+<img width="2400" height="1350" alt="6_Topic-and-Category-Management" src="https://github.com/user-attachments/assets/b3824ef8-d9f9-49d7-b56c-2ce1d33c916e" />
 
-##### 1.
+### 4. Financials
+<img width="2400" height="1350" alt="4_Banking-Transactions-and-Withdrawals" src="https://github.com/user-attachments/assets/f78e202f-9ef5-4205-bba2-544631c8249f" />
 
+### 5. Live Calls
+<img width="2400" height="1368" alt="End-to-End-Call-Management" src="https://github.com/user-attachments/assets/d80aabcb-0900-4436-b2d9-0493da71c3e7" />
 
+### 6. Notifications
+<img width="2400" height="1350" alt="5_Notification-System" src="https://github.com/user-attachments/assets/fd0363be-b661-48e7-a0ba-39c0daa90e18" />
+
+### 7. File Management
+<img width="2400" height="1350" alt="3_File-Upload-Storage-and-Deletion" src="https://github.com/user-attachments/assets/c7f5f193-e40e-438d-bc5f-43f46a7973b0" />
